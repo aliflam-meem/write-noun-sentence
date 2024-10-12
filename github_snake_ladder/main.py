@@ -32,7 +32,7 @@ ladclr = (195, 64, 54)
 pla1clr = (0, 211, 255)
 pla2clr = (255, 121, 191)
 
-color_pallette = [(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(16)]
+color_palette_snake = [(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 90) for i in range(8)]
 
 
 # after Win
@@ -234,8 +234,10 @@ class Snake:
 
     def draw_snake_body(self, screen, points):
         for i, point in enumerate(points):
-            pygame.draw.circle(screen, self.color, (int(point[0]), int(point[1])), self.body_radius)
-
+            circle_surface = pygame.Surface((self.body_radius*2, self.body_radius *2), pygame.SRCALPHA)  # Create a surface with alpha
+            pygame.draw.circle(circle_surface, self.color,
+                               (self.body_radius, self.body_radius), self.body_radius)  # Draw semi-transparent circle
+            screen.blit(circle_surface, (int(point[0]) - self.body_radius, int(point[1]) - self.body_radius))
 
     def draw_snake_head(self, screen, head_pos, prev_pos):
         angle = math.atan2(head_pos[1] - prev_pos[1], head_pos[0] - prev_pos[0])
@@ -328,7 +330,7 @@ class board:
 
                 # Draw rounded rectangle with optional texture overlay
                 if board_texture:
-                    textured_rect = pygame.Surface((59, 59))  # Adjust for texture size
+                    textured_rect = pygame.Surface((59, 59), pygame.SRCALPHA)  # Adjust for texture size
                     textured_rect.blit(board_texture, (0, 0), (40, 40, cell_size, cell_size))
                     gameDisplay.blit(textured_rect, (x, y))
                 else:
@@ -348,7 +350,7 @@ class board:
                 end_pos = [x[1][0] + 30, x[1][1] + 30]
                 self.validate_position(start_pos)
                 self.validate_position(end_pos)
-                snake = Snake(start_pos, end_pos, color_pallette[counter])
+                snake = Snake(start_pos, end_pos, color_palette_snake[counter])
                 snake.draw(gameDisplay)
                 counter += 1
 
