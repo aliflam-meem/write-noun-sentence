@@ -229,11 +229,19 @@ class Snake:
         P0, P1, P2, P3 = self.control_points[:4]
         snake_points = self.catmull_rom_spline(P0, P1, P2, P3)
 
-        self.draw_snake_body(screen, snake_points)
+        # Loop through control points and draw the snake segments using curves
+        for i in range(len(self.control_points) - 3):
+            P0, P1, P2, P3 = self.control_points[i], self.control_points[i + 1], self.control_points[i + 2], \
+                             self.control_points[i + 3]
+            snake_points = self.catmull_rom_spline(P0, P1, P2, P3)
+
+            # Draw the snake body by placing circles at interpolated points
+            self.draw_snake_body(screen, snake_points)
+
         self.draw_snake_head(screen, snake_points[-1], snake_points[-2])
 
     def draw_snake_body(self, screen, points):
-        for i, point in enumerate(points):
+        for point in points:
             circle_surface = pygame.Surface((self.body_radius*2, self.body_radius *2), pygame.SRCALPHA)  # Create a surface with alpha
             pygame.draw.circle(circle_surface, self.color,
                                (self.body_radius, self.body_radius), self.body_radius)  # Draw semi-transparent circle
