@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../github_snake_ladder/.idea/gemini_snake_ladder.iml" filepath="$PROJECT_DIR$/../github_snake_ladder/.idea/gemini_snake_ladder.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/pygame_snake_ladder-main.iml" filepath="$PROJECT_DIR$/.idea/pygame_snake_ladder-main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../snowman/.idea/snowman.iml" filepath="$PROJECT_DIR$/../snowman/.idea/snowman.iml" />
     </modules>
   </component>
 </project>

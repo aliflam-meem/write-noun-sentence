@@ -4,7 +4,5 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="gemini_snake_ladder" />
-    <orderEntry type="module" module-name="snowman" />
   </component>
 </module>

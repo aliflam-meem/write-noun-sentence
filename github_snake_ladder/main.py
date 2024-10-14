@@ -254,33 +254,38 @@ class Snake:
 
 
 # game Board Class
-class board:
-
+class Board:
     def __init__(self):
-        # board List
+        # Board List (Reversed order)
         self.boardarr = []
-        count = 1
+        count = 100
 
-        # generate 2D Board  10 X 10
+        # Load the three textures
+        self.textures = [
+            pygame.image.load('grass_surface_dark.png'),
+            pygame.image.load('grass_surface_light.png'),
+        ]
+
+        # Generate 2D Board  10 X 10
         for i in range(0, 10):
             temp = []
-            for j in range(0, 10):
+            for j in reversed(range(0, 10)):  # Iterate in reverse for bottom-right numbering
                 x = j * cell_size
                 y = i * cell_size
                 temp.append((x, y, count))
-                count += 1
+                count -= 1
             self.boardarr.append(temp)
 
-        # genrate Random Ladders
+        # Generate Random Ladders
         self.ladders = []
         self.countarr = [100, 1]
-        nooflad = random.randint(4, 6)
-        for i in range(nooflad):
+        num_of_ladders = random.randint(4, 6)
+        for i in range(num_of_ladders):
             val = True
             while val:
                 rand1 = random.randint(1, 100)
                 rand2 = random.randint(1, 100)
-                diff = rand1 - rand2
+                diff = rand2 - rand1  # Reverse order for bottom-right numbering
                 if diff > 10 or diff < -10:
                     if rand1 not in self.countarr and rand2 not in self.countarr:
                         val = False
@@ -290,20 +295,21 @@ class board:
             b = None
             for x in self.boardarr:
                 for y in x:
-                    if rand1 == y[2]:
+                    if rand2 == y[2]:  # Use rand2 for bottom-right numbering
                         a = y
-                    if rand2 == y[2]:
+                    if rand1 == y[2]:
                         b = y
             self.ladders.append((a, b))
-        # genrate Random Snakes
-        noofsnk = random.randint(4, 6)
+
+        # Generate Random Snakes
+        num_of_snakes = random.randint(4, 6)
         self.snakes = []
-        for i in range(noofsnk):
+        for i in range(num_of_snakes):
             val = True
             while val:
                 rand1 = random.randint(1, 100)
                 rand2 = random.randint(1, 100)
-                diff = rand1 - rand2
+                diff = rand2 - rand1  # Reverse order for bottom-right numbering
                 if diff > 10 or diff < -10:
                     if rand1 not in self.countarr and rand2 not in self.countarr:
                         val = False
@@ -313,11 +319,12 @@ class board:
             b = None
             for x in self.boardarr:
                 for y in x:
-                    if rand1 == y[2]:
+                    if rand2 == y[2]:  # Use rand2 for bottom-right numbering
                         a = y
-                    if rand2 == y[2]:
+                    if rand1 == y[2]:
                         b = y
-            self.snakes.append([a, b])
+            self.snakes.append((a, b))
+
 
     def validate_position(self, p):
         if p[0] >= display_width - cell_size:
@@ -330,24 +337,24 @@ class board:
             p[1] = cell_size * 2
 
     def draw(self):
-        board_texture = pygame.image.load('grass_surface+1.png')
-        for i in self.boardarr:
-            for j in i:
+        for i, row in enumerate(self.boardarr):
+            for j, cell in enumerate(row):
                 # Calculate adjusted position for rounded rect or custom shape
-                x, y = j[0], j[1]
+                x, y = cell[0], cell[1]
 
-                # Draw rounded rectangle with optional texture overlay
-                if board_texture:
-                    textured_rect = pygame.Surface((59, 59), pygame.SRCALPHA)  # Adjust for texture size
-                    textured_rect.blit(board_texture, (0, 0), (40, 40, cell_size, cell_size))
-                    gameDisplay.blit(textured_rect, (x, y))
-                else:
-                    pygame.draw.rect(gameDisplay, (boardclr), (x, y, 59, 59), border_radius=5)  # Adjust border radius
+                # Pick one of the three textures based on the cell's position (e.g., alternating or random)
+                texture_index = (i + j) % len(self.textures)  # Alternates textures based on row and column
+                chosen_texture = self.textures[texture_index]
+
+                # Draw rounded rectangle with the chosen texture overlay
+                textured_rect = pygame.Surface((59, 59), pygame.SRCALPHA)  # Adjust for texture size
+                textured_rect.blit(chosen_texture, (0, 0), (0, 0, cell_size, cell_size))
+                gameDisplay.blit(textured_rect, (x, y))
 
                 # Enhance text rendering
                 smallText = pygame.font.SysFont("fantasyfont.ttf", 25)
-                textSurf, textRect = text_objects(str(j[2]), smallText, (255, 255, 255))
-                textRect.center = ((x + (cell_size // 2)), (y + (cell_size // 2)))
+                textSurf, textRect = text_objects(str(cell[2]), smallText, (255, 255, 255))
+                textRect.center = ((x + (59 // 2)), (y + (59 // 2)))
 
                 # Draw the actual text
                 gameDisplay.blit(textSurf, textRect)
@@ -455,11 +462,11 @@ def draw_ladder(screen, top_left, bottom_left, ladder_width=cell_size/2, rung_sp
 
         current_height += rung_spacing  # Move to the next rung
 
-# player class
-class player:
+# Player class
+class Player:
 
     def __init__(self, B, clr):
-        self.val = 100
+        self.val = 1  # Start at position 1
         self.xpos = None
         self.ypos = None
         self.barr = B.boardarr
@@ -475,46 +482,50 @@ class player:
                     self.ypos = y[1]
 
     def move(self, no):
-        if self.val - no > 0:
-            self.val -= no
+        # Limit the move to not exceed 100
+        new_val = min(self.val + no, 100)
+        if new_val > self.val:
+            self.val = new_val
         else:
-            print("You can not move")
-        if self.val == 1:
+            print("You can't move that many spaces.")
+
+        # Check for win
+        if self.val == 100:
             print("+=+" * 10 + " YOU WIN " + "+=+" * 10)
             global DONE1
             DONE1 = True
+
+        # Update position based on new value
         for x in self.barr:
             for y in x:
                 if self.val == y[2]:
-                    a = y
                     self.xpos = y[0]
                     self.ypos = y[1]
 
+        # Handle ladders and snakes
         for l in self.lad:
             if (self.ypos == l[0][1] and self.xpos == l[0][0]) or (self.ypos == l[1][1] and self.xpos == l[1][0]):
-                if self.val == max(l[0][2], l[1][2]):
-                    self.val = min(l[0][2], l[1][2])
+                # Check if you landed on the higher end of the ladder (use min for bottom-right numbering)
+                if self.val == min(l[0][2], l[1][2]):
+                    self.val = max(l[0][2], l[1][2])
+                    # Update position based on new value
                     for x in self.barr:
                         for y in x:
                             if self.val == y[2]:
-                                a = y
                                 self.xpos = y[0]
                                 self.ypos = y[1]
-                else:
-                    pass
 
         for l in self.snk:
             if (self.ypos == l[0][1] and self.xpos == l[0][0]) or (self.ypos == l[1][1] and self.xpos == l[1][0]):
-                if self.val == min(l[0][2], l[1][2]):
-                    self.val = max(l[0][2], l[1][2])
+                # Check if you landed on the lower end of the snake (use max for bottom-right numbering)
+                if self.val == max(l[0][2], l[1][2]):
+                    self.val = min(l[0][2], l[1][2])
+                    # Update position based on new value
                     for x in self.barr:
                         for y in x:
                             if self.val == y[2]:
-                                a = y
                                 self.xpos = y[0]
                                 self.ypos = y[1]
-                else:
-                    pass
 
     def draw(self):
         pygame.draw.circle(gameDisplay, (self.clr), (self.xpos + 30, self.ypos + 30), self.size)
@@ -585,9 +596,9 @@ def six():
 
 pygame.init()
 
-b = board()
-pla1 = player(b, (0, 211, 255))
-pla2 = player(b, (255, 121, 191))
+b = Board()
+pla1 = Player(b, (0, 211, 255))
+pla2 = Player(b, (255, 121, 191))
 turn = 1
 gameDisplay.fill(back)
 while not crashed:
