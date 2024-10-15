@@ -1,6 +1,7 @@
 import pygame
 import sys
 
+
 # Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -24,9 +25,10 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("My Game")
 
 # Load fonts (replace with your desired font file)
-font = body_font = pygame.font.Font("Arial.ttf", 30)
+font = body_font = pygame.font.Font("../snowman/Arial.ttf", 30)
 font.set_script("Arab")
 font.set_direction(pygame.DIRECTION_RTL)
+
 
 # Function to draw a button
 def draw_button(text, x, y, width, height, color=GRAY, text_color=WHITE):
@@ -36,11 +38,13 @@ def draw_button(text, x, y, width, height, color=GRAY, text_color=WHITE):
     screen.blit(text_surface, text_rect)
     return pygame.Rect(x, y, width, height)
 
+
 # Function to draw the title
 def draw_title():
     title_text = font.render("My Game", True, WHITE)
     title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 50))
     screen.blit(title_text, title_rect)
+
 
 # Function to draw the game screen (placeholder)
 def game_screen():
@@ -48,15 +52,18 @@ def game_screen():
     button_back = draw_button("Back", 50, 50, 150, 50)
     return button_back
 
+
 # Function to start the game (placeholder)
 def start_game():
     global game_state
     game_state = GAME_SCREEN
 
+
 # Function to quit the game
 def quit_game():
     pygame.quit()
     sys.exit()
+
 
 # Main game loop
 def main():
@@ -110,6 +117,7 @@ def main():
 
     pygame.quit()
     sys.exit()
+
 
 if __name__ == "__main__":
     main()
