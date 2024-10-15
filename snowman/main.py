@@ -9,13 +9,6 @@ from snowman.utility import draw_title, draw_subtitle, draw_button
 pygame.init()
 
 
-# Dummy action to switch to a new screen (the game screen)
-def start_game():
-    global game_state
-    game_state = GAMES_BOARD_SCREEN
-
-
-# Action to quit the game
 def quit_game():
     pygame.quit()
     sys.exit()
@@ -121,7 +114,7 @@ def main():
                     running = False
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left click
                     if button_start.collidepoint(event.pos):
-                        start_game()  # Switch to game screen
+                        game_state = GAMES_BOARD_SCREEN
                     elif button_options.collidepoint(event.pos):
                         pass
                     elif button_quit.collidepoint(event.pos):
