@@ -13,8 +13,8 @@ IMAGE_WIDTH = 200
 BUTTON_WIDTH = 220
 BUTTON_HEIGHT = 50
 MENU_BUTTON_WIDTH = 200
-MENU_BUTTON_HEIGHT = 50
-LONG_PADDING = 60
+MENU_BUTTON_HEIGHT = 60
+LONG_PADDING = 100
 SMALL_PADDING = 20
 
 # Colors
@@ -33,13 +33,13 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("ألف لام ميم")
 
 # Load fonts
-title_font = pygame.font.Font("Arial.ttf", 48)
+title_font = pygame.font.Font("Shoroq-Font.ttf", 48)
 title_font.set_script("Arab")
 title_font.set_direction(pygame.DIRECTION_RTL)
-subtitle_font = pygame.font.Font("Arial.ttf", 35)
+subtitle_font = pygame.font.Font("Shoroq-Font.ttf", 35)
 subtitle_font.set_script("Arab")
 subtitle_font.set_direction(pygame.DIRECTION_RTL)
-body_font = pygame.font.Font("Arial.ttf", 30)
+body_font = pygame.font.Font("Shoroq-Font.ttf", 30)
 body_font.set_script("Arab")
 body_font.set_direction(pygame.DIRECTION_RTL)
 
@@ -137,7 +137,7 @@ def games_board_screen():
     draw_title("قائمة الألعاب")
 
     # Draw a "Back to Menu" button
-    back_button = draw_button("رجوع", 30, (TITLE_HEIGHT - MENU_BUTTON_HEIGHT) / 2, MENU_BUTTON_WIDTH - LONG_PADDING,
+    back_button = draw_button("رجوع", 30, (TITLE_HEIGHT - MENU_BUTTON_HEIGHT) / 2, BUTTON_WIDTH - LONG_PADDING,
                               MENU_BUTTON_HEIGHT)
 
     # List the games buttons
@@ -182,7 +182,7 @@ def snowman_levels_screen():
     back_button = draw_button("رجوع", 30, (TITLE_HEIGHT - MENU_BUTTON_HEIGHT) / 2, BUTTON_WIDTH - LONG_PADDING,
                               MENU_BUTTON_HEIGHT)
     # 10 pixels is a magic number, right indent
-    draw_subtitle("أشكال المبتدأ", SCREEN_WIDTH - edge_space - 10, y_coordinate - 70, brown)
+    draw_subtitle("أشكال المبتدأ", SCREEN_WIDTH - edge_space - 10, y_coordinate - 90, brown)
 
     # Draw menu buttons
     al_atareef_button = draw_button("المعرف بأل التعريف", al_atareef_button_x, y_coordinate, BUTTON_WIDTH,
