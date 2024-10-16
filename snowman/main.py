@@ -221,7 +221,6 @@ def main():
             back_button, answer_box_y, answer_box_x = snowman_game_screen(snowman_level)
             answer_box.y(answer_box_y)
             answer_box.x(answer_box_x)
-            answer_box.x(answer_box_x)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
