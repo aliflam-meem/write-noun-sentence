@@ -46,45 +46,12 @@ class InputBox:
                 self.txt_surface = self.font.render(self.text, True, self.color)
 
     def draw(self):
-        # Draw the input box
+        # Calculate the position to align the text to the right
+        text_width = self.txt_surface.get_width()
+        padding = 10  # You can adjust the padding as needed
+        text_x = self.rect.right - text_width - padding  # Align text to the right with padding
+        text_y = self.rect.y + padding  # Align the text vertically with padding
+
+        # Blit the text surface on the input box (place the text inside the box)
         pygame.draw.rect(screen, self.color, self.rect, 2)
-        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
-
-
-
-#     # Example Pygame loop with the InputBox
-#
-#     # Initialize Pygame
-# pygame.init()
-#
-# # Screen setup
-# screen = pygame.display.set_mode((800, 600))
-# pygame.display.set_caption("Input Box Example")
-#
-# # Colors
-# WHITE = (255, 255, 255)
-#
-# # Create input box
-# input_box = InputBox(400, 300, 200, 40)  # x, y, width, height
-#
-# # Game loop
-# running = True
-# while running:
-#     screen.fill(WHITE)
-#
-#     # Event handling
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             running = False
-#         input_box.handle_event(event)
-#
-#     # Update input box
-#     input_box.update()
-#
-#     # Draw input box on the screen
-#     input_box.draw(screen)
-#
-#     # Update the display
-#     pygame.display.flip()
-#
-# pygame.quit()
+        screen.blit(self.txt_surface, (text_x, text_y))
