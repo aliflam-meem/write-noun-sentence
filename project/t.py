@@ -25,7 +25,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("My Game")
 
 # Load fonts (replace with your desired font file)
-font = body_font = pygame.font.Font("../snowman/Arial.ttf", 30)
+font = body_font = pygame.font.Font("../learning_arabic_games/Arial.ttf", 30)
 font.set_script("Arab")
 font.set_direction(pygame.DIRECTION_RTL)
 
