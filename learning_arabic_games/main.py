@@ -2,6 +2,7 @@ import pygame
 import sys
 from constants import *
 from input import InputBox
+from learning_arabic_games.LLM import load_game_data
 from utility import draw_title, draw_subtitle, draw_button, draw_back_button, draw_image, draw_text_box, \
     draw_score_and_health
 
@@ -83,7 +84,7 @@ def draw_question_interface(answer_box, question_text, image_path, image_width=I
     # Draw question text (right-aligned)
     question_text_x = image_width  # Aligned with buttons
     question_text_y = TITLE_HEIGHT + SMALL_PADDING  # Top quarter of the screen for question text
-    draw_text_box(question_text, question_text_x, question_text_y, question_box_width, question_box_height)
+    question_rect = draw_text_box(question_text, question_text_x, question_text_y, question_box_width, question_box_height)
 
     # Calculate positions for the buttons (right-aligned and horizontally aligned)
     answer_box_y = question_text_y + question_box_height + space_between_elements  # Below question text
@@ -100,7 +101,7 @@ def draw_question_interface(answer_box, question_text, image_path, image_width=I
 
     # Return the interface elements (for any potential further processing)
     return {
-        "question_text": (question_text_x, question_text_y),
+        "question_rect": question_rect,
         "answer_button": answer_button,
         "button_y" : answer_box_y + answer_box.rect.height + space_between_elements,
         "image": (image_x, image_y),
@@ -122,6 +123,25 @@ def draw_helping_buttons(y):
     grammar_button_x = correct_button.x - BUTTON_WIDTH - space_between_elements  # Left-most button
     grammar_button = draw_button("القاعدة", grammar_button_x, y, BUTTON_WIDTH, SMALL_BUTTON_HEIGHT, True)
 
+    return correct_button, help_button, grammar_button
+
+
+def handle_buttons_actions(elements, buttons):
+    correct_button, help_button, grammar_button = buttons
+
+def handle_question_data():
+    question_data = load_game_data()
+    question, correct_answer, help_questions, grammar = question_data.values()
+    num_of_answer_words = len(correct_answer.split())
+    num_words = """كلمة واحدة"""
+    if num_of_answer_words == 2:
+        num_words = """كلمتين"""
+    elif num_of_answer_words > 2:
+        num_words = """أكثر من كلمتين"""
+    question = f"""املأ الفراغ التالي ب{num_words} بالمبتدأ المناسب."""
+
+    return question, correct_answer, help_questions, grammar
+
 
 def snowman_game_screen(answer_box, level=snowman_levels["pronouns"]["name"]):
     screen.fill(cornsilk)
@@ -129,10 +149,10 @@ def snowman_game_screen(answer_box, level=snowman_levels["pronouns"]["name"]):
     back_button = draw_back_button()
     score_y = TITLE_HEIGHT + SMALL_PADDING
     draw_score_and_health(0,y=score_y)
-    question_text = "... من أهم مصادر الطاقة المتجددة."
-    elements = draw_question_interface(answer_box, question_text, "assets/complete.png")
+    question, correct_answer, help_questions, grammar = handle_question_data()
+    elements = draw_question_interface(answer_box, question, "assets/complete.png")
     buttons = draw_helping_buttons(elements["button_y"])
-    # handle_elements_actions(elements)
+    handle_buttons_actions(elements,buttons)
 
     return back_button
 
