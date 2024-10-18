@@ -1,1 +1,3 @@
 /project/.venv/
+/__pycache__/
+/whack_a_mole/__pycache__/

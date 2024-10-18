@@ -17,6 +17,10 @@ BUTTON_HEIGHT = 60
 SMALL_BUTTON_HEIGHT = 50
 LONG_PADDING = 100
 SMALL_PADDING = 20
+GRID_SIZE_X = 400
+GRID_SIZE_Y = 200
+X_OFFSET = 120
+Y_OFFSET = 220
 
 # Colors
 DARK_GRAY = (50, 50, 50)
@@ -45,7 +49,9 @@ body_font.set_script("Arab")
 body_font.set_direction(pygame.DIRECTION_RTL)
 numbering_font = pygame.font.Font("assets/Shoroq-Font.ttf", 30)
 numbering_font.set_script("Arab")
-
+body_font_bold = pygame.font.Font("assets/Shoroq-Font.ttf",30)
+body_font_bold.set_script("Arab")
+body_font_bold.set_direction(pygame.DIRECTION_RTL)
 
 # Load images (You would load your own image files here)
 # For demonstration purposes, let's assume we have 5 images loaded
@@ -63,7 +69,7 @@ MAIN_MENU = "menu"
 GAMES_BOARD_SCREEN = "games_board_screen"
 SNOWMAN_LEVELS = "snowman_levels"
 PREPOSITION_GAME = "preposition_game"
-VOCABULARY_GAME = "vocabulary_game"
+WHACK_A_MOLE_GAME = "whack_a_mole_game"
 SNOWMAN_GAME = "snowman_game"
 
 # Snowman levels

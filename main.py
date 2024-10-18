@@ -2,10 +2,10 @@ import pygame
 import sys
 from constants import *
 from input import InputBox
-from learning_arabic_games.LLM import load_game_data
+from LLM import load_game_data
 from utility import draw_title, draw_subtitle, draw_button, draw_back_button, draw_image, draw_text_box, \
     draw_score_and_health
-
+from whack_a_mole.whack_a_mole import whack_a_mole_game_screen
 
 def quit_game():
     pygame.quit()
@@ -34,12 +34,12 @@ def games_board_screen():
     snowman_button_x = prepositions_button_x - BUTTON_WIDTH - space_between_buttons
 
     # Draw buttons
-    vocabulary_button = draw_button("إصابة القنفذ", vocabulary_button_x, y_coordinate, BUTTON_WIDTH,
+    whack_a_mole_button = draw_button("إصابة القنفذ", vocabulary_button_x, y_coordinate, BUTTON_WIDTH,
                                     BUTTON_HEIGHT)
     prepositions_button = draw_button("بينغو", prepositions_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
     snowman_button = draw_button("الرجل الثلجي", snowman_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
 
-    return back_button, vocabulary_button, prepositions_button, snowman_button
+    return back_button, whack_a_mole_button, prepositions_button, snowman_button
 
 
 def snowman_levels_screen():
@@ -214,7 +214,7 @@ def main():
                         quit_game()
 
         elif game_state == GAMES_BOARD_SCREEN:
-            back_button, vocabulary_button, prepositions_button, snowman_button = games_board_screen()
+            back_button, whack_a_mole_button, prepositions_button, snowman_button = games_board_screen()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -226,12 +226,12 @@ def main():
                         game_state = SNOWMAN_LEVELS
                     if prepositions_button.collidepoint(event.pos):
                         game_state = PREPOSITION_GAME
-                    if vocabulary_button.collidepoint(event.pos):
-                        game_state = VOCABULARY_GAME
+                    if whack_a_mole_button.collidepoint(event.pos):
+                        game_state = WHACK_A_MOLE_GAME
 
         elif game_state == SNOWMAN_LEVELS:
             back_button, al_atareef_button, demonstratives_button, pronouns_button = snowman_levels_screen()
-
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -261,9 +261,12 @@ def main():
                 answer_box.handle_event(event)
             answer_box.draw()
 
+        elif game_state == WHACK_A_MOLE_GAME:
+            whack_a_mole_game_screen()
+
         pygame.display.flip()
         clock.tick(60)  # Limit to 60 FPS
-
+            
     pygame.quit()
     sys.exit()
 
