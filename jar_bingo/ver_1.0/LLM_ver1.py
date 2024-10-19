@@ -4,7 +4,7 @@ import time
 import requests
 from requests.exceptions import RequestException
 from ibm_watsonx_ai.foundation_models import Model
-from jar_bingo.jar_bingo_response_parser import *
+from json_response_parser import *
 
 #watsonx API connection¶
 #This cell defines the credentials required to work with watsonx API for Foundation Model inferencing.
