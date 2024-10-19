@@ -11,13 +11,15 @@ import pygame
 import random
 #from LLM import load_data
 from constants import *
+from utility import draw_score_and_health,draw_title
 #from LLM import load_whack_a_mole_data
 
 # ---------------------------------------
 # Error Handling Functions
 # ---------------------------------------
 CWD = pathlib.Path(__file__).parent
-
+title_height = 60
+lines_spacing = 40
 
 def handle_image_load_error(file_name):
     print(f"Error loading image: {file_name}")
@@ -59,7 +61,7 @@ def load_mole_image():
 
 def load_background_image():
 
-    return load_image(CWD / 'assets/background.png',(SCREEN_WIDTH,SCREEN_HEIGHT))
+    return load_image(CWD / 'assets/background.png',(SCREEN_WIDTH,SCREEN_HEIGHT-50))
 
 
 # ---------------------------------------
@@ -202,7 +204,7 @@ class Game:
         self.bomb = Mole('bomb')
 
     def draw(self):
-        screen.blit(self.background, (0, 0))
+        screen.blit(self.background, (0, 60))
 
         for mole in self.moles:
             mole.draw()
@@ -212,35 +214,41 @@ class Game:
         for hole in self.holes:
             hole.draw()
 
-        score = self.score_text.render(f' النقاط {self.score}', 1,
-                                    (255, 255, 255))
-        screen.blit(score, (10, 10))
+        #score = self.score_text.render(f' النقاط {self.score}', 1,
+        #                            (255, 255, 255))
+        #screen.blit(score, (10, 10))
+        #draw_score_and_health(10*self.score,x=30, y=10, health_points=self.lives, max_score=100 , text_color=saddlebrown)
         if self.current_question_index < len(self.questions):
+
             question_item = self.questions[self.current_question_index]
             question_text = [f"{question_item['sentence']}","ما هو نوع قسم الكلام في كلمة "]
 
             question = []
+            question_max_len = SMALL_PADDING + SCREEN_WIDTH/3
             for line in question_text: 
                 question_dispaly = body_font.render(line, True, (0, 0, 0))
+                question_max_len = max(SMALL_PADDING + SCREEN_WIDTH/3,question_dispaly.get_width())
                 question.append(question_dispaly)
-        
+            question_background_rect = pygame.Rect(SCREEN_WIDTH/3 - SMALL_PADDING, title_height + SMALL_PADDING/4, question_max_len, TITLE_HEIGHT-SMALL_PADDING)
+            pygame.draw.rect(screen, (255,255,255), question_background_rect)
             for line in range(len(question)):
-                screen.blit(question[line], (SCREEN_WIDTH/2.5, 10+(40*line)))        
+                screen.blit(question[line], (SCREEN_WIDTH/2.5, title_height+(lines_spacing*line)))        
     
             question_word = f"( {question_item['word']} )" 
             #print(rendered_question_word.get_width())
             rendered_question_word = body_font_bold.render(question_word, True, (0, 0, 0))
-            screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), 50))
+            screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), title_height+lines_spacing))
             #screen.blit(rendered_question_word, (50, 50))
         
-        lives = self.lives_text.render(f'المحاولات {self.lives}', 1,
-                                    (255, 255, 255))
-        screen.blit(lives, (SCREEN_WIDTH - lives.get_width() - 10, 10))
+        #lives = self.lives_text.render(f'المحاولات {self.lives}', 1,
+        #                           (255, 255, 255))
+        #screen.blit(lives, (SCREEN_WIDTH - lives.get_width() - 10, 10))
+        draw_score_and_health(10*self.score,x=900, y=10, health_points=self.lives, max_score=100 , text_color=saddlebrown)
 
         if self.game_over:
-            text = self.game_over_text.render('GAME OVER', 1, (255, 255, 255))
+            text = self.game_over_text.render('حظ أوفر في المرة القادمة', 1, (255, 255, 255))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2,
-                            SCREEN_HEIGHT //  2 - text.get_height() // 2))
+                               SCREEN_HEIGHT //  2 - text.get_height() // 2))
 
 
 # ---------------------------------------
@@ -249,11 +257,16 @@ class Game:
 
 def whack_a_mole_game_screen():
     try:
+
+
         FPS = 60
         pygame.init()
 
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption('Whack a Mole')
+
+        title = "لعبة أقسام الكلام"
+        
 
         clock = pygame.time.Clock()
 
@@ -266,6 +279,7 @@ def whack_a_mole_game_screen():
         show_up_end = 100
         while in_play:
             #screen.fill((0, 0, 0))
+            draw_title(title, color=BUTTON_FONT_COLOR, title_height = title_height)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -337,4 +351,4 @@ def whack_a_mole_game_screen():
         print(f"Error initializing Pygame: {e}")
         return
     
-#whack_a_mole_game_screen()
+whack_a_mole_game_screen()

@@ -6,12 +6,12 @@ from constants import BUTTON_FONT_COLOR, SCREEN_WIDTH, TITLE_HEIGHT, DARK_GRAY, 
     HEALTH_POINT_IMAGE, numbering_font
 
 
-def draw_title(title, color=BUTTON_FONT_COLOR):
+def draw_title(title, title_height=TITLE_HEIGHT, color=BUTTON_FONT_COLOR):
     title_background_rect = pygame.Rect(0, 0, SCREEN_WIDTH, TITLE_HEIGHT)
     pygame.draw.rect(screen, DARK_GRAY, title_background_rect)
 
     title_text = title_font.render(title, True, color)
-    title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, TITLE_HEIGHT // 2))
+    title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, title_height // 2))
     screen.blit(title_text, title_rect)
 
 
