@@ -1,6 +1,8 @@
 import os
 import sys
 import inspect
+from gtts import gTTS
+import time
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -8,6 +10,7 @@ sys.path.insert(0, parentdir)
 
 import pathlib
 import pygame
+from pygame import mixer
 import random
 #from LLM import load_data
 from constants import *
@@ -63,7 +66,36 @@ def load_background_image():
 
     return load_image(CWD / 'assets/background.png',(SCREEN_WIDTH,SCREEN_HEIGHT-50))
 
+def check_if_sound_finished():
+    if  pygame.mixer.get_busy():
+        return False
+    else:
+        return True
 
+def play_audio(filename):
+  """
+  Plays an audio file using pygame.mixer.
+
+  Args:
+      filename (str): The path to the audio file (e.g., "audio_generated.mp3").
+  """
+
+  # Initialize the mixer if not already done
+  if not mixer.get_init():
+    mixer.init()
+
+  # Load the song
+  mixer.music.load(filename)
+
+  # Set the volume (optional, adjust as needed)
+  mixer.music.set_volume(0.7)
+
+  # Start playing the song
+  mixer.music.play()    
+
+def generate_gtts(text,number):
+    pytts = gTTS(text, lang='ar')
+    pytts.save( os.path.join(CWD , 'assets/audio_generated_l'+ str(number) + '.mp3'))
 # ---------------------------------------
 # game components
 # ---------------------------------------
@@ -193,6 +225,8 @@ class Game:
         #self.questions = questions
         
         self.current_question_index = 0
+        self.next_question_index  = 0
+        self.generate_new_gtts = True
 
         for row in range(3):
             for col in range(3):
@@ -214,11 +248,13 @@ class Game:
         for hole in self.holes:
             hole.draw()
 
+
         #score = self.score_text.render(f' النقاط {self.score}', 1,
         #                            (255, 255, 255))
         #screen.blit(score, (10, 10))
         #draw_score_and_health(10*self.score,x=30, y=10, health_points=self.lives, max_score=100 , text_color=saddlebrown)
         if self.current_question_index < len(self.questions):
+            is_sound_played = False
 
             question_item = self.questions[self.current_question_index]
             question_text = [f"{question_item['sentence']}","ما هو نوع قسم الكلام في كلمة "]
@@ -239,10 +275,13 @@ class Game:
             rendered_question_word = body_font_bold.render(question_word, True, (0, 0, 0))
             screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), title_height+lines_spacing))
             #screen.blit(rendered_question_word, (50, 50))
-        
-        #lives = self.lives_text.render(f'المحاولات {self.lives}', 1,
-        #                           (255, 255, 255))
-        #screen.blit(lives, (SCREEN_WIDTH - lives.get_width() - 10, 10))
+            question_text_l2 = [question_text[1], question_word] 
+
+            if self.generate_new_gtts:
+                generate_gtts(question_text[0],1)
+                generate_gtts(' '.join(question_text_l2),2)
+                self.generate_new_gtts = False
+
         draw_score_and_health(10*self.score,x=900, y=10, health_points=self.lives, max_score=100 , text_color=saddlebrown)
 
         if self.game_over:
@@ -277,6 +316,7 @@ def whack_a_mole_game_screen():
         in_play = True
         show_up_timer = 0
         show_up_end = 100
+
         while in_play:
             #screen.fill((0, 0, 0))
             draw_title(title, color=BUTTON_FONT_COLOR, title_height = title_height)
@@ -292,11 +332,12 @@ def whack_a_mole_game_screen():
                             #if mole.is_correct_answer():
                             clicked_answer = mole.clicked_answer();
                             if clicked_answer == game.questions[game.current_question_index]["answer"]:
-                                print(clicked_answer)  # for debugging                
+                                #print(clicked_answer)  # for debugging                
                                 game.score += 1
                                 mole.move = False
                                 mole.counter = 0
                                 game.current_question_index +=1
+                                game.generate_new_gtts = True
                             else:
                                 game.lives -= 1
                                 mole.move = False
@@ -341,8 +382,20 @@ def whack_a_mole_game_screen():
 
             game.draw()
             pygame.display.update()
+            clock.tick(FPS)    
+            audio_1 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio_generated_l1.mp3'))  
+            audio_2 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio_generated_l2.mp3'))  
+            if  game.next_question_index == game.current_question_index:
+                audio_1.play()
+                while pygame.mixer.get_busy():
+                    #pygame.time.delay(1)
+                    pygame.event.poll()              
+                audio_2.play()
+                while pygame.mixer.get_busy():
+                    #pygame.time.delay(1)
+                    pygame.event.poll()            
+                game.next_question_index+=1
 
-            clock.tick(FPS)
         
         pygame.quit()
             
@@ -351,4 +404,4 @@ def whack_a_mole_game_screen():
         print(f"Error initializing Pygame: {e}")
         return
     
-whack_a_mole_game_screen()
+#whack_a_mole_game_screen()
