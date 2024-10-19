@@ -4,7 +4,7 @@ import time
 from settings import *
 from LLM import *
 from data import *
-from jar_bingo.jar_bingo_response_parser import *
+from json_response_parser import *
 from board import *
 from game_over import *
 

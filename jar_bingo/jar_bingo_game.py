@@ -4,7 +4,7 @@ import time
 from jar_bingo_settings import *
 from jar_bingo_LLM import *
 from jar_bingo_data import *
-from jar_bingo.jar_bingo_response_parser import *
+from json_response_parser import *
 from jar_bingo_board import *
 from jar_bingo_game_over import *
 from jar_bingo_game_state import *
