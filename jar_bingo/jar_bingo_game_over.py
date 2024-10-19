@@ -1,7 +1,8 @@
 import pygame
 from jar_bingo_settings import *
+from play_audio import play_sound
 
-def game_over_card(screen, image_path, message_font, message_color, message, audio):
+def game_over_card(screen, image_path, message_font, message_color, message, audio_var):
     """
     Prints a message on top of the board, centered horizontally and vertically.
 
@@ -26,15 +27,14 @@ def game_over_card(screen, image_path, message_font, message_color, message, aud
     screen.blit(image, (x, y))
 
     # Create the "You win!" message
-    message_font = pygame.font.Font(, 35)
+    message_font = pygame.font.Font(F_Arial, 35)
     message_font.set_script("Arab")
     message_font.set_direction(pygame.DIRECTION_RTL)
     message_text = message_font.render(message, True, message_color)
-
     # Calculate the message position to center it within the image
     message_x = x + (image.get_width() - message_text.get_width()) // 2
     message_y = y + (image.get_height() - message_text.get_height()) // 2
 
     # Blit the message onto the screen
     screen.blit(message_text, (message_x, message_y))
-    audio.play()
+    play_sound(WIN_1)

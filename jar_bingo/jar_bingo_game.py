@@ -22,12 +22,11 @@ def initialize_game():
     #sounds
     pygame.mixer.init()
     play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
-    win_audio = pygame.mixer.Sound("audio\Fliki_you_win.mp3")
     # Game state variables
     board = []
     clicked_cells = [] #tracked clicked cells in the board to disable them after getting clicked.
     game_over = False
-    return (model, screen, font, board, clicked_cells, game_over, win_audio)
+    return (model, screen, font, board, clicked_cells, game_over)
 
 def initialize_quiz_card():
     quiz_card_shown = False # track the state of the quiz card
@@ -68,13 +67,14 @@ def show_quiz_card(model, screen, font, preposition, choices, quiz_card_surface)
     # Adjust drawing positions based on the quiz card image content
     #question and choices
     text_margin = 20
-    question_text = font.render(string_parser(quiz_question), True, BLACK)
+
+    question_text = string_parser(quiz_question)
     question_rect = question_text.get_rect(center=(quiz_card_image.get_width() // 2 + 100, 120 + (CHOICE_RECT_HEIGHT + CHOICE_RECT_PADDING)))
     screen.blit(question_text, question_rect) 
     # Choice rects and text
     choice_rects = []
     for i, choice in enumerate(quiz_choices):
-        choice_text = font.render(string_parser(choice), True, BLACK)
+        choice_text = string_parser(choice)
         # Adjust choice positioning based on margins and number of choices
         choice_y_position = quiz_card_image.get_height() // 2 + (i + 1) * (choice_text.get_height() // 2)
         choices_size = pygame.Rect(QUIZ_CARD_PADDING+100, QUIZ_CARD_HEIGHT + (40* i), QUIZ_CARD_WIDTH - 2 * QUIZ_CARD_PADDING, CHOICE_RECT_HEIGHT)
@@ -111,7 +111,7 @@ def pause(clock):
 # Game loop
 def main():
     #intialize game
-    model, screen, font, board, clicked_cells, game_over, win_audio = initialize_game()
+    model, screen, font, board, clicked_cells, game_over = initialize_game()
     background_image, jellyfish_tiles = initialize_imgs()
     quiz_card_shown, quiz_card_surface = initialize_quiz_card()
     #Draw on screen
@@ -179,7 +179,7 @@ def main():
                     draw_board(board, screen, background_image)
                 if game_over:
                     if game_state == "win":
-                        game_over_card(screen, WIN_MENU_IMG, font, GREEN, "لقد فزت!", win_audio)
+                        game_over_card(screen, WIN_MENU_IMG, font, GREEN, "لقد فزت!", "jar_bingo/audio/Fliki_you_win.mp3")
                     elif game_state == "lost":
                         game_over_card(screen, LOSE_MENU_IMG, font, RED, "حظاً أوفر")
 

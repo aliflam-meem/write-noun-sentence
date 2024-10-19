@@ -1,20 +1,26 @@
-import arabic_reshaper
-from bidi.algorithm import get_display
+import pygame
+from jar_bingo_settings import F_Arial
+from jar_bingo_settings import BLACK
 
 #in: list, out: reshaped list
 def list_parser(arabic_list):
+    message_font = pygame.font.Font(F_Arial, 35)
+    message_font.set_script("Arab")
+    message_font.set_direction(pygame.DIRECTION_RTL)
     reshaped_list = []
     for i in arabic_list:
-        reshaped_item = arabic_reshaper.reshape(i)
-        reshaped_list.append(get_display(reshaped_item))
+        message_text = message_font.render(i, True, BLACK)
+        reshaped_list.append(message_text)
         #print("reshaped the following item: ",reshaped_item)
     return reshaped_list
 
 #in string, out: reshaped string
 def string_parser(arabic_string):
     reshaped_string = ""
-    reshaped_item = arabic_reshaper.reshape(arabic_string)
-    reshaped_string = get_display(reshaped_item)
+    message_font = pygame.font.Font(F_Arial, 35)
+    message_font.set_script("Arab")
+    message_font.set_direction(pygame.DIRECTION_RTL)
+    reshaped_string = message_font.render(arabic_string, True, BLACK)
     #print("reshaped the following item: ",reshaped_string)
     return reshaped_string
 
