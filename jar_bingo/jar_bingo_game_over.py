@@ -1,5 +1,5 @@
 import pygame
-from settings import *
+from jar_bingo_settings import *
 
 def game_over_card(screen, image_path, message_font, message_color, message, audio):
     """
@@ -26,7 +26,7 @@ def game_over_card(screen, image_path, message_font, message_color, message, aud
     screen.blit(image, (x, y))
 
     # Create the "You win!" message
-    message_font = pygame.font.Font("fonts/Arial.ttf", 35)
+    message_font = pygame.font.Font(, 35)
     message_font.set_script("Arab")
     message_font.set_direction(pygame.DIRECTION_RTL)
     message_text = message_font.render(message, True, message_color)

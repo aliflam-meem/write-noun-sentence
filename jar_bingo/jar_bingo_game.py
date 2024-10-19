@@ -1,13 +1,13 @@
 import pygame
 import random
 import time
-from settings import *
-from LLM import *
-from data import *
-from response_parser import *
-from board import *
-from game_over import *
-from game_state import *
+from jar_bingo_settings import *
+from jar_bingo_LLM import *
+from jar_bingo_data import *
+from jar_bingo.jar_bingo_response_parser import *
+from jar_bingo_board import *
+from jar_bingo_game_over import *
+from jar_bingo_game_state import *
 from play_audio import *
 
 
@@ -18,10 +18,10 @@ def initialize_game():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Preposition Quiz Game")
     # Font and colors
-    font = pygame.font.Font('fonts/Arial.ttf', 32)
+    font = pygame.font.Font(F_Arial, 32)
     #sounds
+    pygame.mixer.init()
     play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
-
     win_audio = pygame.mixer.Sound("audio\Fliki_you_win.mp3")
     # Game state variables
     board = []
@@ -54,7 +54,7 @@ def initialize_imgs():
 def show_quiz_card(model, screen, font, preposition, choices, quiz_card_surface):
     quiz_card_shown = True
     # Draw the resized quiz card image onto the screen
-    quiz_card_image = pygame.image.load("images/card_Gemini_Generated_Image_2jadgq2jadgq2jad.jfif")  
+    quiz_card_image = pygame.image.load(QUIZ_IMG)  
     # Resize the quiz card image to fit within the defined QUIZ_CARD_WIDTH and QUIZ_CARD_HEIGHT
     quiz_card_image = pygame.transform.scale(quiz_card_image, (QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT))
     screen.blit(quiz_card_image, (QUIZ_CARD_PADDING, QUIZ_CARD_PADDING+20, QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT)) #((screen.get_width() - quiz_card_image.get_width()) // 2, (screen.get_height() - quiz_card_image.get_height()) // 2))

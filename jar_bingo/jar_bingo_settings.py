@@ -23,6 +23,7 @@ WIN_LENGTH = 3  # Adjust this value to change the required winning streak
 ## images
 ### Screen,board,tiles,quiz_card
 BACKGROUND_IMG = "images/Gemini_Generated_Image_5ivjha5ivjha5ivj.jfif"
+QUIZ_IMG = "images/card_Gemini_Generated_Image_2jadgq2jadgq2jad.jfif"
 BLUE_JELLYFISH_TILE = "images/Gemini_Generated_Image_b7o9wwb7o9wwb7o9 (1).jfif" 
 GREEN_JELLYFISH_TILE = "images/Gemini_Generated_Image_3n68uq3n68uq3n68.jfif"
 RED_JELLYFISH_TILE = "images/Gemini_Generated_Image_501zw2501zw2501z.jfif"
@@ -31,7 +32,8 @@ WIN_MENU_IMG = "images/win_Gemini_Generated_Image_rw3exvrw3exvrw3e.jfif"
 LOSE_MENU_IMG = "images/lose_Gemini_Generated_Image_8m9gt98m9gt98m9g.jfif"
 ## Audio
 BACKGROUND_SEA_SHP = "audio/mixkit-wooden-ship-on-the-sea-1187.wav"
-
+## Fonts
+F_Arial = "fonts/Arial.ttf"
 
 # colors
 WHITE = (255, 255, 255)

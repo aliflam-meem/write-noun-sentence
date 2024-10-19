@@ -6,4 +6,5 @@ python-dotenv==0.19.1
 python-bidi
 pygamece==2.5.1
 python== 3.9.12
-#mkl-service #github dep
+google-cloud-aiplatform
+mkl-service #github dep

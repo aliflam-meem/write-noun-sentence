@@ -1,4 +1,4 @@
-from response_parser import *
+from jar_bingo.jar_bingo_response_parser import *
 
 string_data = '[{"name": "Alice", "age": 30}, "name": "Bob", "age": 25},]'
 parsed_data = parse_dict_list(string_data)

@@ -1,7 +1,7 @@
 import pygame
 import random
-from data import *
-from settings import *
+from jar_bingo_data import *
+from jar_bingo_settings import *
 
 # Function to create the game board
 def create_board(board, jellyfish_tiles):
