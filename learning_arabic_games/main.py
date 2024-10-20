@@ -1,10 +1,11 @@
-import pygame
+import re
 import sys
+
 from constants import *
 from input import InputBox
-from learning_arabic_games.LLM import load_game_data
-from utility import draw_title, draw_subtitle, draw_button, draw_back_button, draw_image, draw_text_box, \
-    draw_score_and_health
+from learning_arabic_games.snowman.snowman_llm import load_game_data
+from utility import draw_title, draw_subtitle, draw_button, draw_back_button, draw_text_box, \
+    draw_score_and_health, format_questions_count_string
 
 
 def quit_game():
@@ -74,22 +75,23 @@ def snowman_levels_screen():
     return back_button, al_atareef_button, demonstratives_button, pronouns_button
 
 
-def draw_question_interface(answer_box, question_text, image_path, image_width=IMAGE_WIDTH, image_height=IMAGE_WIDTH):
+def draw_question_interface(answer_box, question_text, snowman_image):
     # Space between elements
     space_between_elements = 20
 
-    question_box_width = SCREEN_WIDTH - image_width - SMALL_PADDING
+    question_box_width = SCREEN_WIDTH - IMAGE_WIDTH - SMALL_PADDING
     question_box_height = 130
 
     # Draw question text (right-aligned)
-    question_text_x = image_width  # Aligned with buttons
+    question_text_x = IMAGE_WIDTH  # Aligned with buttons
     question_text_y = TITLE_HEIGHT + SMALL_PADDING  # Top quarter of the screen for question text
-    question_rect = draw_text_box(question_text, question_text_x, question_text_y, question_box_width, question_box_height)
+    draw_text_box(question_text, question_text_x, question_text_y, question_box_width,
+                  question_box_height)
 
     # Calculate positions for the buttons (right-aligned and horizontally aligned)
     answer_box_y = question_text_y + question_box_height + space_between_elements  # Below question text
-    answer_box.y(answer_box_y)
-    answer_box.x(question_text_x + BUTTON_WIDTH / 2 + SMALL_PADDING)
+    answer_box.set_rect_y(answer_box_y)
+    answer_box.set_rect_x(question_text_x + BUTTON_WIDTH / 2 + SMALL_PADDING)
     answer_button_x = question_text_x  # Right-most button
     answer_button = draw_button("أجب", answer_button_x, answer_box_y, BUTTON_WIDTH / 2, SMALL_BUTTON_HEIGHT)
 
@@ -97,14 +99,12 @@ def draw_question_interface(answer_box, question_text, image_path, image_width=I
     image_x = 0  # Image aligned to the left of screen
     image_y = question_text_y + SCOREBAR_HEIGHT  # Aligned vertically with the question text
 
-    draw_image(image_path, image_x, image_y, image_width, image_height)
+    screen.blit(snowman_image, image_x, image_y)
 
     # Return the interface elements (for any potential further processing)
     return {
-        "question_rect": question_rect,
         "answer_button": answer_button,
-        "button_y" : answer_box_y + answer_box.rect.height + space_between_elements,
-        "image": (image_x, image_y),
+        "button_y": answer_box_y + answer_box.rect.height + space_between_elements,
     }
 
 
@@ -126,35 +126,16 @@ def draw_helping_buttons(y):
     return correct_button, help_button, grammar_button
 
 
-def handle_buttons_actions(elements, buttons):
-    correct_button, help_button, grammar_button = buttons
-
-def handle_question_data():
-    question_data = load_game_data()
-    question, correct_answer, help_questions, grammar = question_data.values()
-    num_of_answer_words = len(correct_answer.split())
-    num_words = """كلمة واحدة"""
-    if num_of_answer_words == 2:
-        num_words = """كلمتين"""
-    elif num_of_answer_words > 2:
-        num_words = """أكثر من كلمتين"""
-    question = f"""املأ الفراغ التالي ب{num_words} بالمبتدأ المناسب."""
-
-    return question, correct_answer, help_questions, grammar
-
-
-def snowman_game_screen(answer_box, level=snowman_levels["pronouns"]["name"]):
+def snowman_game_screen(answer_box, question, title, score, health_points, image_path):
     screen.fill(cornsilk)
-    draw_title(snowman_levels[level]["title"])
+    draw_title(title)
     back_button = draw_back_button()
     score_y = TITLE_HEIGHT + SMALL_PADDING
-    draw_score_and_health(0,y=score_y)
-    question, correct_answer, help_questions, grammar = handle_question_data()
-    elements = draw_question_interface(answer_box, question, "assets/complete.png")
+    draw_score_and_health(score, y=score_y, health_points=health_points)
+    elements = draw_question_interface(answer_box, question, image_path)
     buttons = draw_helping_buttons(elements["button_y"])
-    handle_buttons_actions(elements,buttons)
 
-    return back_button
+    return back_button, buttons
 
 
 def main_menu_screen():
@@ -175,7 +156,7 @@ def main_menu_screen():
 
 
 def create_input_box():
-    input_box_width = SCREEN_WIDTH - IMAGE_WIDTH - 2*SMALL_PADDING - BUTTON_WIDTH/2
+    input_box_width = SCREEN_WIDTH - IMAGE_WIDTH - 2 * SMALL_PADDING - BUTTON_WIDTH / 2
     input_box_height = SMALL_BUTTON_HEIGHT
     # Draw input box below the buttons (right-aligned)
     input_box_y = SCREEN_HEIGHT - 2 * LONG_PADDING
@@ -185,14 +166,164 @@ def create_input_box():
     return InputBox(input_box_x, input_box_y, input_box_width, input_box_height)
 
 
+class SnowmanGame:
+
+    def __init__(self, level=snowman_levels_keys[2], questions_count=1):
+        self.isWin = None
+        self.points_per_questions = 10
+        self.melting_snowman_images = []
+        self.melting_image_index = 0
+        self.questions = []
+        self.question_index = 0
+        self.score = 0
+        self.health_points = 2
+        self.opened_help_questions = 0
+        self.num_of_wrong_answers = 0
+        self.level = level
+        self.questions_count_per_type = questions_count
+        self.max_questions_count_per_type = 5
+        self.load_melting_snowman_images()
+
+    def reset_game(self):
+        self.isWin = None
+        self.question_index = 0
+        self.score = 0
+        self.health_points = 2
+        self.opened_help_questions = 0
+        self.num_of_wrong_answers = 0
+        self.melting_image_index = 0
+        self.questions = []
+
+    def generate_questions_data(self, noun_type):
+        # Initialize the list to store all questions
+        questions = []
+
+        # Process the questions in chunks of 5
+        total_questions_count = self.questions_count_per_type
+
+        # Generate questions in batches of 5 until we run out of questions
+        for i in range(0, total_questions_count, self.max_questions_count_per_type):
+            # Determine how many questions to generate in the current batch
+            questions_to_generate = min(self.max_questions_count_per_type, total_questions_count - i)
+
+            # Format the questions count string (assuming it's for UI or logging)
+            format_questions_count_string(questions_to_generate)
+
+            # Load the question data for the current batch
+            questions_data = load_game_data(noun_type, questions_to_generate)
+            print(questions_data)
+            # Process each question in the batch
+            for question_dict in questions_data:
+                question = question_dict["question"]
+                # Replace any series of periods (e.g., ...) with '-------'
+                question = re.sub(r'\.+', "-------", question)
+
+                # Determine the number of words in the correct answer
+                num_of_answer_words = len(question_dict["correct_answer"].split())
+
+                # Determine the word description in Arabic
+                if num_of_answer_words == 1:
+                    num_words = "كلمة واحدة"
+                elif num_of_answer_words == 2:
+                    num_words = "كلمتين"
+                else:
+                    num_words = "أكثر من كلمتين"
+
+                # Format the question with the correct word description
+                question = f"املأ الفراغ التالي ب{num_words} بالمبتدأ المناسب.\n{question}"
+
+                # Update the question in the dictionary
+                question_dict["question"] = question
+
+            # Add the processed questions to the final list
+            questions.extend(questions_data)
+        return questions
+
+
+    def initialize_game(self):
+        for n_type in snowman_levels[self.level]["noun_types"]:
+            self.questions.extend(self.generate_questions_data(n_type))
+
+    def load_melting_snowman_images(self):
+        img = pygame.image.load("assets/complete.png")
+        img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
+        self.melting_snowman_images.append(img)
+        img = pygame.image.load("assets/melting_1.png")
+        img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
+        self.melting_snowman_images.append(img)
+        img = pygame.image.load("assets/melting_2.png")
+        img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
+        self.melting_snowman_images.append(img)
+        img = pygame.image.load("assets/melting_3.png")
+        img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
+        self.melting_snowman_images.append(img)
+        img = pygame.image.load("assets/melting_4.png")
+        img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
+        self.melting_snowman_images.append(img)
+        img = pygame.image.load("assets/melted.jpg")
+        img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
+        self.melting_snowman_images.append(img)
+
+
+    def get_current_question(self):
+        return self.questions[self.question_index]["question"]
+
+    def get_current_correct_answer(self):
+        return self.questions[self.question_index]["correct_answer"]
+
+    def get_current_melting_snowman_image(self):
+        return self.melting_snowman_images[self.melting_image_index]
+
+    def is_game_over(self):
+        return self.num_of_wrong_answers == len(self.melting_snowman_images) - 1 or self.reached_last_question()
+
+    def reached_last_question(self):
+        return self.question_index == len(self.questions) - 1
+
+    def move_to_next_snowman_melting_image(self):
+        self.melting_image_index += 1
+
+    def move_to_next_question(self):
+        self.question_index += 1
+        self.move_to_next_snowman_melting_image()
+        self.score = self.score + self.points_per_questions - self.opened_help_questions * 2
+        self.health_points = 2
+        self.opened_help_questions = 0
+
+    def display_game_result(self):
+        # Determine the result text
+        result_text = "أحسنت! لقد فُزت!!" if self.isWin else "لقد خسرت!"
+        text_surface = title_font.render(result_text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+
+        # Create a small window
+        window_width, window_height = 400, 200
+        window_surface = pygame.Surface((window_width, window_height))
+        # Blit the background image onto the window surface
+        window_surface.blit(SNOWMAN_GAME_RESULT, (0, 0))  # Draw the image at (0,0)
+
+        # Optionally, draw a border around the window
+        pygame.draw.rect(window_surface, (200, 200, 200), window_surface.get_rect(), 2)  # Gray border
+
+        # Blit the result window onto the main screen
+        window_rect = window_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        screen.blit(window_surface, window_rect)
+        screen.blit(text_surface,
+                    (window_rect.centerx - text_rect.width // 2, window_rect.centery - text_rect.height // 2))
+
+
 # Main game loop
+def validate_answer(snowman_current_game, answer_box):
+    return snowman_current_game.get_current_correct_answer() == answer_box.text
+
+
 def main():
     global game_state
     game_state = MAIN_MENU  # Start with the menu screen
-    snowman_level = snowman_levels["pronouns"]["name"]
     answer_box = create_input_box()
     clock = pygame.time.Clock()
     running = True
+    snowman_current_game = SnowmanGame()
 
     while running:
         screen.fill("black")  # Set background color of the screen
@@ -242,15 +373,31 @@ def main():
                         game_state = MAIN_MENU
                     if al_atareef_button.collidepoint(event.pos):
                         game_state = SNOWMAN_GAME
-                        snowman_level = snowman_levels["al_atareef"]["name"]
+                        snowman_current_game.level = snowman_levels_keys[0]
+                        snowman_current_game.questions_count_per_type = 2
+                        snowman_current_game.reset_game()
+                        snowman_current_game.initialize_game()
                     if demonstratives_button.collidepoint(event.pos):
                         game_state = SNOWMAN_GAME
-                        snowman_level = snowman_levels["demonstratives"]["name"]
+                        snowman_current_game.level = snowman_levels_keys[1]
+                        snowman_current_game.questions_count_per_type = 10
+                        snowman_current_game.reset_game()
+                        snowman_current_game.initialize_game()
                     if pronouns_button.collidepoint(event.pos):
                         game_state = SNOWMAN_GAME
-                        snowman_level = snowman_levels["pronouns"]["name"]
+                        snowman_current_game.level = snowman_levels_keys[2]
+                        snowman_current_game.questions_count_per_type = 3
+                        snowman_current_game.reset_game()
+                        snowman_current_game.initialize_game()
+
         elif game_state == SNOWMAN_GAME:
-            back_button = snowman_game_screen(answer_box, snowman_level)
+            title = snowman_levels[snowman_current_game.level]["title"]
+            back_button, buttons = snowman_game_screen(answer_box,
+                                                       snowman_current_game.get_current_question(), title,
+                                                       snowman_current_game.score,
+                                                       snowman_current_game.health_points,
+                                                       snowman_current_game.get_current_melting_snowman_image())
+            correct_button, help_button, grammar_button = buttons
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -258,6 +405,28 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         game_state = SNOWMAN_LEVELS
+                    if correct_button.collidepoint(event.pos):
+                        if validate_answer(snowman_current_game, answer_box):
+                            if snowman_current_game.reached_last_question():
+                                # We've reached the last question already --> show final score and result
+                                snowman_current_game.is_win = True
+                                snowman_current_game.display_game_result()
+                            else:
+                                # Move to the next question
+                                snowman_current_game.move_to_next_question()
+                        else:
+                            is_game_over = snowman_current_game.is_game_over()
+                            if snowman_current_game.health_points > 0:
+                                snowman_current_game.health_points -= 1
+                            elif snowman_current_game.health_points == 0:
+                                if is_game_over:
+                                    # We've reached the last question already --> show final score and result
+                                    # or the snowman is melted
+                                    snowman_current_game.is_win = False
+                                    snowman_current_game.display_game_result()
+                                elif snowman_current_game.reached_last_question() and not is_game_over:
+                                    # Move to the next question
+                                    snowman_current_game.move_to_next_question()
                 answer_box.handle_event(event)
             answer_box.draw()
 

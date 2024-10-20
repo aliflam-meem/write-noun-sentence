@@ -168,3 +168,14 @@ def draw_score_and_health(score,x=30, y=30, health_points=2, max_score=100 , tex
     for i in range(health_points):
         heart_rect = pygame.Rect(heart_x + i * (heart_width + 10), heart_y, heart_width, heart_height)
         screen.blit(scaled_heart, heart_rect)
+
+
+def format_questions_count_string(count=1):
+    if count == 1:
+        return "سؤال واحد"
+    elif count == 2:
+        return "سؤالين"
+    elif count > 2 and count <= 10:
+        return f"""{count} أسئلة"""
+    elif count > 10:
+        return f"""{count} سؤال"""
