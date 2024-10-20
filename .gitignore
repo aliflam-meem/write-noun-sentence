@@ -1,4 +1,5 @@
 /project/.venv/
 /__pycache__/
-/whack_a_mole/__pycache__/
-/.mp3
+/src/whack_a_mole/__pycache__/
+write-noun-sentence.code-workspace
+.mp3
