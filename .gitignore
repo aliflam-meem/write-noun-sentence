@@ -1,5 +1,5 @@
 /project/.venv/
 /__pycache__/
-/whack_a_mole/__pycache__/
+/src/whack_a_mole/__pycache__/
 
 write-noun-sentence.code-workspace

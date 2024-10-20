@@ -1,7 +1,7 @@
 # Function to draw the title with background
 import pygame
 
-from constants import BUTTON_FONT_COLOR, SCREEN_WIDTH, TITLE_HEIGHT, DARK_GRAY, screen, title_font, \
+from src.constants import BUTTON_FONT_COLOR, SCREEN_WIDTH, TITLE_HEIGHT, DARK_GRAY, screen, title_font, \
     subtitle_font, saddlebrown, brown, body_font, BUTTON_COLOR, BUTTON_HEIGHT, BUTTON_WIDTH, LONG_PADDING, cornsilk, \
     HEALTH_POINT_IMAGE, numbering_font
 

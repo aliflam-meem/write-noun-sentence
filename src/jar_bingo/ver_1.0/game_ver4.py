@@ -1,10 +1,8 @@
-import pygame
 import random
-import time
 from settings import *
-from LLM import *
+from src.snowman.LLM import *
 from data import *
-from json_response_parser import *
+from src.core.json_response_parser import *
 
 # Pygame initialization
 def initialize_game():
