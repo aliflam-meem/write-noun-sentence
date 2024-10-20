@@ -116,7 +116,6 @@ def generate_gtts(text,number):
 # game components
 # ---------------------------------------
 
-
 class Hole:
 
     def __init__(self, num, col, row):
