@@ -1,12 +1,15 @@
 import sys
 
-from constants import *
-from core.input import InputBox
-from core.utility import draw_title, draw_button, draw_back_button
-from snowman.constants import snowman_levels, snowman_levels_keys
-from snowman.game import validate_answer, SnowmanGame
-from snowman.scences import snowman_levels_screen, snowman_game_screen
-from whack_a_mole.game import whack_a_mole_game_screen
+import pygame
+
+from src.constants import screen, GAME_SCREEN_BG, SCREEN_WIDTH, BUTTON_WIDTH, BUTTON_HEIGHT, SCREEN_HEIGHT, \
+    MENU_BUTTON_WIDTH, SMALL_PADDING, MAIN_MENU, GAMES_BOARD_SCREEN, \
+    WHACK_A_MOLE_GAME, PREPOSITION_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME
+from src.core.utility import draw_title, draw_back_button, draw_button
+from src.snowman.constants import snowman_levels_keys, snowman_levels
+from src.snowman.game import SnowmanGame, validate_answer
+from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen
+from src.whack_a_mole.game import whack_a_mole_game_screen
 
 
 def quit_game():
@@ -59,17 +62,6 @@ def main_menu_screen():
                               BUTTON_HEIGHT)
 
     return button_start, button_options, button_quit
-
-
-def create_input_box():
-    input_box_width = SCREEN_WIDTH - IMAGE_WIDTH - 2 * SMALL_PADDING - BUTTON_WIDTH / 2
-    input_box_height = SMALL_BUTTON_HEIGHT
-    # Draw input box below the buttons (right-aligned)
-    input_box_y = SCREEN_HEIGHT - 2 * LONG_PADDING
-    input_box_x = IMAGE_WIDTH + SMALL_PADDING
-
-    # Create an instance of InputBox instead of using draw_input_box
-    return InputBox(input_box_x, input_box_y, input_box_width, input_box_height)
 
 
 # Main game loop

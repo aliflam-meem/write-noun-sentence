@@ -1,3 +1,11 @@
+from src.constants import SCREEN_WIDTH, IMAGE_WIDTH, SMALL_PADDING, BUTTON_WIDTH, LONG_PADDING, SMALL_BUTTON_HEIGHT, \
+    SCREEN_HEIGHT, GAME_SCREEN_BG, screen, BUTTON_HEIGHT, TITLE_HEIGHT, SCOREBAR_HEIGHT, cornsilk, brown
+from src.core.input import InputBox
+from src.core.utility import draw_title, draw_back_button, draw_subtitle, draw_button, draw_text_box, \
+    draw_score_and_health
+from src.snowman.constants import snowman_levels
+
+
 def snowman_levels_screen():
     screen.blit(GAME_SCREEN_BG, (0, 0))
     draw_title("لعبة الرجل الثلجي")
@@ -91,3 +99,14 @@ def snowman_game_screen(answer_box, question, title, score, health_points, image
     buttons = draw_helping_buttons(elements["button_y"])
 
     return back_button, buttons
+
+
+def create_input_box():
+    input_box_width = SCREEN_WIDTH - IMAGE_WIDTH - 2 * SMALL_PADDING - BUTTON_WIDTH / 2
+    input_box_height = SMALL_BUTTON_HEIGHT
+    # Draw input box below the buttons (right-aligned)
+    input_box_y = SCREEN_HEIGHT - 2 * LONG_PADDING
+    input_box_x = IMAGE_WIDTH + SMALL_PADDING
+
+    # Create an instance of InputBox instead of using draw_input_box
+    return InputBox(input_box_x, input_box_y, input_box_width, input_box_height)

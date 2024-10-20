@@ -57,19 +57,19 @@ def load_image(filename, size):
 
 
 def load_bomb_image():
-    return load_image(CWD / 'assets/bomb.png', (100, 100))
+    return load_image(CWD / 'assets/images/bomb.png', (100, 100))
 
 
 def load_hole_image():
-    return load_image(CWD / 'assets/hole.png', (120, 120))
+    return load_image(CWD / 'assets/images/hole.png', (120, 120))
 
 
 def load_mole_image():
-    return load_image(CWD / 'assets/mole2.png', (125, 125))
+    return load_image(CWD / 'assets/images/mole2.png', (125, 125))
 
 
 def load_background_image():
-    return load_image(CWD / 'assets/background.png', (SCREEN_WIDTH, SCREEN_HEIGHT - 50))
+    return load_image(CWD / 'assets/images/background.png', (SCREEN_WIDTH, SCREEN_HEIGHT - 50))
 
 
 # ---------------------------------------
@@ -360,5 +360,4 @@ def whack_a_mole_game_screen():
         print(f"Error initializing Pygame: {e}")
         return
 
-
-whack_a_mole_game_screen()
+# whack_a_mole_game_screen()

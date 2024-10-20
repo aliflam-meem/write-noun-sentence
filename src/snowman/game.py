@@ -1,5 +1,12 @@
 import re
 
+import pygame
+
+from src.constants import title_font, SCREEN_WIDTH, SCREEN_HEIGHT, screen, IMAGE_WIDTH
+from src.core.utility import format_questions_count_string
+from src.snowman.LLM import load_game_data
+from src.snowman.constants import snowman_levels, snowman_levels_keys, snowman_working_directory
+
 
 class SnowmanGame:
 
@@ -80,24 +87,25 @@ class SnowmanGame:
             self.questions.extend(self.generate_questions_data(n_type))
 
     def load_melting_snowman_images(self):
-        img = pygame.image.load("assets/complete.png")
+        img = pygame.image.load(snowman_working_directory / "assets/images/complete.png")
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load("assets/melting_1.png")
+        img = pygame.image.load(snowman_working_directory / "assets/images/melting_1.png")
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load("assets/melting_2.png")
+        img = pygame.image.load(snowman_working_directory / "assets/images/melting_2.png")
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load("assets/melting_3.png")
+        img = pygame.image.load(snowman_working_directory / "assets/images/melting_3.png")
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load("assets/melting_4.png")
+        img = pygame.image.load(snowman_working_directory / "assets/images/melting_4.png")
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load("assets/melted.jpg")
+        img = pygame.image.load(snowman_working_directory / "assets/images/melted.jpg")
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
+        print(snowman_working_directory)
 
 
     def get_current_question(self):
@@ -125,7 +133,7 @@ class SnowmanGame:
         self.health_points = 2
         self.opened_help_questions = 0
 
-    def display_game_result(self):
+    def display_game_result(self, SNOWMAN_GAME_RESULT=None):
         # Determine the result text
         result_text = "أحسنت! لقد فُزت!!" if self.isWin else "لقد خسرت!"
         text_surface = title_font.render(result_text, True, (255, 255, 255))

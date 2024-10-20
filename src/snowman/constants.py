@@ -1,3 +1,8 @@
+import pathlib
+
+
+snowman_working_directory = pathlib.Path(__file__).parent
+
 snowman_levels_keys = ["al_atareef", "demonstratives", "pronouns"]
 snowman_levels = {
     snowman_levels_keys[0]: {

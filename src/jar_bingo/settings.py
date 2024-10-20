@@ -1,8 +1,4 @@
 # Game constants
-## Screen
-SCREEN_WIDTH = 1200  # Increased screen width for better fit
-SCREEN_HEIGHT = 700  # 720
-
 ## Board
 CELL_SIZE = 200  # 200
 BOARD_SIZE = 3  # Initial board size
