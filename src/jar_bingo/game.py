@@ -1,3 +1,7 @@
+import random
+
+from _data import *
+
 from LLM import *
 from board import *
 from game_over import *

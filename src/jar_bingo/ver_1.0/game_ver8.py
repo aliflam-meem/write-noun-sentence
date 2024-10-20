@@ -1,12 +1,12 @@
 import random
 
+from LLM import *
 from board import *
 from data import *
 from game_over import *
 from settings import *
 
 from src.core.json_response_parser import *
-from src.snowman.LLM import *
 
 
 # Pygame initialization

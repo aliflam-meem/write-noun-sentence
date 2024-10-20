@@ -28,9 +28,9 @@ saddlebrown = (139, 69, 19)
 cornsilk = (251, 245, 229)
 BUTTON_FONT_COLOR = (255, 235, 205)
 BUTTON_COLOR = (160, 82, 45)
-GAME_SCREEN_BG = pygame.image.load("assets/main_bg.jpg")
+GAME_SCREEN_BG = pygame.image.load("assets/images/main_bg.jpg")
 GAME_SCREEN_BG = pygame.transform.scale(GAME_SCREEN_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
-HEALTH_POINT_IMAGE = pygame.image.load("assets/health_heart.png")
+HEALTH_POINT_IMAGE = pygame.image.load("assets/images/health_heart.png")
 
 # Create the Pygame screen object
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

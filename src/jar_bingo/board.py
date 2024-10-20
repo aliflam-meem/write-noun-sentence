@@ -13,7 +13,6 @@ def create_board(board, jellyfish_tiles):
              range(BOARD_SIZE)]
     return board
 
-
 # Function to draw the game board
 def draw_board(board, screen, background_image):
     screen.blit(background_image,
@@ -26,8 +25,8 @@ def draw_board(board, screen, background_image):
             color_cell = board[i][j][2]
             # No need to draw text as prepositions are replaced with images
             pygame.draw.rect(screen, color_cell, (
-                BOARD_PADDING + i * CELL_SIZE, BOARD_PADDING + j * CELL_SIZE, CELL_SIZE,
-                CELL_SIZE))  # (i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE))  # cell color fill
+            BOARD_PADDING + i * CELL_SIZE, BOARD_PADDING + j * CELL_SIZE, CELL_SIZE,
+            CELL_SIZE))  # (i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE))  # cell color fill
             pygame.draw.rect(screen, DARK_BLUE1,
                              (BOARD_PADDING + i * CELL_SIZE, BOARD_PADDING + j * CELL_SIZE, CELL_SIZE, CELL_SIZE),
                              2)  # (i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE), 2)  # border
