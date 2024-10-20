@@ -1,7 +1,9 @@
 import inspect
 import os
 import sys
-
+import inspect
+from gtts import gTTS
+import time
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -9,10 +11,11 @@ sys.path.insert(0, parentdir)
 
 import pathlib
 import pygame
+from pygame import mixer
 import random
 # from LLM import load_data
 from src.constants import *
-from src.core.utility import draw_score_and_health, draw_title
+from src.core.utility import draw_score_and_health, draw_title, draw_button
 
 
 # from LLM import load_whack_a_mole_data
@@ -71,11 +74,47 @@ def load_mole_image():
 def load_background_image():
     return load_image(CWD / 'assets/images/background.png', (SCREEN_WIDTH, SCREEN_HEIGHT - 50))
 
+#def load_win_image():
+#    return load_image(CWD / 'assets/Win.png',(400,400))
 
+def check_if_sound_finished():
+    if  pygame.mixer.get_busy():
+        return False
+    else:
+        return True
+
+def play_audio(filename):
+  """
+  Plays an audio file using pygame.mixer.
+
+  Args:
+      filename (str): The path to the audio file (e.g., "audio_generated.mp3").
+  """
+
+  # Initialize the mixer if not already done
+  if not mixer.get_init():
+    mixer.init()
+
+  # Load the song
+  mixer.music.load(filename)
+
+  # Set the volume (optional, adjust as needed)
+  mixer.music.set_volume(0.7)
+
+  # Start playing the song
+  mixer.music.play()    
+
+def generate_gtts(text,number):
+    try:
+        pytts = gTTS(text, lang='ar')
+        pytts.save( os.path.join(CWD , 'assets/audio/gtts/audio_generated_l'+ str(number) + '.mp3'))
+
+    except Exception as e:
+        print(f"Unexpected error saving gtts {text}: {e}")
+        quit()
 # ---------------------------------------
 # game components
 # ---------------------------------------
-
 
 class Hole:
 
@@ -182,6 +221,8 @@ class Game:
         self.game_over = False
         self.game_over_counter = 0
         self.game_over_text = body_font
+        self.game_end = False
+        self.game_end_counter = 0
         self.score_text = body_font
         self.lives_text = body_font
         self.background = load_background_image()
@@ -201,6 +242,8 @@ class Game:
         # self.questions = questions
 
         self.current_question_index = 0
+        self.next_question_index  = 0
+        self.generate_new_gtts = True
 
         for row in range(3):
             for col in range(3):
@@ -246,20 +289,27 @@ class Game:
             question_word = f"( {question_item['word']} )"
             # print(rendered_question_word.get_width())
             rendered_question_word = body_font_bold.render(question_word, True, (0, 0, 0))
-            screen.blit(rendered_question_word,
-                        (SCREEN_WIDTH / 2.5 - rendered_question_word.get_width(), title_height + lines_spacing))
-            # screen.blit(rendered_question_word, (50, 50))
+            screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), title_height+lines_spacing))
+            #screen.blit(rendered_question_word, (50, 50))
+            question_text_l2 = [question_text[1], question_word] 
 
-        # lives = self.lives_text.render(f'المحاولات {self.lives}', 1,
-        #                           (255, 255, 255))
-        # screen.blit(lives, (SCREEN_WIDTH - lives.get_width() - 10, 10))
-        draw_score_and_health(10 * self.score, x=900, y=10, health_points=self.lives, max_score=100,
-                              text_color=saddlebrown)
+            if self.generate_new_gtts:
+                generate_gtts(question_text[0],1)
+                generate_gtts(' '.join(question_text_l2),2)
+                self.generate_new_gtts = False
+
+        draw_score_and_health(10*self.score,x=900, y=10, health_points=self.lives, max_score=100 , text_color=saddlebrown)
 
         if self.game_over:
             text = self.game_over_text.render('حظ أوفر في المرة القادمة', 1, (255, 255, 255))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2,
-                               SCREEN_HEIGHT // 2 - text.get_height() // 2))
+                               SCREEN_HEIGHT //  2 - text.get_height() // 2))
+            
+        if self.game_end:
+            text = self.game_over_text.render('انتهت اللعبة', 1, (255, 255, 255))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2,
+                               SCREEN_HEIGHT //  2 - text.get_height() // 2))
+            
 
 
 # ---------------------------------------
@@ -286,9 +336,14 @@ def whack_a_mole_game_screen():
         in_play = True
         show_up_timer = 0
         show_up_end = 100
+
         while in_play:
             # screen.fill((0, 0, 0))
             draw_title(title, color=BUTTON_FONT_COLOR, title_height=title_height)
+
+            # Doesn't work yet
+            back_button = draw_button("رجوع", 30, (title_height - BUTTON_HEIGHT // 1.5 ) / 2, BUTTON_WIDTH - LONG_PADDING,
+                          BUTTON_HEIGHT // 1.5 )
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -301,11 +356,12 @@ def whack_a_mole_game_screen():
                             # if mole.is_correct_answer():
                             clicked_answer = mole.clicked_answer();
                             if clicked_answer == game.questions[game.current_question_index]["answer"]:
-                                print(clicked_answer)  # for debugging
+                                #print(clicked_answer)  # for debugging                
                                 game.score += 1
                                 mole.move = False
                                 mole.counter = 0
-                                game.current_question_index += 1
+                                game.current_question_index +=1
+                                game.generate_new_gtts = True
                             else:
                                 game.lives -= 1
                                 mole.move = False
@@ -324,7 +380,13 @@ def whack_a_mole_game_screen():
                 if game.game_over_counter >= 180:
                     in_play = False
 
-            if not game.game_over:
+            if game.game_end == True: 
+                # turn off the game after 3 seconds
+                game.game_end_counter += 1
+                if game.game_end_counter >= 180:
+                    in_play = False
+
+            if not game.game_over and not game.game_end:
                 show_up_timer += 1
                 if show_up_timer >= show_up_end:
                     # holes that are already taken
@@ -351,13 +413,31 @@ def whack_a_mole_game_screen():
             game.draw()
             pygame.display.update()
 
-            clock.tick(FPS)
+            audio_1 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l1.mp3'))  
+            audio_2 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l2.mp3'))  
+            if  game.next_question_index == game.current_question_index and game.next_question_index<=len(game.questions):
+                game.next_question_index+=1
+                if  game.next_question_index > len(game.questions):
+                    game.game_end = True
 
+                else:
+                    audio_1.play()
+                    while pygame.mixer.get_busy():
+                        pygame.time.delay(1)
+                        pygame.event.poll()              
+                    audio_2.play()
+                    while pygame.mixer.get_busy():
+                        pygame.time.delay(1)
+                        pygame.event.poll()            
+                
+                      
+            clock.tick(FPS)                  
+      
         pygame.quit()
 
 
     except Exception as e:
         print(f"Error initializing Pygame: {e}")
         return
-
-# whack_a_mole_game_screen()
+    
+#whack_a_mole_game_screen()
