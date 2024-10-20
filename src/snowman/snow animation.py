@@ -8,9 +8,11 @@
  Explanation video: http://youtu.be/Gkhz3FuhGoI
 """
 
+import random
+
 # Import a library of functions called 'pygame'
 import pygame
-import random
+
 
 # Initialize the game engine
 pygame.init()
@@ -39,9 +41,9 @@ clock = pygame.time.Clock()
 done = False
 while not done:
 
-    for event in pygame.event.get():   # User did something
+    for event in pygame.event.get():  # User did something
         if event.type == pygame.QUIT:  # If user clicked close
-            done = True   # Flag that we are done so we exit this loop
+            done = True  # Flag that we are done so we exit this loop
 
     # Set the screen background
     screen.fill(BLACK)

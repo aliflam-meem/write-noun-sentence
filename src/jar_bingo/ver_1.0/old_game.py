@@ -1,6 +1,7 @@
-import pygame
 import random
-import time
+
+import pygame
+
 
 # Game constants
 SCREEN_WIDTH = 800
@@ -29,6 +30,7 @@ quiz_question = None
 quiz_choices = []
 correct_answer = None
 
+
 # Function to create the game board
 def create_board(size):
     global board
@@ -36,6 +38,7 @@ def create_board(size):
     for i in range(size):
         for j in range(size):
             board[i][j] = random.choice(prepositions)
+
 
 # Function to draw the game board
 def draw_board():
@@ -46,6 +49,7 @@ def draw_board():
             text_rect = text.get_rect(center=(i * CELL_SIZE + CELL_SIZE // 2, j * CELL_SIZE + CELL_SIZE // 2))
             screen.blit(text, text_rect)
 
+
 # Function to show the quiz card
 def show_quiz_card(question, choices):
     global quiz_card_shown, quiz_question, quiz_choices, correct_answer
@@ -55,15 +59,19 @@ def show_quiz_card(question, choices):
     correct_answer = choices[0]  # Assuming the first choice is correct
 
     # Draw the quiz card
-    pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH // 2 - QUIZ_CARD_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2, QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT))
+    pygame.draw.rect(screen, WHITE, (
+        SCREEN_WIDTH // 2 - QUIZ_CARD_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2, QUIZ_CARD_WIDTH,
+        QUIZ_CARD_HEIGHT))
     question_text = font.render(quiz_question, True, BLACK)
     question_rect = question_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2 + 50))
     screen.blit(question_text, question_rect)
 
     for i, choice in enumerate(quiz_choices):
         choice_text = font.render(choice, True, BLACK)
-        choice_rect = choice_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2 + 100 + i * 50))
+        choice_rect = choice_text.get_rect(
+            center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2 + 100 + i * 50))
         screen.blit(choice_text, choice_rect)
+
 
 # Function to check if a cell is clicked
 def check_cell_click(pos):
@@ -72,6 +80,7 @@ def check_cell_click(pos):
             if i * CELL_SIZE < pos[0] < (i + 1) * CELL_SIZE and j * CELL_SIZE < pos[1] < (j + 1) * CELL_SIZE:
                 return i, j
     return None
+
 
 # Game loop
 running = True

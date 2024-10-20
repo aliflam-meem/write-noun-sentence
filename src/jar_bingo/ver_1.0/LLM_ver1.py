@@ -1,19 +1,22 @@
 from ibm_watsonx_ai.foundation_models import Model
+
 from src.core.json_response_parser import *
 
-#watsonx API connection¶
-#This cell defines the credentials required to work with watsonx API for Foundation Model inferencing.
-#Action: Provide the IBM Cloud personal API key. For details, see documentation.
+
+# watsonx API connection¶
+# This cell defines the credentials required to work with watsonx API for Foundation Model inferencing.
+# Action: Provide the IBM Cloud personal API key. For details, see documentation.
 def get_credentials():
-	return {
-		"url" : "https://eu-de.ml.cloud.ibm.com",
-		"apikey" : input("Please enter your api key (hit enter): ")
-	}
+    return {
+        "url": "https://eu-de.ml.cloud.ibm.com",
+        "apikey": input("Please enter your api key (hit enter): ")
+    }
+
 
 def set_model():
-    #Defining the model id
+    # Defining the model id
     model_id = "sdaia/allam-1-13b-instruct"
-    #Defining the model parameters
+    # Defining the model parameters
     parameters = {
         "decoding_method": "sample",
         "max_new_tokens": 350,
@@ -23,21 +26,22 @@ def set_model():
         "top_p": 0.9,
         "repetition_penalty": 1.08
     }
-    #Defining the project id or space id
+    # Defining the project id or space id
     project_id = input("PROJECT_ID")
-    #Defining the Model object
+    # Defining the Model object
     model = Model(
-        model_id = model_id,
-        params = parameters,
-        credentials = get_credentials(),
-        project_id = project_id,
-        )
+        model_id=model_id,
+        params=parameters,
+        credentials=get_credentials(),
+        project_id=project_id,
+    )
     return model
 
-#Defining the inferencing input
 
-def get_question_(lvl_prep, sentence_count, correct_example, with_jar = ""):
-     return "اكتب 4 جمل مشكولة صحيحة المعنى وصرف الكلمات باللغة العربية."
+# Defining the inferencing input
+
+def get_question_(lvl_prep, sentence_count, correct_example, with_jar=""):
+    return "اكتب 4 جمل مشكولة صحيحة المعنى وصرف الكلمات باللغة العربية."
 
 
 def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar):
@@ -211,8 +215,8 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     Output:"""
 
     print("Submitting generation request...")
-    #model = set_model()
-    generated_response = model.generate_text(prompt=prompt_input) #guardrails=False
+    # model = set_model()
+    generated_response = model.generate_text(prompt=prompt_input)  # guardrails=False
     print("generated_response", generated_response)
     # Remove spaces before "[" and after "]"
     processed_response = parse_dict_list(generated_response)

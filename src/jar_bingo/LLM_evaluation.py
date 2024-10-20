@@ -1,6 +1,5 @@
-
-#import vertexai
-#from vertexai.generative_models import GenerativeModel
+# import vertexai
+# from vertexai.generative_models import GenerativeModel
 # prompt="أكل البنت الطعام وشرب اماء"
 # vertexai.init(project=PROJECT_ID, location="us-central1")
 
@@ -21,8 +20,10 @@ $ pip install google.ai.generativelanguage
 """
 
 import os
+
 import google.generativeai as genai
 from google.ai.generativelanguage_v1beta.types import content
+
 
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
@@ -33,22 +34,22 @@ generation_config = {
   "top_k": 64,
   "max_output_tokens": 8192,
   "response_schema": content.Schema(
-    type = content.Type.OBJECT,
-    enum = "[]",
-    required = "["sentence"]",
-    properties = {
-      "sentence": content.Schema(
-        type = content.Type.STRING,
-      ),
-      "pos": content.Schema(
-        type = content.Type.ARRAY,
-        items = content.Schema(
-          type = content.Type.STRING,
-        ),
-      ),
-    },
-  ),
-  "response_mime_type": "application/json",
+    type=content.Type.OBJECT,
+    enum="[]",
+    required="["sentence"]",
+  properties = {
+                 "sentence": content.Schema(
+                   type=content.Type.STRING,
+                 ),
+                 "pos": content.Schema(
+                   type=content.Type.ARRAY,
+                   items=content.Schema(
+                     type=content.Type.STRING,
+                   ),
+                 ),
+               },
+),
+"response_mime_type": "application/json",
 }
 
 model = genai.GenerativeModel(

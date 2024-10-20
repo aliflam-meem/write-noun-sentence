@@ -15,10 +15,10 @@ class InputBox:
         self.txt_surface = self.font.render(text, True, self.color)
         self.active = False
 
-    def y(self, y):
+    def set_rect_y(self, y):
         self.rect.y = y
 
-    def x(self, x):
+    def set_rect_x(self, x):
         self.rect.x = x
 
     def handle_event(self, event):

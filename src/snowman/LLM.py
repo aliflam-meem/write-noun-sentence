@@ -1,4 +1,6 @@
 import json
+
+from ibm_watsonx_ai import APIClient
 from ibm_watsonx_ai.foundation_models import Model
 
 
@@ -8,7 +10,7 @@ from ibm_watsonx_ai.foundation_models import Model
 def get_credentials():
     return {
         "url": "https://eu-de.ml.cloud.ibm.com",
-        "apikey": input("API key: ")
+        "apikey": "WNTEfrjfUygDMK5_8eW-TMGYGUgNgxw2aor4bWsb0Wit"
     }
 
 
@@ -29,7 +31,10 @@ def set_model():
     }
 
     # Defining the project id or space id
-    project_id = input("PROJECT_ID: ")
+    project_id = "5637c821-378b-4fc9-b2b7-c96b62f8be4e"
+    client = APIClient(get_credentials())
+    client.set.default_project(project_id)
+
     # Defining the Model object
     model = Model(
         model_id=model_id,
@@ -41,7 +46,7 @@ def set_model():
 
 
 # Defining the inferencing input
-def load_game_data(noun_type = """ضمير مفرد""", questions_count = """سؤالين"""):
+def load_game_data(noun_type="""ضمير مفرد""", questions_count="""سؤال واحد"""):
     try:
         model = set_model()
 
@@ -75,13 +80,6 @@ def load_game_data(noun_type = """ضمير مفرد""", questions_count = """س�
         3- الثمار لذيذة.
         4- الجبال شاهقة.
 
-        -الاسم الصريح كاسم علم:
-        1- زيد ذكي.
-        2- فاطمة جميلة.
-        3- عمر كريم.
-        4- ليلى شاعرة.
-        5- خالد رياضي.
-        6- هند طبيبة.
 
         - حالة الضمير المفرد:
         1- أنت مهندس ماهر.
@@ -95,8 +93,8 @@ def load_game_data(noun_type = """ضمير مفرد""", questions_count = """س�
         3- أنتما مهندستان مبتكرتان.
         4- هما طالبتان مجدتان.
 
-        - الضمير الجمع:
-        1- نحن طلاب مجتهدون.
+        - حالة الضمير الجمع:
+        1- نحن طالبات مجتهدات.
         2- أنتم مهندسون أذكياء.
         3- هم أطباء متخصصون.
         4- هن بنات بارات.
@@ -217,11 +215,13 @@ def load_game_data(noun_type = """ضمير مفرد""", questions_count = """س�
 
         allam_response = model.generate_text(prompt=prompt_input,
                                              guardrails=False)
-        json_data = allam_response.replace("<start_json>",
-                                           "").replace("<end_json>", "")
-        quiz_data = json.loads(json_data)
-        print(quiz_data)
-        return quiz_data
+        json_data = allam_response.replace("<start_json>", "").replace("<end_json>", "").strip()
+        print("json ", json_data)
+        print("*********************")
+        data = json.loads(json_data)
+        print(data)
+        print("*********************")
+        return data
 
     except Exception as e:
         print(f"Error: {str(e)}")

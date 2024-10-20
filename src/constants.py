@@ -4,7 +4,6 @@ import pygame
 
 pygame.init()
 
-
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 700
 TITLE_HEIGHT = 100
@@ -24,35 +23,34 @@ Y_OFFSET = 260
 
 # Colors
 DARK_GRAY = (50, 50, 50)
-brown = (205,133,63)
+brown = (205, 133, 63)
 saddlebrown = (139, 69, 19)
 cornsilk = (251, 245, 229)
-BUTTON_FONT_COLOR = (255,235,205)
-BUTTON_COLOR = (160,82,45)
-GAME_SCREEN_BG = pygame.image.load("../assets/main_bg.jpg")
+BUTTON_FONT_COLOR = (255, 235, 205)
+BUTTON_COLOR = (160, 82, 45)
+GAME_SCREEN_BG = pygame.image.load("assets/images/main_bg.jpg")
 GAME_SCREEN_BG = pygame.transform.scale(GAME_SCREEN_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
-HEALTH_POINT_IMAGE = pygame.image.load("../assets/health_heart.png")
+HEALTH_POINT_IMAGE = pygame.image.load("assets/images/health_heart.png")
 
 # Create the Pygame screen object
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("ألف لام ميم")
 
 # Load fonts
-title_font = pygame.font.Font("../assets/fonts/Shoroq-Font.ttf", 48)
+title_font = pygame.font.Font("assets/fonts/Shoroq-Font.ttf", 48)
 title_font.set_script("Arab")
 title_font.set_direction(pygame.DIRECTION_RTL)
-subtitle_font = pygame.font.Font("../assets/fonts/Shoroq-Font.ttf", 35)
+subtitle_font = pygame.font.Font("assets/fonts/Shoroq-Font.ttf", 35)
 subtitle_font.set_script("Arab")
 subtitle_font.set_direction(pygame.DIRECTION_RTL)
-body_font = pygame.font.Font("../assets/fonts/Shoroq-Font.ttf", 30)
+body_font = pygame.font.Font("assets/fonts/Shoroq-Font.ttf", 30)
 body_font.set_script("Arab")
 body_font.set_direction(pygame.DIRECTION_RTL)
-numbering_font = pygame.font.Font("../assets/fonts/Shoroq-Font.ttf", 30)
+numbering_font = pygame.font.Font("assets/fonts/Shoroq-Font.ttf", 30)
 numbering_font.set_script("Arab")
-body_font_bold = pygame.font.Font("../assets/fonts/Shoroq-Font.ttf", 30)
+body_font_bold = pygame.font.Font("assets/fonts/Shoroq-Font.ttf", 30)
 body_font_bold.set_script("Arab")
 body_font_bold.set_direction(pygame.DIRECTION_RTL)
-
 
 # Game states
 MAIN_MENU = "menu"

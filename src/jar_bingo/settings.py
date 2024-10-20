@@ -1,12 +1,8 @@
 # Game constants
-## Screen
-SCREEN_WIDTH = 1200  # Increased screen width for better fit
-SCREEN_HEIGHT = 700 #720
-
 ## Board
-CELL_SIZE =  200 #200
+CELL_SIZE = 200  # 200
 BOARD_SIZE = 3  # Initial board size
-BOARD_PADDING = 55 # Added padding for the board
+BOARD_PADDING = 55  # Added padding for the board
 BOARD_WIDTH = 600
 BOARD_HEIGHT = 600
 
@@ -15,16 +11,16 @@ QUIZ_CARD_HEIGHT = 275
 QUIZ_CARD_PADDING = 100
 CHOICE_RECT_WIDTH = 200  # Increased width for wider choice rectangles
 CHOICE_RECT_HEIGHT = 30
-CHOICE_RECT_PADDING = 30 #80
+CHOICE_RECT_PADDING = 30  # 80
 
 WIN_LENGTH = 3  # Adjust this value to change the required winning streak
 
-#paths
+# paths
 ## images
 ### Screen,board,tiles,quiz_card
 BACKGROUND_IMG = "jar_bingo/images/Gemini_Generated_Image_5ivjha5ivjha5ivj.jfif"
 QUIZ_IMG = "jar_bingo/images/card_Gemini_Generated_Image_2jadgq2jadgq2jad.jfif"
-BLUE_JELLYFISH_TILE = "jar_bingo/images/Gemini_Generated_Image_b7o9wwb7o9wwb7o9 (1).jfif" 
+BLUE_JELLYFISH_TILE = "jar_bingo/images/Gemini_Generated_Image_b7o9wwb7o9wwb7o9 (1).jfif"
 GREEN_JELLYFISH_TILE = "jar_bingo/images/Gemini_Generated_Image_3n68uq3n68uq3n68.jfif"
 RED_JELLYFISH_TILE = "jar_bingo/images/Gemini_Generated_Image_501zw2501zw2501z.jfif"
 ### Game Over

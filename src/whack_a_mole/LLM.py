@@ -1,4 +1,5 @@
 import json
+
 from ibm_watsonx_ai.foundation_models import Model
 
 
@@ -29,7 +30,7 @@ def set_model():
     }
 
     # Defining the project id or space id
-    project_id = "404e8279-d931-4311-b13d-4327914f2b8c" #input("PROJECT_ID: ")
+    project_id = "404e8279-d931-4311-b13d-4327914f2b8c"  # input("PROJECT_ID: ")
     # Defining the Model object
     model = Model(
         model_id=model_id,
@@ -41,7 +42,7 @@ def set_model():
 
 
 # Defining the inferencing input
-def load_game_data(noun_type = """ضمير مفرد""", questions_count = """سؤالين"""):
+def load_game_data(noun_type="""ضمير مفرد""", questions_count="""سؤالين"""):
     try:
         model = set_model()
 
@@ -229,11 +230,10 @@ def load_game_data(noun_type = """ضمير مفرد""", questions_count = """س�
 
 
 def load_whack_a_mole_data():
-
     try:
-          #Defining the model id
+        # Defining the model id
         model_id = "sdaia/allam-1-13b-instruct"
-        #Defining the model parameters
+        # Defining the model parameters
         parameters = {
             "decoding_method": "sample",
             "max_new_tokens": 600,
@@ -243,9 +243,9 @@ def load_whack_a_mole_data():
             "top_p": 1,
             "timeout": 60
         }
-        #Defining the project id or space id
+        # Defining the project id or space id
         project_id = "404e8279-d931-4311-b13d-4327914f2b8c"
-        #Defining the Model object
+        # Defining the Model object
         model = Model(
             model_id=model_id,
             params=parameters,

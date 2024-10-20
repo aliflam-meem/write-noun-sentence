@@ -1,5 +1,6 @@
-import pygame
 import random
+
+import pygame
 from settings import *
 
 
@@ -21,7 +22,6 @@ def inititalize_game():
     return (screen, font, board, clicked_cells, quiz_card_shown, correct_answer)
 
 
-
 # Function to create the game board
 
 def create_board(board):
@@ -31,7 +31,6 @@ def create_board(board):
             board[i][j] = random.choice(prepositions)
 
     return board
-
 
 
 # Function to draw the game board
@@ -50,7 +49,6 @@ def draw_board(board, screen, font, correct_cell=None, incorrect_cell=None):
             screen.blit(text, text_rect)
 
 
-
 # Function to show the quiz card
 def show_quiz_card(screen, font, question, choices):
     quiz_card_shown = True
@@ -59,7 +57,9 @@ def show_quiz_card(screen, font, question, choices):
     correct_answer = choices[0]  # Assuming the first choice is correct
 
     # Draw the quiz card
-    pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH // 2 - QUIZ_CARD_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2, QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT))
+    pygame.draw.rect(screen, WHITE, (
+        SCREEN_WIDTH // 2 - QUIZ_CARD_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2, QUIZ_CARD_WIDTH,
+        QUIZ_CARD_HEIGHT))
     question_text = font.render(quiz_question, True, BLACK)
     question_rect = question_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2 + 50))
     screen.blit(question_text, question_rect)
@@ -67,12 +67,12 @@ def show_quiz_card(screen, font, question, choices):
     choice_rects = []
     for i, choice in enumerate(quiz_choices):
         choice_text = font.render(choice, True, BLACK)
-        choice_rect = choice_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2 + 100 + i * 50))
+        choice_rect = choice_text.get_rect(
+            center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - QUIZ_CARD_HEIGHT // 2 + 100 + i * 50))
         screen.blit(choice_text, choice_rect)
         choice_rects.append(choice_rect)
 
     return quiz_card_shown, choice_rects
-
 
 
 # Function to check if a cell is clicked
@@ -85,11 +85,10 @@ def check_cell_click(pos):
     return None
 
 
-
 # Game loop
 
 def main():
-    #intialize game
+    # intialize game
     screen, font, board, clicked_cells, quiz_card_shown, correct_answer = inititalize_game()
     board = create_board(board)
     screen.fill(WHITE)
@@ -107,7 +106,8 @@ def main():
                     preposition = board[clicked_cell[0]][clicked_cell[1]]
                     prep_index = prepositions.index(preposition)
                     quiz_choices = [preposition] + random.sample(prepositions, 2)
-                    quiz_card_shown, choice_rects = show_quiz_card(screen, font, quiz_questions[prep_index], quiz_choices)
+                    quiz_card_shown, choice_rects = show_quiz_card(screen, font, quiz_questions[prep_index],
+                                                                   quiz_choices)
             elif event.type == pygame.MOUSEBUTTONDOWN and quiz_card_shown:
                 quiz_card_shown = False
                 # Check if the clicked position is within any of the choice rectangles
@@ -133,13 +133,14 @@ def main():
                             screen.fill(WHITE)
                             draw_board(board, screen, font, incorrect_cell=clicked_cell)
 
-            #screen.fill(WHITE)
-            #draw_board(board, screen, font)
-            #if quiz_card_shown:
+            # screen.fill(WHITE)
+            # draw_board(board, screen, font)
+            # if quiz_card_shown:
             #    quiz_card_shown = show_quiz_card(screen, font, quiz_questions[prep_index], quiz_choices)
 
         pygame.display.flip()
     pygame.quit()
+
 
 # Run the game
 

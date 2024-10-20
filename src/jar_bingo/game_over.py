@@ -1,6 +1,8 @@
 import pygame
+
 from settings import *
 from src.core.play_audio import play_sound
+
 
 def game_over_card(screen, image_path, message_font, message_color, message, audio_var):
     """
