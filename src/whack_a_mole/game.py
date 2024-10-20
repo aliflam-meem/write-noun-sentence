@@ -4,14 +4,14 @@ import inspect
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir) 
+sys.path.insert(0, parentdir)
 
 import pathlib
 import pygame
 import random
 #from LLM import load_data
-from constants import *
-from utility import draw_score_and_health,draw_title
+from src.constants import *
+from src.core.utility import draw_score_and_health,draw_title
 #from LLM import load_whack_a_mole_data
 
 # ---------------------------------------
@@ -98,7 +98,7 @@ class Mole:
         self.options = ['اسم','فعل','حرف']
         self.mole_image = load_mole_image()
         self.bomb_image = load_bomb_image()
-        
+
 
     def select_hole(self, taken_holes):
         # Select a hole that is not taken
@@ -176,7 +176,7 @@ class Game:
         self.score_text = body_font
         self.lives_text = body_font
         self.background = load_background_image()
-    
+
 
         #self.question_item = {
         #    "sentence": "يجلسُ الطالبُ على المقعدِ",
@@ -191,7 +191,7 @@ class Game:
         ]
         #"""
         #self.questions = questions
-        
+
         self.current_question_index = 0
 
         for row in range(3):
@@ -225,21 +225,21 @@ class Game:
 
             question = []
             question_max_len = SMALL_PADDING + SCREEN_WIDTH/3
-            for line in question_text: 
+            for line in question_text:
                 question_dispaly = body_font.render(line, True, (0, 0, 0))
                 question_max_len = max(SMALL_PADDING + SCREEN_WIDTH/3,question_dispaly.get_width())
                 question.append(question_dispaly)
             question_background_rect = pygame.Rect(SCREEN_WIDTH/3 - SMALL_PADDING, title_height + SMALL_PADDING/4, question_max_len, TITLE_HEIGHT-SMALL_PADDING)
             pygame.draw.rect(screen, (255,255,255), question_background_rect)
             for line in range(len(question)):
-                screen.blit(question[line], (SCREEN_WIDTH/2.5, title_height+(lines_spacing*line)))        
-    
-            question_word = f"( {question_item['word']} )" 
+                screen.blit(question[line], (SCREEN_WIDTH/2.5, title_height+(lines_spacing*line)))
+
+            question_word = f"( {question_item['word']} )"
             #print(rendered_question_word.get_width())
             rendered_question_word = body_font_bold.render(question_word, True, (0, 0, 0))
             screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), title_height+lines_spacing))
             #screen.blit(rendered_question_word, (50, 50))
-        
+
         #lives = self.lives_text.render(f'المحاولات {self.lives}', 1,
         #                           (255, 255, 255))
         #screen.blit(lives, (SCREEN_WIDTH - lives.get_width() - 10, 10))
@@ -266,14 +266,14 @@ def whack_a_mole_game_screen():
         pygame.display.set_caption('Whack a Mole')
 
         title = "لعبة أقسام الكلام"
-        
+
 
         clock = pygame.time.Clock()
 
         #questions = load_whack_a_mole_data()
         #game = Game(questions)
         game = Game()
-  
+
         in_play = True
         show_up_timer = 0
         show_up_end = 100
@@ -292,7 +292,7 @@ def whack_a_mole_game_screen():
                             #if mole.is_correct_answer():
                             clicked_answer = mole.clicked_answer();
                             if clicked_answer == game.questions[game.current_question_index]["answer"]:
-                                print(clicked_answer)  # for debugging                
+                                print(clicked_answer)  # for debugging
                                 game.score += 1
                                 mole.move = False
                                 mole.counter = 0
@@ -343,12 +343,12 @@ def whack_a_mole_game_screen():
             pygame.display.update()
 
             clock.tick(FPS)
-        
+
         pygame.quit()
-            
+
 
     except Exception as e:
         print(f"Error initializing Pygame: {e}")
         return
-    
+
 whack_a_mole_game_screen()

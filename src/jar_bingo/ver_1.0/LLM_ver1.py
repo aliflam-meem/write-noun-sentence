@@ -1,10 +1,5 @@
-import json
-import os
-import time
-import requests
-from requests.exceptions import RequestException
 from ibm_watsonx_ai.foundation_models import Model
-from json_response_parser import *
+from src.core.json_response_parser import *
 
 #watsonx API connection¶
 #This cell defines the credentials required to work with watsonx API for Foundation Model inferencing.
@@ -23,7 +18,7 @@ def set_model():
         "decoding_method": "sample",
         "max_new_tokens": 350,
         "stop_sequences": ["<end>"],
-        "temperature": 0.8,
+        "temperature": 0.9,
         "top_k": 40,
         "top_p": 0.9,
         "repetition_penalty": 1.08
@@ -40,6 +35,10 @@ def set_model():
     return model
 
 #Defining the inferencing input
+
+def get_question_(lvl_prep, sentence_count, correct_example, with_jar = ""):
+     return "اكتب 4 جمل مشكولة صحيحة المعنى وصرف الكلمات باللغة العربية."
+
 
 def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar):
     lvl_prep = _lvl_prep
@@ -214,6 +213,7 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     print("Submitting generation request...")
     #model = set_model()
     generated_response = model.generate_text(prompt=prompt_input) #guardrails=False
+    print("generated_response", generated_response)
     # Remove spaces before "[" and after "]"
     processed_response = parse_dict_list(generated_response)
     print("processed_response:", processed_response)
@@ -223,3 +223,19 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     # except json.decoder.JSONDecodeError as e:
     #      print(f"Error decoding JSON: {e}")
     return processed_response[0]
+
+
+def get_prepositions_and_question():
+    prepositions = ["in", "on", "at", "of", "to", "for", "with", "by", "from", "about"]
+    quiz_questions = [
+        "What preposition is used to indicate location inside something?",
+        "What preposition is used to indicate location on a surface?",
+        "What preposition is used to indicate a specific point in time or location?",
+        "What preposition is used to indicate ownership or possession?",
+        "What preposition is used to indicate movement or direction?",
+        "What preposition is used to indicate purpose or reason?",
+        "What preposition is used to indicate accompaniment or association?",
+        "What preposition is used to indicate the agent of an action or means of transportation?",
+        "What preposition is used to indicate origin or starting point?",
+        "What preposition is used to indicate a topic or subject?"
+    ]

@@ -1,6 +1,6 @@
 import pygame
 
-from constants import body_font, screen
+from src.constants import body_font, screen
 
 
 class InputBox:
