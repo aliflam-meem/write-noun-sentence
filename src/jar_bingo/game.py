@@ -1,12 +1,19 @@
 import random
+import pygame
+import os 
+import inspect
+import sys
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
 
-from _data import *
-
-from LLM import *
-from board import *
-from game_over import *
-from src.core.json_response_parser import *
-from src.core.play_audio import *
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from core.json_response_parser import *
+from core.audio_player import *
+from src.jar_bingo.data import *
+from src.jar_bingo.LLM import *
+from src.jar_bingo.board import *
+from src.jar_bingo.game_over import *
 
 
 # Pygame initialization

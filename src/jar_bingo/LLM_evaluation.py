@@ -1,24 +1,9 @@
-# import vertexai
-# from vertexai.generative_models import GenerativeModel
-# prompt="أكل البنت الطعام وشرب اماء"
-# vertexai.init(project=PROJECT_ID, location="us-central1")
-
-# model = GenerativeModel("gemini-1.5-flash-002")
-
-# response = model.generate_content(
-#     f"صحح النص التالي: {prompt}",
-# )
-
-# print(response.text)
-
-
 
 """
 Install an additional SDK for JSON schema support Google AI Python SDK
 
 $ pip install google.ai.generativelanguage
 """
-
 import os
 
 import google.generativeai as genai
@@ -66,3 +51,19 @@ chat_session = model.start_chat(
 response = chat_session.send_message("INSERT_INPUT_HERE")
 
 print(response.text)
+
+
+# import vertexai
+# from vertexai.generative_models import GenerativeModel
+# prompt="أكل البنت الطعام وشرب اماء"
+# vertexai.init(project=PROJECT_ID, location="us-central1")
+
+# model = GenerativeModel("gemini-1.5-flash-002")
+
+# response = model.generate_content(
+#     f"صحح النص التالي: {prompt}",
+# )
+
+# print(response.text)
+
+
