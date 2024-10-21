@@ -23,11 +23,14 @@ Y_OFFSET = 260
 
 # Colors
 DARK_GRAY = (50, 50, 50)
-brown = (205, 133, 63)
-saddlebrown = (139, 69, 19)
+brown = (205, 133, 63) #to upper
+saddlebrown = (139, 69, 19) #to upper
 cornsilk = (251, 245, 229)
 BUTTON_FONT_COLOR = (255, 235, 205)
 BUTTON_COLOR = (160, 82, 45)
+BLACK = (0, 0, 0)
+
+# Images
 GAME_SCREEN_BG = pygame.image.load("assets/images/main_bg.jpg")
 GAME_SCREEN_BG = pygame.transform.scale(GAME_SCREEN_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
 HEALTH_POINT_IMAGE = pygame.image.load("assets/images/health_heart.png")

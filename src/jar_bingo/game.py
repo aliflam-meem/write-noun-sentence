@@ -1,20 +1,13 @@
 import random
 import pygame
-import os 
-import inspect
-import sys
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
 
 from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT
-from core.json_response_parser import *
-from core.audio_player import *
+from src.core.json_response_parser import *
+from src.core.audio_player import *
 from src.jar_bingo.data import *
 from src.jar_bingo.LLM import *
 from src.jar_bingo.board import *
 from src.jar_bingo.game_over import *
-
 
 # Pygame initialization
 def initialize_game():
@@ -77,14 +70,14 @@ def show_quiz_card(model, screen, font, preposition, choices, quiz_card_surface)
     # question and choices
     text_margin = 20
 
-    question_text = string_parser(quiz_question)
+    question_text = string_parser(quiz_question, F_Arial, BLACK)
     question_rect = question_text.get_rect(
         center=(quiz_card_image.get_width() // 2 + 100, 120 + (CHOICE_RECT_HEIGHT + CHOICE_RECT_PADDING)))
     screen.blit(question_text, question_rect)
     # Choice rects and text
     choice_rects = []
     for i, choice in enumerate(quiz_choices):
-        choice_text = string_parser(choice)
+        choice_text = string_parser(choice, F_Arial, BLACK)
         # Adjust choice positioning based on margins and number of choices
         choice_y_position = quiz_card_image.get_height() // 2 + (i + 1) * (choice_text.get_height() // 2)
         choices_size = pygame.Rect(QUIZ_CARD_PADDING + 100, QUIZ_CARD_HEIGHT + (40 * i),

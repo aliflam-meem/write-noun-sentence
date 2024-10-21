@@ -4,5 +4,6 @@ ibm_watsonx_ai==1.0.1
 python-dotenv==0.19.1
 pygame-ce==2.5.1
 
+gtts==2.5.3
 google.ai.generativelanguage
 mkl-service #github dep
