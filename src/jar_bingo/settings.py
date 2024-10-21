@@ -17,20 +17,20 @@ WIN_LENGTH = 3  # Adjust this value to change the required winning streak
 
 # paths
 ## images
-### Screen,board,tiles,quiz_card
-BACKGROUND_IMG = "jar_bingo/images/Gemini_Generated_Image_5ivjha5ivjha5ivj.jfif"
-QUIZ_IMG = "jar_bingo/images/card_Gemini_Generated_Image_2jadgq2jadgq2jad.jfif"
-BLUE_JELLYFISH_TILE = "jar_bingo/images/Gemini_Generated_Image_b7o9wwb7o9wwb7o9 (1).jfif"
-GREEN_JELLYFISH_TILE = "jar_bingo/images/Gemini_Generated_Image_3n68uq3n68uq3n68.jfif"
-RED_JELLYFISH_TILE = "jar_bingo/images/Gemini_Generated_Image_501zw2501zw2501z.jfif"
+### board,tiles,quiz_card
+BACKGROUND_IMG = "src/jar_bingo/assets/images/Gemini_Generated_Image_5ivjha5ivjha5ivj.jfif"
+QUIZ_IMG = "src/jar_bingo/assets/images/card_Gemini_Generated_Image_2jadgq2jadgq2jad.jfif"
+BLUE_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_b7o9wwb7o9wwb7o9 (1).jfif"
+GREEN_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_3n68uq3n68uq3n68.jfif"
+RED_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_501zw2501zw2501z.jfif"
 ### Game Over
-WIN_MENU_IMG = "jar_bingo/images/win_Gemini_Generated_Image_rw3exvrw3exvrw3e.jfif"
-LOSE_MENU_IMG = "jar_bingo/images/lose_Gemini_Generated_Image_8m9gt98m9gt98m9g.jfif"
+WIN_MENU_IMG = "src/jar_bingo/assets/images/win_Gemini_Generated_Image_rw3exvrw3exvrw3e.jfif"
+LOSE_MENU_IMG = "src/jar_bingo/assets/images/lose_Gemini_Generated_Image_8m9gt98m9gt98m9g.jfif"
 ## Audio
-BACKGROUND_SEA_SHP = "jar_bingo/audio/mixkit-wooden-ship-on-the-sea-1187.wav"
-WIN_1 = "jar_bingo/audio/Fliki_you_win.mp3"
+BACKGROUND_SEA_SHP = "src/jar_bingo/assets/audio/mixkit-wooden-ship-on-the-sea-1187.wav"
+WIN_1 = "src/jar_bingo/assets/audio/Fliki_you_win.mp3"
 ## Fonts
-F_Arial = "jar_bingo/fonts/Arial.ttf"
+F_Arial = "assets/fonts/Arial.ttf"
 
 # colors
 WHITE = (255, 255, 255)

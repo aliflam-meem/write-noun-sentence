@@ -214,7 +214,7 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     # model = set_model()
     generated_response = model.generate_text(prompt=prompt_input)  # guardrails=False
     # Remove spaces before "[" and after "]"
-    processed_response = parse_dict_list(generated_response)
+    processed_response = parse_json_response(generated_response, "<start>", "<end>")
     print("processed_response:", processed_response)
     # try:
     #     json_response = json.loads(processed_response)

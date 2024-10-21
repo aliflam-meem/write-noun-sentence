@@ -27,16 +27,18 @@ def string_parser(arabic_string):
     return reshaped_string
 
 
-def parse_dict_list(string):
+def parse_json_response(string, start_marker, end_marker):
     """Parses a string containing a list of dictionaries into a Python list.
     Args:             string: The input string.
+                      start_marker: the string which marks the start of the json object.
+                      end_marker: the string which marks the end of the json object.
     Returns:            A list of dictionaries.
     """
     dict_list = []
     # Remove leading and trailing spaces from the response
     string = string.encode('utf-8').decode('utf-8').strip()
     # Remove extra tags and brackets.
-    string = string.replace("<start>", "").replace("<end>", "").replace(" [", "").replace("[ ", "").replace(" ]",
+    string = string.replace(start_marker, "").replace(end_marker, "").replace(" [", "").replace("[ ", "").replace(" ]",
                                                                                                             "").replace(
         "] ", "").replace("]", "").replace("[", "")
     dict_str = string.split(",")
