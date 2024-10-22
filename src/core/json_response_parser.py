@@ -1,28 +1,25 @@
 import pygame
-from jar_bingo_settings import BLACK
-from jar_bingo_settings import F_Arial
-
 
 # in: list, out: reshaped list
-def list_parser(arabic_list):
-    message_font = pygame.font.Font(F_Arial, 35)
+def list_parser(arabic_list, font, font_color): #list of strings, font_asset_path, rgb_color
+    message_font = pygame.font.Font(font, 35)
     message_font.set_script("Arab")
     message_font.set_direction(pygame.DIRECTION_RTL)
     reshaped_list = []
     for i in arabic_list:
-        message_text = message_font.render(i, True, BLACK)
+        message_text = message_font.render(i, True, font_color)
         reshaped_list.append(message_text)
         # print("reshaped the following item: ",reshaped_item)
     return reshaped_list
 
 
 # in string, out: reshaped string
-def string_parser(arabic_string):
+def string_parser(arabic_string, font, font_color): #string, font_asset_path, rgb_color
     reshaped_string = ""
-    message_font = pygame.font.Font(F_Arial, 35)
+    message_font = pygame.font.Font(font, 35)
     message_font.set_script("Arab")
     message_font.set_direction(pygame.DIRECTION_RTL)
-    reshaped_string = message_font.render(arabic_string, True, BLACK)
+    reshaped_string = message_font.render(arabic_string, True, font_color)
     # print("reshaped the following item: ",reshaped_string)
     return reshaped_string
 
