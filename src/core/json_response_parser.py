@@ -1,6 +1,9 @@
+import json
+import re
+
 import pygame
-from jar_bingo_settings import BLACK
-from jar_bingo_settings import F_Arial
+
+from src.jar_bingo.settings import F_Arial, BLACK
 
 
 # in: list, out: reshaped list
@@ -27,27 +30,27 @@ def string_parser(arabic_string):
     return reshaped_string
 
 
-def parse_dict_list(string):
+def parse_dict_list(string, start_marker="<start>", end_marker="<end>"):
     """Parses a string containing a list of dictionaries into a Python list.
     Args:             string: The input string.
     Returns:            A list of dictionaries.
     """
     dict_list = []
     # Remove leading and trailing spaces from the response
-    string = string.encode('utf-8').decode('utf-8').strip()
+    # string = string.encode('utf-8').decode('utf-8').strip()
     # Remove extra tags and brackets.
-    string = string.replace("<start>", "").replace("<end>", "").replace(" [", "").replace("[ ", "").replace(" ]",
-                                                                                                            "").replace(
-        "] ", "").replace("]", "").replace("[", "")
-    dict_str = string.split(",")
-    i = 0
-    while i < len(dict_str) - 1:
-        key_value_pairs = dict_str[i].split(":")
-        d = {}
-        key = key_value_pairs[0].strip().replace(" ", "").replace("'", "").replace('"', '').replace("{", "").replace(
-            "}", "")
-        value = key_value_pairs[1].strip().replace("'", "").replace('"', '').replace("{", "").replace("}", "")
-        d[key] = value
-        dict_list.append(d)
-        i += 1
-    return dict_list
+    string = string.replace(start_marker, "").replace(end_marker, "") \
+        .replace(" [", "[").replace("[ ", "[").replace(" ]", "]").replace(
+        "] ", "]").replace("\n", "").replace("\t", "")
+    string = re.sub(' +', " ", string)
+
+    # print("string : ", string)
+    search = json.dumps(string)
+    # print(search)
+    # dict_str = string.split(",")
+    # print("dict_str : ", dict_str)
+    data = json.loads(search)
+    data = json.loads(data)
+    print("data : ", data)
+    print(type(data))
+    return data

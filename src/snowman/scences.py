@@ -62,7 +62,7 @@ def draw_question_interface(answer_box, question_text, snowman_image):
     image_x = 0  # Image aligned to the left of screen
     image_y = question_text_y + SCOREBAR_HEIGHT  # Aligned vertically with the question text
 
-    screen.blit(snowman_image, image_x, image_y)
+    screen.blit(snowman_image, (image_x, image_y))
 
     # Return the interface elements (for any potential further processing)
     return {
@@ -89,13 +89,13 @@ def draw_helping_buttons(y):
     return correct_button, help_button, grammar_button
 
 
-def snowman_game_screen(answer_box, question, title, score, health_points, image_path):
+def snowman_game_screen(answer_box, question, title, score, health_points, image):
     screen.fill(cornsilk)
     draw_title(title)
     back_button = draw_back_button()
     score_y = TITLE_HEIGHT + SMALL_PADDING
     draw_score_and_health(score, y=score_y, health_points=health_points)
-    elements = draw_question_interface(answer_box, question, image_path)
+    elements = draw_question_interface(answer_box, question, image)
     buttons = draw_helping_buttons(elements["button_y"])
 
     return back_button, buttons

@@ -23,7 +23,7 @@ class SnowmanGame:
         self.num_of_wrong_answers = 0
         self.level = level
         self.questions_count_per_type = questions_count
-        self.max_questions_count_per_type = 5
+        self.max_questions_count_per_type = 4
         self.load_melting_snowman_images()
 
     def reset_game(self):
@@ -49,35 +49,19 @@ class SnowmanGame:
             questions_to_generate = min(self.max_questions_count_per_type, total_questions_count - i)
 
             # Format the questions count string (assuming it's for UI or logging)
-            format_questions_count_string(questions_to_generate)
+            questions_count_as_string = format_questions_count_string(questions_to_generate)
 
             # Load the question data for the current batch
-            questions_data = load_game_data(noun_type, questions_to_generate)
-            print(questions_data)
-            # Process each question in the batch
-            for question_dict in questions_data:
-                question = question_dict["question"]
-                # Replace any series of periods (e.g., ...) with '-------'
-                question = re.sub(r'\.+', "-------", question)
-
-                # Determine the number of words in the correct answer
-                num_of_answer_words = len(question_dict["correct_answer"].split())
-
-                # Determine the word description in Arabic
-                if num_of_answer_words == 1:
-                    num_words = "كلمة واحدة"
-                elif num_of_answer_words == 2:
-                    num_words = "كلمتين"
-                else:
-                    num_words = "أكثر من كلمتين"
-
-                # Format the question with the correct word description
-                question = f"املأ الفراغ التالي ب{num_words} بالمبتدأ المناسب.\n{question}"
-
-                # Update the question in the dictionary
-                question_dict["question"] = question
+            questions_data = load_game_data(noun_type, questions_count_as_string)
+            if type(questions_data) is dict:
+                self.format_questions_data(questions_data)
+                # Process each question in the batch
+            elif type(questions_data) is list:
+                for question_dict in questions_data:
+                    self.format_questions_data(question_dict)
 
             # Add the processed questions to the final list
+            print("questions data after formatting ", questions_data)
             questions.extend(questions_data)
         return questions
 
@@ -87,25 +71,24 @@ class SnowmanGame:
             self.questions.extend(self.generate_questions_data(n_type))
 
     def load_melting_snowman_images(self):
-        img = pygame.image.load(snowman_working_directory / "assets/images/complete.png")
+        img = pygame.image.load(snowman_working_directory / 'assets/images/complete.png')
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load(snowman_working_directory / "assets/images/melting_1.png")
+        img = pygame.image.load(snowman_working_directory / 'assets/images/melting_1.png')
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load(snowman_working_directory / "assets/images/melting_2.png")
+        img = pygame.image.load(snowman_working_directory / 'assets/images/melting_2.png')
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load(snowman_working_directory / "assets/images/melting_3.png")
+        img = pygame.image.load(snowman_working_directory / 'assets/images/melting_3.png')
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load(snowman_working_directory / "assets/images/melting_4.png")
+        img = pygame.image.load(snowman_working_directory / 'assets/images/melting_4.png')
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load(snowman_working_directory / "assets/images/melted.jpg")
+        img = pygame.image.load(snowman_working_directory / 'assets/images/melted.jpg')
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        print(snowman_working_directory)
 
 
     def get_current_question(self):
@@ -154,7 +137,33 @@ class SnowmanGame:
         screen.blit(text_surface,
                     (window_rect.centerx - text_rect.width // 2, window_rect.centery - text_rect.height // 2))
 
+    def format_questions_data(self, question_dict):
+        print(question_dict)
+        question_dict["correct_answer"] = question_dict["correct_answer"].strip()
+        question = question_dict["question"]
+        # Replace any series of periods (e.g., ...) with '-------'
+        re.sub(r'\...+', " _______", question)
+        print("question after format: ", question)
+
+        # Determine the number of words in the correct answer
+        num_of_answer_words = len(question_dict["correct_answer"].split())
+
+        # Determine the word description in Arabic
+        if num_of_answer_words == 1:
+            num_words = "كلمة واحدة"
+        elif num_of_answer_words == 2:
+            num_words = "كلمتين"
+        else:
+            num_words = "أكثر من كلمتين"
+
+        # Format the question with the correct word description
+        question = f"املأ الفراغ التالي ب{num_words} بالمبتدأ المناسب.\n{question}"
+
+        # Update the question in the dictionary
+        question_dict["question"] = question
+
 
 # Main game loop
 def validate_answer(snowman_current_game, answer_box):
-    return snowman_current_game.get_current_correct_answer() == answer_box.text
+    print("get_current_correct_answer ", snowman_current_game.get_current_correct_answer())
+    return snowman_current_game.get_current_correct_answer() == answer_box.text.strip()

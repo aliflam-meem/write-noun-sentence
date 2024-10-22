@@ -128,13 +128,13 @@ def main():
                     if demonstratives_button.collidepoint(event.pos):
                         game_state = SNOWMAN_GAME
                         snowman_current_game.level = snowman_levels_keys[1]
-                        snowman_current_game.questions_count_per_type = 10
+                        snowman_current_game.questions_count_per_type = 2
                         snowman_current_game.reset_game()
                         snowman_current_game.initialize_game()
                     if pronouns_button.collidepoint(event.pos):
                         game_state = SNOWMAN_GAME
                         snowman_current_game.level = snowman_levels_keys[2]
-                        snowman_current_game.questions_count_per_type = 3
+                        snowman_current_game.questions_count_per_type = 2
                         snowman_current_game.reset_game()
                         snowman_current_game.initialize_game()
 
