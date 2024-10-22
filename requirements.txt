@@ -3,6 +3,8 @@ Requests==2.32.3
 ibm_watsonx_ai==1.0.1
 python-dotenv==0.19.1
 pygame-ce==2.5.1
+gTTS==2.5.3
+thefuzz=0.22.1
 
 google.ai.generativelanguage
 mkl-service #github dep

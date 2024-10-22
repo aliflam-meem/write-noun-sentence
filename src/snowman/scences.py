@@ -38,7 +38,7 @@ def snowman_levels_screen():
     return back_button, al_atareef_button, demonstratives_button, pronouns_button
 
 
-def draw_question_interface(answer_box, question_text, snowman_image):
+def draw_question_interface(answer_box, question_text, snowman_image, submit_button_text):
     # Space between elements
     space_between_elements = 20
 
@@ -53,10 +53,12 @@ def draw_question_interface(answer_box, question_text, snowman_image):
 
     # Calculate positions for the buttons (right-aligned and horizontally aligned)
     answer_box_y = question_text_y + question_box_height + space_between_elements  # Below question text
+    answer_box_x = question_text_x + BUTTON_WIDTH / 2 + SMALL_PADDING
     answer_box.set_rect_y(answer_box_y)
-    answer_box.set_rect_x(question_text_x + BUTTON_WIDTH / 2 + SMALL_PADDING)
-    answer_button_x = question_text_x  # Right-most button
-    answer_button = draw_button("أجب", answer_button_x, answer_box_y, BUTTON_WIDTH / 2, SMALL_BUTTON_HEIGHT)
+    answer_box.set_rect_x(answer_box_x)
+    submit_answer_button_x = question_text_x  # Right-most button
+    submit_answer_button = draw_button(submit_button_text, submit_answer_button_x, answer_box_y, BUTTON_WIDTH / 2,
+                                       SMALL_BUTTON_HEIGHT)
 
     # Draw image to the left of the buttons
     image_x = 0  # Image aligned to the left of screen
@@ -66,8 +68,9 @@ def draw_question_interface(answer_box, question_text, snowman_image):
 
     # Return the interface elements (for any potential further processing)
     return {
-        "answer_button": answer_button,
+        "submit_answer_button": submit_answer_button,
         "button_y": answer_box_y + answer_box.rect.height + space_between_elements,
+        "information_area_x": answer_box_x
     }
 
 
@@ -89,16 +92,34 @@ def draw_helping_buttons(y):
     return correct_button, help_button, grammar_button
 
 
-def snowman_game_screen(answer_box, question, title, score, health_points, image):
+def draw_information_area(x, y, width, height, text=""):
+    information_area_rect = draw_text_box(text, x, y, width, height)
+
+    # Create a surface for the rectangle with per-pixel alpha (transparency)
+    # rect_surface = pygame.Surface((width, height), pygame.SRCALPHA).convert_alpha()
+    # rect_surface.fill((0, 0, 0, 0))  # Transparent background
+    #
+    # # Draw the border (make sure the border color is solid, e.g., (255, 0, 0, 255) for red)
+    # information_area_rect = pygame.draw.rect(rect_surface, creamy, rect_surface.get_rect(), 2)  # 2-pixel wide border
+    #
+    # # Blit the transparent rect_surface onto the main screen at (x, y)
+    # screen.blit(rect_surface, (x, y))
+    return information_area_rect
+
+
+def snowman_game_screen(answer_box, question, title, score, health_points, image, information_area_content,
+                        submit_button_text):
     screen.fill(cornsilk)
     draw_title(title)
     back_button = draw_back_button()
     score_y = TITLE_HEIGHT + SMALL_PADDING
     draw_score_and_health(score, y=score_y, health_points=health_points)
-    elements = draw_question_interface(answer_box, question, image)
+    elements = draw_question_interface(answer_box, question, image, submit_button_text)
     buttons = draw_helping_buttons(elements["button_y"])
+    draw_information_area(answer_box.rect.x, answer_box.rect.y, answer_box.rect.width, answer_box.rect.height,
+                          information_area_content)
 
-    return back_button, buttons
+    return back_button, buttons, elements["submit_answer_button"]
 
 
 def create_input_box():

@@ -55,3 +55,6 @@ class InputBox:
         # Blit the text surface on the input box (place the text inside the box)
         pygame.draw.rect(screen, self.color, self.rect, 2)
         screen.blit(self.txt_surface, (text_x, text_y))
+
+    def clear(self):
+        self.text = ""

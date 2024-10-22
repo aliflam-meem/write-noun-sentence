@@ -124,27 +124,30 @@ def main():
                         snowman_current_game.level = snowman_levels_keys[0]
                         snowman_current_game.questions_count_per_type = 2
                         snowman_current_game.reset_game()
-                        snowman_current_game.initialize_game()
+                        snowman_current_game.initialize_game_with_questions()
                     if demonstratives_button.collidepoint(event.pos):
                         game_state = SNOWMAN_GAME
                         snowman_current_game.level = snowman_levels_keys[1]
                         snowman_current_game.questions_count_per_type = 2
                         snowman_current_game.reset_game()
-                        snowman_current_game.initialize_game()
+                        snowman_current_game.initialize_game_with_questions()
                     if pronouns_button.collidepoint(event.pos):
                         game_state = SNOWMAN_GAME
                         snowman_current_game.level = snowman_levels_keys[2]
                         snowman_current_game.questions_count_per_type = 2
                         snowman_current_game.reset_game()
-                        snowman_current_game.initialize_game()
+                        snowman_current_game.initialize_game_with_questions()
 
         elif game_state == SNOWMAN_GAME:
             title = snowman_levels[snowman_current_game.level]["title"]
-            back_button, buttons = snowman_game_screen(answer_box,
-                                                       snowman_current_game.get_current_question(), title,
-                                                       snowman_current_game.score,
-                                                       snowman_current_game.health_points,
-                                                       snowman_current_game.get_current_melting_snowman_image())
+            back_button, buttons, submit_answer_button = snowman_game_screen(answer_box,
+                                                                             snowman_current_game.get_current_question(),
+                                                                             title,
+                                                                             snowman_current_game.score,
+                                                                             snowman_current_game.health_points,
+                                                                             snowman_current_game.get_current_melting_snowman_image(),
+                                                                             snowman_current_game.get_current_information(),
+                                                                             snowman_current_game.get_submit_button_text())
             correct_button, help_button, grammar_button = buttons
 
             for event in pygame.event.get():
@@ -153,28 +156,45 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         game_state = SNOWMAN_LEVELS
-                    if correct_button.collidepoint(event.pos):
-                        if validate_answer(snowman_current_game, answer_box):
-                            if snowman_current_game.reached_last_question():
-                                # We've reached the last question already --> show final score and result
-                                snowman_current_game.is_win = True
-                                snowman_current_game.display_game_result()
-                            else:
-                                # Move to the next question
-                                snowman_current_game.move_to_next_question()
+                    if submit_answer_button.collidepoint(event.pos):
+                        if snowman_current_game.is_correct_answer_displayed:
+                            # Move to the next question
+                            answer_box.clear()
+                            snowman_current_game.move_to_next_question()
                         else:
-                            is_game_over = snowman_current_game.is_game_over()
-                            if snowman_current_game.health_points > 0:
-                                snowman_current_game.health_points -= 1
-                            elif snowman_current_game.health_points == 0:
-                                if is_game_over:
+                            if validate_answer(snowman_current_game, answer_box):
+                                if snowman_current_game.reached_last_question():
                                     # We've reached the last question already --> show final score and result
-                                    # or the snowman is melted
-                                    snowman_current_game.is_win = False
+                                    snowman_current_game.is_win = True
                                     snowman_current_game.display_game_result()
-                                elif snowman_current_game.reached_last_question() and not is_game_over:
+                                else:
                                     # Move to the next question
+                                    answer_box.clear()
                                     snowman_current_game.move_to_next_question()
+                            else:
+                                is_game_over = snowman_current_game.is_game_over()
+                                if snowman_current_game.health_points > 0:
+                                    snowman_current_game.health_points -= 1
+                                elif snowman_current_game.health_points == 0:
+                                    if is_game_over:
+                                        # We've reached the last question already --> show final score and result
+                                        # or the snowman is melted
+                                        snowman_current_game.is_win = False
+                                        snowman_current_game.display_game_result()
+                                    elif snowman_current_game.reached_last_question() and not is_game_over:
+                                        # Move to the next question
+                                        answer_box.clear()
+                                        snowman_current_game.move_to_next_question()
+                                    else:
+                                        snowman_current_game.move_to_next_snowman_melting_image()
+                    if correct_button.collidepoint(event.pos):
+                        snowman_current_game.set_correct_answer_as_information()
+                        snowman_current_game.melt_the_snowman()
+                    if help_button.collidepoint(event.pos):
+                        snowman_current_game.set_help_questions_as_information()
+                    if grammar_button.collidepoint(event.pos):
+                        snowman_current_game.set_grammar_as_information()
+
                 answer_box.handle_event(event)
             answer_box.draw()
 

@@ -1,7 +1,10 @@
 import pathlib
 
+import pygame.image
+
 
 snowman_working_directory = pathlib.Path(__file__).parent
+SNOWMAN_GAME_RESULT = pygame.image.load(snowman_working_directory / 'assets/images/snowman_game_result.jpg')
 
 snowman_levels_keys = ["al_atareef", "demonstratives", "pronouns"]
 snowman_levels = {
