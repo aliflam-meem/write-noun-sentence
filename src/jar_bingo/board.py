@@ -2,8 +2,9 @@ import random
 
 import pygame
 
-from data import *
-from settings import *
+from src.jar_bingo.data import *
+from src.jar_bingo.settings import *
+from src.constants import SCREEN_WIDTH
 
 
 # Function to create the game board

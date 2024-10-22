@@ -1,7 +1,8 @@
 import pygame
 
-from settings import *
-from src.core.play_audio import play_sound
+from src.jar_bingo.settings import *
+from src.core.audio_player import play_sound
+from src.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 def game_over_card(screen, image_path, message_font, message_color, message, audio_var):

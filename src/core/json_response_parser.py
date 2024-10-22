@@ -31,8 +31,11 @@ def string_parser(arabic_string):
 
 
 def parse_dict_list(string, start_marker="<start>", end_marker="<end>"):
+def parse_json_response(string, start_marker, end_marker):
     """Parses a string containing a list of dictionaries into a Python list.
     Args:             string: The input string.
+                      start_marker: the string which marks the start of the json object.
+                      end_marker: the string which marks the end of the json object.
     Returns:            A list of dictionaries.
     """
     dict_list = []
