@@ -1,22 +1,15 @@
-import inspect
 import os
 import sys
-import inspect
 from gtts import gTTS
 import time
-
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-
 import pathlib
 import pygame
 from pygame import mixer
 import random
 # from LLM import load_data
 from src.constants import *
+from src.whack_a_mole.constants import *
 from src.core.utility import draw_score_and_health, draw_title, draw_button
-
 
 # from LLM import load_whack_a_mole_data
 
@@ -24,8 +17,7 @@ from src.core.utility import draw_score_and_health, draw_title, draw_button
 # Error Handling Functions
 # ---------------------------------------
 CWD = pathlib.Path(__file__).parent
-title_height = 60
-lines_spacing = 40
+
 
 
 def handle_image_load_error(file_name):
@@ -112,6 +104,24 @@ def generate_gtts(text,number):
     except Exception as e:
         print(f"Unexpected error saving gtts {text}: {e}")
         quit()
+
+def whack_a_mole_play_audio(game):
+            audio_1 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l1.mp3'))  
+            audio_2 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l2.mp3'))  
+            if  game.next_question_index == game.current_question_index and game.next_question_index<=len(game.questions):
+                game.next_question_index+=1
+                if  game.next_question_index > len(game.questions):
+                    game.game_end = True
+
+                else:
+                    audio_1.play()
+                    while pygame.mixer.get_busy():
+                        #pygame.time.delay(1)
+                        pygame.event.poll()              
+                    audio_2.play()
+                    while pygame.mixer.get_busy():
+                        #pygame.time.delay(1)
+                        pygame.event.poll() 
 # ---------------------------------------
 # game components
 # ---------------------------------------
@@ -210,7 +220,7 @@ class Mole:
 # ---------------------------------------
 
 
-class Game:
+class WhackaMoleGame:
 
     # def __init__(self,questions):
     def __init__(self):
@@ -226,6 +236,8 @@ class Game:
         self.score_text = body_font
         self.lives_text = body_font
         self.background = load_background_image()
+        self.show_up_timer = 0
+        self.show_up_end = 100
 
         # self.question_item = {
         #    "sentence": "يجلسُ الطالبُ على المقعدِ",
@@ -255,7 +267,7 @@ class Game:
         self.bomb = Mole('bomb')
 
     def draw(self):
-        screen.blit(self.background, (0, 60))
+        
 
         for mole in self.moles:
             mole.draw()
@@ -265,10 +277,6 @@ class Game:
         for hole in self.holes:
             hole.draw()
 
-        # score = self.score_text.render(f' النقاط {self.score}', 1,
-        #                            (255, 255, 255))
-        # screen.blit(score, (10, 10))
-        # draw_score_and_health(10*self.score,x=30, y=10, health_points=self.lives, max_score=100 , text_color=saddlebrown)
         if self.current_question_index < len(self.questions):
 
             question_item = self.questions[self.current_question_index]
@@ -280,16 +288,16 @@ class Game:
                 question_dispaly = body_font.render(line, True, (0, 0, 0))
                 question_max_len = max(SMALL_PADDING + SCREEN_WIDTH / 3, question_dispaly.get_width())
                 question.append(question_dispaly)
-            question_background_rect = pygame.Rect(SCREEN_WIDTH / 3 - SMALL_PADDING, title_height + SMALL_PADDING / 4,
+            question_background_rect = pygame.Rect(SCREEN_WIDTH / 3 - SMALL_PADDING, TITLE_HEIGHT + SMALL_PADDING / 4,
                                                    question_max_len, TITLE_HEIGHT - SMALL_PADDING)
             pygame.draw.rect(screen, (255, 255, 255), question_background_rect)
             for line in range(len(question)):
-                screen.blit(question[line], (SCREEN_WIDTH / 2.5, title_height + (lines_spacing * line)))
+                screen.blit(question[line], (SCREEN_WIDTH / 2.5, TITLE_HEIGHT + (LINES_SPACING * line)))
 
             question_word = f"( {question_item['word']} )"
             # print(rendered_question_word.get_width())
             rendered_question_word = body_font_bold.render(question_word, True, (0, 0, 0))
-            screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), title_height+lines_spacing))
+            screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), TITLE_HEIGHT+LINES_SPACING))
             #screen.blit(rendered_question_word, (50, 50))
             question_text_l2 = [question_text[1], question_word] 
 
@@ -297,6 +305,7 @@ class Game:
                 generate_gtts(question_text[0],1)
                 generate_gtts(' '.join(question_text_l2),2)
                 self.generate_new_gtts = False
+            
 
         draw_score_and_health(10*self.score,x=900, y=10, health_points=self.lives, max_score=100 , text_color=saddlebrown)
 
@@ -316,128 +325,25 @@ class Game:
 # whack_a_mole_game_screen function
 # ---------------------------------------
 
-def whack_a_mole_game_screen():
+def whack_a_mole_game_screen(game):
     try:
-
-        FPS = 60
-        pygame.init()
-
-        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption('Whack a Mole')
-
         title = "لعبة أقسام الكلام"
+        draw_title(title, color=BUTTON_FONT_COLOR, title_height=TITLE_HEIGHT)
 
-        clock = pygame.time.Clock()
-
+        back_button = draw_button("رجوع", 30, (TITLE_HEIGHT - BUTTON_HEIGHT // 1.5 ) / 2,
+                                                BUTTON_WIDTH - LONG_PADDING, BUTTON_HEIGHT // 1.5 )
+        
         # questions = load_whack_a_mole_data()
         # game = Game(questions)
-        game = Game()
 
-        in_play = True
-        show_up_timer = 0
-        show_up_end = 100
+        screen.blit(game.background, (0, 60))
+        game.draw()
+        pygame.display.update()
+        whack_a_mole_play_audio(game) 
 
-        while in_play:
-            # screen.fill((0, 0, 0))
-            draw_title(title, color=BUTTON_FONT_COLOR, title_height=title_height)
-
-            # Doesn't work yet
-            back_button = draw_button("رجوع", 30, (title_height - BUTTON_HEIGHT // 1.5 ) / 2, BUTTON_WIDTH - LONG_PADDING,
-                          BUTTON_HEIGHT // 1.5 )
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    in_play = False
-
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    mousePos = pygame.mouse.get_pos()
-                    for mole in game.moles:
-                        if mole.is_clicked(mousePos):
-                            # if mole.is_correct_answer():
-                            clicked_answer = mole.clicked_answer();
-                            if clicked_answer == game.questions[game.current_question_index]["answer"]:
-                                #print(clicked_answer)  # for debugging                
-                                game.score += 1
-                                mole.move = False
-                                mole.counter = 0
-                                game.current_question_index +=1
-                                game.generate_new_gtts = True
-                            else:
-                                game.lives -= 1
-                                mole.move = False
-                                mole.counter = 0
-
-                    if game.bomb.is_clicked(mousePos):
-                        game.lives -= 1
-                        game.bomb.move = False
-                        game.bomb.counter = 0
-
-            if game.lives <= 0:
-                game.game_over = True
-
-                # turn off the game after 3 seconds
-                game.game_over_counter += 1
-                if game.game_over_counter >= 180:
-                    in_play = False
-
-            if game.game_end == True: 
-                # turn off the game after 3 seconds
-                game.game_end_counter += 1
-                if game.game_end_counter >= 180:
-                    in_play = False
-
-            if not game.game_over and not game.game_end:
-                show_up_timer += 1
-                if show_up_timer >= show_up_end:
-                    # holes that are already taken
-                    taken_holes = [mole.hole_num
-                                   for mole in game.moles] + [game.bomb.hole_num]
-
-                    # select a new hole for each mole
-                    for mole in game.moles:
-                        if not mole.move:
-                            mole.select_hole(taken_holes)
-                            taken_holes.append(mole.hole_num)
-                            break
-
-                    # select a new hole for the bomb
-                    if not game.bomb.move:
-                        game.bomb.select_hole(taken_holes)
-
-                    show_up_timer = 0
-
-                for mole in game.moles:
-                    mole.show()
-                game.bomb.show()
-
-            game.draw()
-            pygame.display.update()
-
-            audio_1 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l1.mp3'))  
-            audio_2 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l2.mp3'))  
-            if  game.next_question_index == game.current_question_index and game.next_question_index<=len(game.questions):
-                game.next_question_index+=1
-                if  game.next_question_index > len(game.questions):
-                    game.game_end = True
-
-                else:
-                    audio_1.play()
-                    while pygame.mixer.get_busy():
-                        pygame.time.delay(1)
-                        pygame.event.poll()              
-                    audio_2.play()
-                    while pygame.mixer.get_busy():
-                        pygame.time.delay(1)
-                        pygame.event.poll()            
-                
-                      
-            clock.tick(FPS)                  
-      
-        pygame.quit()
+        return game
 
 
     except Exception as e:
-        print(f"Error initializing Pygame: {e}")
+        print(f"Error initializing whack_a_mole_game: {e}")
         return
-    
-#whack_a_mole_game_screen()
