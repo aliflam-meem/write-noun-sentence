@@ -1,17 +1,16 @@
 import os
-import sys
-from gtts import gTTS
-import time
 import pathlib
-import pygame
-from pygame import mixer
 import random
-from src.whack_a_mole.LLM import load_whack_a_mole_data
-from src.constants import SCREEN_HEIGHT,SCREEN_WIDTH, screen,body_font,SMALL_PADDING,LONG_PADDING,BUTTON_HEIGHT,\
-                         BUTTON_WIDTH,LOADING_IMAGE,BUTTON_FONT_COLOR,TITLE_HEIGHT,saddlebrown
 
+from gtts import gTTS
+from pygame import mixer
+
+from src.constants import SCREEN_HEIGHT, SCREEN_WIDTH, screen, body_font, SMALL_PADDING, LONG_PADDING, BUTTON_HEIGHT, \
+    BUTTON_WIDTH, LOADING_IMAGE, BUTTON_FONT_COLOR, TITLE_HEIGHT, saddlebrown, thumbnail_width
+from src.core.utility import draw_score_and_health, draw_title, draw_button, load_image
+from src.whack_a_mole.LLM import load_whack_a_mole_data
 from src.whack_a_mole.constants import *
-from src.core.utility import draw_score_and_health, draw_title, draw_button
+
 
 # from LLM import load_whack_a_mole_data
 
@@ -22,35 +21,8 @@ CWD = pathlib.Path(__file__).parent
 
 
 
-def handle_image_load_error(file_name):
-    print(f"Error loading image: {file_name}")
-
-
 def handle_font_load_error(font_name, size):
     print(f"Error loading font: {font_name} with size {size}")
-
-
-def load_image(filename, size):
-    """Loads and scales an image.
-
-    Args:
-        filename (str): The name of the image file.
-        size (tuple): The desired width and height of the scaled image.
-
-    Returns:
-        pygame.Surface: The loaded and scaled image surface.
-    """
-
-    try:
-        image_file_name = pygame.image.load(filename)
-        image = pygame.transform.scale(image_file_name, size)
-        return image
-    except FileNotFoundError:
-        handle_image_load_error(filename)
-        quit()
-    except Exception as e:
-        print(f"Unexpected error loading image {filename}: {e}")
-        quit()
 
 
 def load_bomb_image():
@@ -68,11 +40,16 @@ def load_mole_image():
 def load_background_image():
     return load_image(CWD / 'assets/images/background.png', (SCREEN_WIDTH, SCREEN_HEIGHT - 50))
 
-#def load_win_image():
+
+def load_mole_game_thumbnail():
+    return load_image(CWD / 'assets/images/whack_a_mole_thumbnail.jpg', (thumbnail_width, thumbnail_width))
+
+
+# def load_win_image():
 #    return load_image(CWD / 'assets/Win.png',(400,400))
 
 def check_if_sound_finished():
-    if  pygame.mixer.get_busy():
+    if pygame.mixer.get_busy():
         return False
     else:
         return True
@@ -96,7 +73,7 @@ def play_audio(filename):
   mixer.music.set_volume(0.7)
 
   # Start playing the song
-  mixer.music.play()    
+  mixer.music.play()
 
 def generate_gtts(text,number):
     try:
@@ -108,8 +85,8 @@ def generate_gtts(text,number):
         quit()
 
 def whack_a_mole_play_audio(game):
-            audio_1 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l1.mp3'))  
-            audio_2 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l2.mp3'))  
+            audio_1 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l1.mp3'))
+            audio_2 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l2.mp3'))
             if  game.next_question_index == game.current_question_index and game.next_question_index<=len(game.questions):
                 game.next_question_index+=1
                 if  game.next_question_index > len(game.questions):
@@ -119,11 +96,11 @@ def whack_a_mole_play_audio(game):
                     audio_1.play()
                     while pygame.mixer.get_busy():
                         #pygame.time.delay(1)
-                        pygame.event.poll()              
+                        pygame.event.poll()
                     audio_2.play()
                     while pygame.mixer.get_busy():
                         #pygame.time.delay(1)
-                        pygame.event.poll() 
+                        pygame.event.poll()
 # ---------------------------------------
 # game components
 # ---------------------------------------
@@ -270,7 +247,7 @@ class WhackaMoleGame:
         self.bomb = Mole('bomb')
 
     def draw(self):
-        
+
 
         for mole in self.moles:
             mole.draw()
@@ -302,13 +279,13 @@ class WhackaMoleGame:
             rendered_question_word = body_font.render(question_word, True, (0, 0, 0))
             screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), WM_TITLE_HEIGHT+LINES_SPACING))
             #screen.blit(rendered_question_word, (50, 50))
-            question_text_l2 = [question_text[1], question_word] 
+            question_text_l2 = [question_text[1], question_word]
 
             if self.generate_new_gtts:
                 generate_gtts(question_text[0],1)
                 generate_gtts(' '.join(question_text_l2),2)
                 self.generate_new_gtts = False
-            
+
 
         draw_score_and_health(10*self.score,x=900, y=10, health_points=self.lives, max_score=100 , text_color=saddlebrown)
 
@@ -316,12 +293,12 @@ class WhackaMoleGame:
             text = self.game_over_text.render('حظ أوفر في المرة القادمة', 1, (255, 255, 255))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2,
                                SCREEN_HEIGHT //  2 - text.get_height() // 2))
-            
+
         if self.game_end:
             text = self.game_over_text.render('انتهت اللعبة', 1, (255, 255, 255))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2,
                                SCREEN_HEIGHT //  2 - text.get_height() // 2))
-            
+
 
 
 # ---------------------------------------
@@ -331,28 +308,26 @@ class WhackaMoleGame:
 def whack_a_mole_game_screen(game):
     try:
         title = "لعبة أقسام الكلام"
-        draw_title(title, color=BUTTON_FONT_COLOR, title_height=WM_TITLE_HEIGHT)
+        draw_title(title, title_color=BUTTON_FONT_COLOR, title_height=WM_TITLE_HEIGHT)
 
-        back_button = draw_button("رجوع", 30, (WM_TITLE_HEIGHT - BUTTON_HEIGHT // 1.5 ) / 2,
-                                                BUTTON_WIDTH - LONG_PADDING, BUTTON_HEIGHT // 1.5 )
+        back_button = draw_button("رجوع", 30, (WM_TITLE_HEIGHT - BUTTON_HEIGHT // 1.5) / 2,
+                                  BUTTON_WIDTH - LONG_PADDING, BUTTON_HEIGHT // 1.5)
         screen.blit(game.background, (0, 60))
-
 
         if game.is_data_loaded == False:
-            
             text = body_font.render('جار تحميل اللعبة', 1, (255, 255, 255))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2 + SMALL_PADDING //2,
-                               SCREEN_HEIGHT //  2 - text.get_height() // 2 +LONG_PADDING ))
-            screen.blit(LOADING_IMAGE, (SCREEN_WIDTH*0.5 -LONG_PADDING //2 , SCREEN_HEIGHT*0.5 -LONG_PADDING))
-            pygame.display.update()  
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2 + SMALL_PADDING // 2,
+                               SCREEN_HEIGHT // 2 - text.get_height() // 2 + LONG_PADDING))
+            screen.blit(LOADING_IMAGE, (SCREEN_WIDTH * 0.5 - LONG_PADDING // 2, SCREEN_HEIGHT * 0.5 - LONG_PADDING))
+            pygame.display.update()
             questions = load_whack_a_mole_data()
-            game.questions = questions           
+            game.questions = questions
             game.is_data_loaded = True
-        
+
         screen.blit(game.background, (0, 60))
-        game.draw()   
-        pygame.display.update()    
-        whack_a_mole_play_audio(game) 
+        game.draw()
+        pygame.display.update()
+        whack_a_mole_play_audio(game)
 
         return game
 

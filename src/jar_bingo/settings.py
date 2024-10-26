@@ -23,12 +23,13 @@ QUIZ_IMG = "src/jar_bingo/assets/images/card_Gemini_Generated_Image_2jadgq2jadgq
 BLUE_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_b7o9wwb7o9wwb7o9 (1).jfif"
 GREEN_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_3n68uq3n68uq3n68.jfif"
 RED_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_501zw2501zw2501z.jfif"
+jar_bingo_thumbnail = "src/jar_bingo/assets/images/jar_bingo_thumbnail.png"
 ### Game Over
 WIN_MENU_IMG = "src/jar_bingo/assets/images/win_Gemini_Generated_Image_rw3exvrw3exvrw3e.jfif"
 LOSE_MENU_IMG = "src/jar_bingo/assets/images/lose_Gemini_Generated_Image_8m9gt98m9gt98m9g.jfif"
 ## Audio
 BACKGROUND_SEA_SHP = "src/jar_bingo/assets/audio/mixkit-wooden-ship-on-the-sea-1187.wav"
-WIN_1 = "src/jar_bingo/assets/audio/Fliki_you_win.mp3"
+
 ## Fonts
 F_Arial = "assets/fonts/Arial.ttf"
 
@@ -36,8 +37,6 @@ F_Arial = "assets/fonts/Arial.ttf"
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAY = (128, 128, 128)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
 DARK_BLUE1 = (0, 0, 128)
 DARK_BLUE2 = (0, 0, 64)
 DARK_BLUE3 = (0, 0, 255)

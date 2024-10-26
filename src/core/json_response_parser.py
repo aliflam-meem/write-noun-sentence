@@ -1,4 +1,8 @@
+import json
+import re
+
 import pygame
+
 
 # in: list, out: reshaped list
 def list_parser(arabic_list, font, font_color): #list of strings, font_asset_path, rgb_color
@@ -50,3 +54,43 @@ def parse_json_response(string, start_marker, end_marker):
         dict_list.append(d)
         i += 1
     return dict_list
+
+
+def parse_specific_json_response(string, start_marker="<start>", end_marker="<end>"):
+    """Parses a string containing a list of dictionaries into a Python list.
+    Args:             string: The input string.
+                      start_marker: the string which marks the start of the json object.
+                      end_marker: the string which marks the end of the json object.
+    Returns:            A list of dictionaries.
+    """
+    # Remove leading and trailing spaces from the response
+    string = get_substring_delimited_by(string, start_marker, end_marker)
+    print("string after slicing")
+    print(string)
+    # Remove extra tags and brackets.
+    string = string.replace(" [", "[").replace("[ ", "[").replace(" ]", "]").replace(
+        "] ", "]").replace("\n", "").replace("\t", "")
+    string = re.sub(' +', " ", string)
+
+    search = json.dumps(string)
+    data = json.loads(search)
+    data = json.loads(data)
+    print("data : ", data)
+    print(type(data))
+    return data
+
+
+def get_substring_delimited_by(text, start_word, end_word):
+    # Find the start and end index of the words
+    start_index = text.find(start_word)
+    end_index = text.find(end_word, start_index)
+
+    # If start or end words are not found, return None
+    if start_index == -1 or end_index == -1:
+        return None
+
+    # Adjust the start index to get the substring after 'start_word'
+    start_index += len(start_word)
+
+    # Extract the substring between the two words
+    return text[start_index:end_index].strip()

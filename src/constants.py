@@ -14,19 +14,29 @@ SMALL_BUTTON_WIDTH = 180
 MENU_BUTTON_WIDTH = 200
 BUTTON_HEIGHT = 60
 SMALL_BUTTON_HEIGHT = 50
+thumbnail_width = 125
 LONG_PADDING = 100
 SMALL_PADDING = 20
 
 # Colors
+silverfiligree = (127, 124, 129)
+barelyblue = (221, 224, 223)
+silverpink = (220, 177, 175)
+maroon = (134, 62, 59)
+ivory = (251, 246, 246)
 DARK_GRAY = (50, 50, 50)
-brown = (205, 133, 63) #to upper
-saddlebrown = (139, 69, 19) #to upper
+gainsboro = (211, 211, 211)
+brown = (205, 133, 63)
+saddlebrown = (139, 69, 19)
 cornsilk = (251, 245, 229)
-BUTTON_FONT_COLOR = (255, 235, 205)
-BUTTON_COLOR = (160, 82, 45)
-BLACK = (0, 0, 0)
-
-# Images
+creamy = (100, 99, 81)
+salmon = (250, 128, 114)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BUTTON_FONT_COLOR = (251, 246, 246)
+BUTTON_COLOR = (168, 78, 74)
+DISABLED_BUTTON_COLOR = (206, 177, 176)
+HIGHLIGHT_BUTTON_COLOR = (170, 119, 117)
 GAME_SCREEN_BG = pygame.image.load("assets/images/main_bg.jpg")
 GAME_SCREEN_BG = pygame.transform.scale(GAME_SCREEN_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
 HEALTH_POINT_IMAGE = pygame.image.load("assets/images/health_heart.png")
@@ -60,3 +70,7 @@ SNOWMAN_LEVELS = "snowman_levels"
 PREPOSITION_GAME = "preposition_game"
 WHACK_A_MOLE_GAME = "whack_a_mole_game"
 SNOWMAN_GAME = "snowman_game"
+
+# Audio
+YOU_WIN_AUDIO = "assets/audio/Fliki_you_win.mp3"
+YOU_LOST_AUDIO = "assets/audio/better_luck_next_time.mp3"
