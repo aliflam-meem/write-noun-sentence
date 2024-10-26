@@ -1,22 +1,16 @@
 import os
-import sys
+import pathlib
+import random
 
 from gtts import gTTS
-from src.whack_a_mole.LLM import load_whack_a_mole_data
+from pygame import mixer
 
+from src.constants import SCREEN_HEIGHT, SCREEN_WIDTH, screen, body_font, SMALL_PADDING, LONG_PADDING, BUTTON_HEIGHT, \
+    BUTTON_WIDTH, LOADING_IMAGE, BUTTON_FONT_COLOR, TITLE_HEIGHT, saddlebrown, thumbnail_width
+from src.core.utility import draw_score_and_health, draw_title, draw_button, load_image
+from src.whack_a_mole.LLM import load_whack_a_mole_data
 from src.whack_a_mole.constants import *
 
-
-
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-
-import pathlib
-from pygame import mixer
-import random
-from src.constants import *
-from src.core.utility import draw_score_and_health, draw_title, draw_button, load_image
 
 # from LLM import load_whack_a_mole_data
 
@@ -314,19 +308,17 @@ class WhackaMoleGame:
 def whack_a_mole_game_screen(game):
     try:
         title = "لعبة أقسام الكلام"
-        draw_title(title, color=BUTTON_FONT_COLOR, title_height=WM_TITLE_HEIGHT)
+        draw_title(title, title_color=BUTTON_FONT_COLOR, title_height=WM_TITLE_HEIGHT)
 
-        back_button = draw_button("رجوع", 30, (WM_TITLE_HEIGHT - BUTTON_HEIGHT // 1.5 ) / 2,
-                                                BUTTON_WIDTH - LONG_PADDING, BUTTON_HEIGHT // 1.5 )
+        back_button = draw_button("رجوع", 30, (WM_TITLE_HEIGHT - BUTTON_HEIGHT // 1.5) / 2,
+                                  BUTTON_WIDTH - LONG_PADDING, BUTTON_HEIGHT // 1.5)
         screen.blit(game.background, (0, 60))
 
-
         if game.is_data_loaded == False:
-
             text = body_font.render('جار تحميل اللعبة', 1, (255, 255, 255))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2 + SMALL_PADDING //2,
-                               SCREEN_HEIGHT //  2 - text.get_height() // 2 +LONG_PADDING ))
-            screen.blit(LOADING_IMAGE, (SCREEN_WIDTH*0.5 -LONG_PADDING //2 , SCREEN_HEIGHT*0.5 -LONG_PADDING))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2 + SMALL_PADDING // 2,
+                               SCREEN_HEIGHT // 2 - text.get_height() // 2 + LONG_PADDING))
+            screen.blit(LOADING_IMAGE, (SCREEN_WIDTH * 0.5 - LONG_PADDING // 2, SCREEN_HEIGHT * 0.5 - LONG_PADDING))
             pygame.display.update()
             questions = load_whack_a_mole_data()
             game.questions = questions
@@ -343,5 +335,3 @@ def whack_a_mole_game_screen(game):
     except Exception as e:
         print(f"Error initializing whack_a_mole_game: {e}")
         return
-
-#whack_a_mole_game_screen()

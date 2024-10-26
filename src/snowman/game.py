@@ -148,7 +148,7 @@ class SnowmanGame:
         img = pygame.image.load(snowman_working_directory / 'assets/images/melting_4.png')
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
-        img = pygame.image.load(snowman_working_directory / 'assets/images/melted.jpg')
+        img = pygame.image.load(snowman_working_directory / 'assets/images/melted.png')
         img = pygame.transform.scale(img, (IMAGE_WIDTH, IMAGE_WIDTH))
         self.melting_snowman_images.append(img)
 
