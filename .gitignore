@@ -9,3 +9,4 @@ write-noun-sentence.code-workspace
 src/jar_bingo/__pycache__/
 src/jar_bingo/ver_1.0/
 src/jar_bingo/tests.py
+src/whack_a_mole/assets/*.xlsx

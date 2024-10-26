@@ -8,6 +8,7 @@ from src.constants import screen, GAME_SCREEN_BG, SCREEN_WIDTH, BUTTON_WIDTH, BU
 from src.core.utility import draw_title, draw_back_button, draw_button
 from src.jar_bingo.game import load_jar_bingo_game_thumbnail
 from src.snowman.constants import snowman_levels_keys, snowman_levels
+from src.whack_a_mole.game import WhackaMoleGame
 from src.snowman.game import SnowmanGame, is_answer_valid
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
     load_snowman_game_thumbnail
@@ -112,6 +113,7 @@ def main():
     clock = pygame.time.Clock()
     running = True
     snowman_current_game = SnowmanGame()
+    whack_a_mole_game = WhackaMoleGame()
 
     while running:
         screen.fill("black")  # Set background color of the screen
@@ -245,7 +247,69 @@ def main():
                 snowman_current_game.display_result_and_play_sound()
 
         elif game_state == WHACK_A_MOLE_GAME:
-            whack_a_mole_game_screen()
+            whack_a_mole_game = whack_a_mole_game_screen(whack_a_mole_game)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if back_button.collidepoint(event.pos):
+                        game_state = GAMES_BOARD_SCREEN
+                    mousePos = pygame.mouse.get_pos()
+                    for mole in whack_a_mole_game.moles:
+                        if mole.is_clicked(mousePos):
+                            # if mole.is_correct_answer():
+                            clicked_answer = mole.clicked_answer();
+                            if clicked_answer == whack_a_mole_game.questions[whack_a_mole_game.current_question_index]["answer"]:
+                                #print(clicked_answer)  # for debugging
+                                whack_a_mole_game.score += 1
+                                mole.move = False
+                                mole.counter = 0
+                                whack_a_mole_game.current_question_index +=1
+                                whack_a_mole_game.generate_new_gtts = True
+                            else:
+                                whack_a_mole_game.lives -= 1
+                                mole.move = False
+                                mole.counter = 0
+
+                    if whack_a_mole_game.bomb.is_clicked(mousePos):
+                        whack_a_mole_game.lives -= 1
+                        whack_a_mole_game.bomb.move = False
+                        whack_a_mole_game.bomb.counter = 0
+
+            if whack_a_mole_game.lives <= 0:
+                whack_a_mole_game.game_over = True
+
+            #if whack_a_mole_game.game_end == True:
+                # turn off the game after 3 seconds
+                #whack_a_mole_game.game_end_counter += 1
+                #if whack_a_mole_game.game_end_counter >= 180:
+                #    in_play = False
+
+            if not whack_a_mole_game.game_over and not whack_a_mole_game.game_end:
+                whack_a_mole_game.show_up_timer += 1
+                if whack_a_mole_game.show_up_timer >= whack_a_mole_game.show_up_end:
+                    # holes that are already taken
+                    taken_holes = [mole.hole_num
+                                    for mole in whack_a_mole_game.moles] + [whack_a_mole_game.bomb.hole_num]
+
+                    # select a new hole for each mole
+                    for mole in whack_a_mole_game.moles:
+                        if not mole.move:
+                            mole.select_hole(taken_holes)
+                            taken_holes.append(mole.hole_num)
+                            break
+
+                    # select a new hole for the bomb
+                    if not whack_a_mole_game.bomb.move:
+                        whack_a_mole_game.bomb.select_hole(taken_holes)
+
+                    whack_a_mole_game.show_up_timer = 0
+
+                for mole in whack_a_mole_game.moles:
+                    mole.show()
+                whack_a_mole_game.bomb.show()
+
 
         pygame.display.flip()
         clock.tick(60)  # Limit to 60 FPS

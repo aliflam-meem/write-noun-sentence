@@ -17,10 +17,6 @@ SMALL_BUTTON_HEIGHT = 50
 thumbnail_width = 125
 LONG_PADDING = 100
 SMALL_PADDING = 20
-GRID_SIZE_X = 400
-GRID_SIZE_Y = 180
-X_OFFSET = 120
-Y_OFFSET = 260
 
 # Colors
 silverfiligree = (127, 124, 129)
@@ -44,6 +40,8 @@ HIGHLIGHT_BUTTON_COLOR = (170, 119, 117)
 GAME_SCREEN_BG = pygame.image.load("assets/images/main_bg.jpg")
 GAME_SCREEN_BG = pygame.transform.scale(GAME_SCREEN_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
 HEALTH_POINT_IMAGE = pygame.image.load("assets/images/health_heart.png")
+LOADING_IMAGE = pygame.image.load("assets/images/loading.png")
+LOADING_IMAGE = pygame.transform.scale(LOADING_IMAGE, (125, 125))
 
 # Create the Pygame screen object
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
