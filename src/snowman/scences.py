@@ -1,13 +1,13 @@
 from src.constants import SCREEN_WIDTH, IMAGE_WIDTH, SMALL_PADDING, BUTTON_WIDTH, LONG_PADDING, SMALL_BUTTON_HEIGHT, \
-    SCREEN_HEIGHT, GAME_SCREEN_BG, screen, BUTTON_HEIGHT, TITLE_HEIGHT, SCOREBAR_HEIGHT, cornsilk, brown
+    SCREEN_HEIGHT, screen, BUTTON_HEIGHT, TITLE_HEIGHT, SCOREBAR_HEIGHT, thumbnail_width, BUTTON_COLOR
 from src.core.input import InputBox
 from src.core.utility import draw_title, draw_back_button, draw_subtitle, draw_button, draw_text_box, \
-    draw_score_and_health
-from src.snowman.constants import snowman_levels
+    draw_score_and_health, load_image
+from src.snowman.constants import snowman_levels, SNOWMAN_GAME_SCREEN_BG, snowman_thumbnail, SNOWMAN_GAME_SCREEN_BG_TRA
 
 
 def snowman_levels_screen():
-    screen.blit(GAME_SCREEN_BG, (0, 0))
+    screen.blit(load_snowman_game_background(), (0, 0))
     draw_title("لعبة الرجل الثلجي")
 
     # List the games buttons
@@ -25,7 +25,7 @@ def snowman_levels_screen():
 
     back_button = draw_back_button()
     # 10 pixels is a magic number, right indent
-    draw_subtitle("أشكال المبتدأ", SCREEN_WIDTH - edge_space - 10, y_coordinate - 90, brown)
+    draw_subtitle("أشكال المبتدأ", SCREEN_WIDTH - edge_space - 10, y_coordinate - 90, BUTTON_COLOR)
 
     # Draw menu buttons
     al_atareef_button = draw_button(snowman_levels["al_atareef"]["title"], al_atareef_button_x,
@@ -40,7 +40,7 @@ def snowman_levels_screen():
 
 def draw_question_interface(answer_box, question_text, snowman_image, is_submit_button_enabled):
     # Space between elements
-    space_between_elements = 20
+    space_between_elements = 30
 
     question_box_width = SCREEN_WIDTH - IMAGE_WIDTH - SMALL_PADDING
     question_box_height = 130
@@ -76,7 +76,7 @@ def draw_question_interface(answer_box, question_text, snowman_image, is_submit_
 
 def draw_helping_buttons(y, is_next_question_button_enabled):
     # Space between elements
-    space_between_elements = 20
+    space_between_elements = 30
 
     # Calculate the right-most x-coordinate for alignment
     right_alignment_x = SCREEN_WIDTH - SMALL_PADDING
@@ -97,7 +97,8 @@ def draw_helping_buttons(y, is_next_question_button_enabled):
 
 def snowman_game_screen(answer_box, question, title, score, health_points, image,
                         information_area_content, is_submit_button_enabled, is_next_question_button_enabled):
-    screen.fill(cornsilk)
+    background = load_snowman_game_background(True)
+    screen.blit(background, (0, 0))
     draw_title(title)
     back_button = draw_back_button()
     score_y = TITLE_HEIGHT + SMALL_PADDING
@@ -120,3 +121,13 @@ def create_input_box():
 
     # Create an instance of InputBox instead of using draw_input_box
     return InputBox(input_box_x, input_box_y, input_box_width, input_box_height)
+
+
+def load_snowman_game_thumbnail():
+    return load_image(snowman_thumbnail, (thumbnail_width, thumbnail_width))
+
+
+def load_snowman_game_background(transparent=False):
+    if transparent:
+        return load_image(SNOWMAN_GAME_SCREEN_BG_TRA, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    return load_image(SNOWMAN_GAME_SCREEN_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))

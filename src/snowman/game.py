@@ -3,7 +3,7 @@ import re
 import pygame
 
 from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, IMAGE_WIDTH, YOU_WIN_AUDIO, YOU_LOST_AUDIO, \
-    body_font, RED, GREEN, numbering_font, saddlebrown, SMALL_PADDING
+    body_font, RED, GREEN, numbering_font, SMALL_PADDING
 from src.core.audio_player import play_sound
 from src.core.utility import format_questions_count_string
 from src.snowman.LLM import load_game_data
@@ -15,7 +15,6 @@ class SnowmanGame:
     def __init__(self, level=snowman_levels_keys[2], questions_count=1):
         self.max_score = 100
         self.help_question_index = 0
-        self.submit_button_text = "أجب"
         self.is_win = None
         self.points_per_questions = 10
         self.melting_snowman_images = []
@@ -31,7 +30,7 @@ class SnowmanGame:
         self.max_questions_count_per_type = 4
         self.information = ""
         self.is_correct_answer_displayed = False
-        self.submit_button_text = "أجب"
+        self.is_result_sound_played = False
         self.load_melting_snowman_images()
 
     def reset_game(self):
@@ -46,7 +45,10 @@ class SnowmanGame:
         self.reset_information()
         self.reset_is_answer_displayed()
         self.reset_help_question_index()
+        self.reset_is_result_sound_played()
 
+    def reset_is_result_sound_played(self):
+        self.is_result_sound_played = False
 
     def reset_is_answer_displayed(self):
         self.is_correct_answer_displayed = False
@@ -172,8 +174,11 @@ class SnowmanGame:
     def get_current_melting_snowman_image(self):
         return self.melting_snowman_images[self.melting_image_index]
 
+    def are_all_answers_wrong(self):
+        return self.num_of_wrong_answers == len(self.melting_snowman_images) - 1
+
     def is_game_over(self):
-        return self.num_of_wrong_answers == len(self.melting_snowman_images) or self.reached_last_question()
+        return self.are_all_answers_wrong() or self.reached_last_question()
 
     def reached_last_question(self):
         return self.question_index == len(self.questions) - 1
@@ -197,13 +202,11 @@ class SnowmanGame:
         self.reset_is_answer_displayed()
         self.reset_help_question_index()
 
-    def display_game_result(self, win_state=None):
-        self.is_win = win_state if win_state is not None else self.is_win
-        message = "أحسنت! لقد فُزت!!" if win_state else "لقد خسرت!"
-
+    def display_game_result(self):
+        message = "أحسنت!!" if self.is_win else "لقد خسرت!"
         message_color = GREEN if self.is_win else RED
 
-        # Load the image
+        # Load the result image
         image = pygame.image.load(SNOWMAN_GAME_RESULT)
 
         # Scale the image to half the screen size
@@ -211,34 +214,34 @@ class SnowmanGame:
 
         # Calculate the image position to center it
         x = (SCREEN_WIDTH - IMAGE_WIDTH) // 2
-        y = (SCREEN_HEIGHT - IMAGE_WIDTH) // 1.5
+        y = (SCREEN_HEIGHT - IMAGE_WIDTH) // 1.5 - SMALL_PADDING
 
-        # Blit the image onto the screen
+        # Define the border size and color
+        BORDER_SIZE = 10
+        BORDER_COLOR = (100, 100, 100)  # Adjust to your preferred border color
+        BORDER_RADIUS = 20  # Adjust the corner roundness here
+
+        # Create a rounded rectangle for the border
+        border_rect = pygame.Rect(x - BORDER_SIZE, y - BORDER_SIZE,
+                                  IMAGE_WIDTH + 2 * BORDER_SIZE, IMAGE_WIDTH + 2 * BORDER_SIZE)
+        pygame.draw.rect(screen, BORDER_COLOR, border_rect, border_radius=BORDER_RADIUS)
+
+        # Blit the main image onto the screen, centered within the border
         screen.blit(image, (x, y))
 
+        # Render the result message and center it within the image
         message_text = body_font.render(message, True, message_color)
-        # Calculate the message position to center it within the image
         message_x = x + (IMAGE_WIDTH - message_text.get_width()) // 2
         message_y = y + (IMAGE_WIDTH - message_text.get_height()) // 2
-
-        # Blit the message onto the screen
         screen.blit(message_text, (message_x, message_y))
 
+        # Display the score in the top-left corner within the image
         score_numbers_text = f"{self.max_score}/{self.score}"
-
-        # Render the score text
-        score_numbers_surface = numbering_font.render(score_numbers_text, True, saddlebrown)
-
-        # Get the width of the score text surface
+        score_numbers_surface = numbering_font.render(score_numbers_text, True, message_color)
         score_numbers_rect = score_numbers_surface.get_rect(
-            topleft=(message_x + SMALL_PADDING, message_y + SMALL_PADDING))
-
-        # Draw the score text on the screen
+            topleft=(message_x + message_text.get_width() / 3, message_y + SMALL_PADDING * 2)
+        )
         screen.blit(score_numbers_surface, score_numbers_rect)
-
-        audio = YOU_WIN_AUDIO if win_state else YOU_LOST_AUDIO
-        play_sound(audio, 1)
-
 
     def melt_the_snowman(self):
         self.melting_image_index = len(self.melting_snowman_images) - 1
@@ -256,15 +259,29 @@ class SnowmanGame:
         self.information = f"القاعدة \n {self.get_current_grammar()}"
 
     def can_submit_answer(self):
-        return not (self.is_correct_answer_displayed and self.num_of_wrong_answers == len(self.melting_snowman_images))
+        return not (self.is_correct_answer_displayed and self.are_all_answers_wrong())
 
     def can_proceed_to_next_question(self):
         return not self.is_game_over()
 
     def finalize_game(self):
-        if not self.is_correct_answer_displayed:
+        if self.are_all_answers_wrong():
+            self.score -= self.opened_help_questions * 2
+        elif not self.are_all_answers_wrong() and not self.is_correct_answer_displayed:
             self.score += self.points_per_questions - self.opened_help_questions * 2
-        self.is_win = self.num_of_wrong_answers < len(self.melting_snowman_images)
+        if self.score < 0:
+            self.score = 0
+        self.is_win = self.num_of_wrong_answers < len(self.melting_snowman_images) - 1
+
+    def play_result_sound(self):
+        audio = YOU_WIN_AUDIO if self.is_win else YOU_LOST_AUDIO
+        play_sound(audio)
+
+    def display_result_and_play_sound(self):
+        self.display_game_result()
+        if not self.is_result_sound_played:
+            self.is_result_sound_played = True
+            self.play_result_sound()
 
 
 def is_answer_valid(snowman_current_game, answer_box):

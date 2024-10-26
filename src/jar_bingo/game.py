@@ -2,12 +2,14 @@ import inspect
 import os
 import sys
 
+from src.core.utility import load_image
+
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
-from src.constants import RED
+from src.constants import RED, thumbnail_width
 from core.json_response_parser import *
 from core.audio_player import *
 from src.jar_bingo.LLM import *
@@ -105,6 +107,10 @@ def check_cell_click(pos):
             if i * CELL_SIZE < pos[0] < (i + 1) * CELL_SIZE and j * CELL_SIZE < pos[1] < (j + 1) * CELL_SIZE:
                 return i, j
     return None
+
+
+def load_jar_bingo_game_thumbnail():
+    return load_image(jar_bingo_thumbnail, (thumbnail_width, thumbnail_width))
 
 
 # pause the game

@@ -11,6 +11,6 @@ def stop_background_sound():
     pygame.mixer.music.stop()
 
 
-def play_sound(path, loops):
+def play_sound(path):
     audio = pygame.mixer.Sound(path)
-    audio.play(loops=loops)
+    audio.play()

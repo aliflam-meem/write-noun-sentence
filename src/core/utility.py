@@ -1,18 +1,26 @@
 # Function to draw the title with background
 import pygame
 
-from src.constants import BUTTON_FONT_COLOR, SCREEN_WIDTH, TITLE_HEIGHT, DARK_GRAY, screen, title_font, \
-    subtitle_font, saddlebrown, brown, body_font, BUTTON_COLOR, BUTTON_HEIGHT, BUTTON_WIDTH, LONG_PADDING, cornsilk, \
-    HEALTH_POINT_IMAGE, numbering_font, DISABLED_BUTTON_COLOR
+from src.constants import SCREEN_WIDTH, TITLE_HEIGHT, screen, title_font, \
+    subtitle_font, body_font, BUTTON_COLOR, BUTTON_HEIGHT, BUTTON_WIDTH, LONG_PADDING, HEALTH_POINT_IMAGE, \
+    numbering_font, DISABLED_BUTTON_COLOR, silverfiligree, barelyblue, ivory, maroon, \
+    HIGHLIGHT_BUTTON_COLOR
 
 
-def draw_title(title, title_height=TITLE_HEIGHT, color=BUTTON_FONT_COLOR):
-    title_background_rect = pygame.Rect(0, 0, SCREEN_WIDTH, TITLE_HEIGHT)
-    pygame.draw.rect(screen, DARK_GRAY, title_background_rect)
+def draw_title(title, title_height=TITLE_HEIGHT, title_color=barelyblue, padding=160,
+               border_radius=30, background_color=silverfiligree):
+    # Define the width of the background rectangle with padding on the left and right
+    rect_width = SCREEN_WIDTH - 2 * padding
+    title_background_rect = pygame.Rect(padding, 0, rect_width, title_height)
 
-    title_text = title_font.render(title, True, color)
+    # Draw the rounded rectangle as the background
+    pygame.draw.rect(screen, background_color, title_background_rect, border_radius=border_radius)
+
+    # Render and center the title text within the rounded rectangle
+    title_text = title_font.render(title, True, title_color)
     title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, title_height // 2))
     screen.blit(title_text, title_rect)
+
 
 
 def draw_subtitle(subtitle, x, y, color="white"):
@@ -22,8 +30,8 @@ def draw_subtitle(subtitle, x, y, color="white"):
     screen.blit(title_text, title_rect)
 
 
-def draw_button(text, x, y, width, height, auto_width=False, border_width=2, border_color=saddlebrown,
-                text_color=BUTTON_FONT_COLOR, highlight_color=brown, radius=10, is_disabled=False):
+def draw_button(text, x, y, width, height, auto_width=False, border_width=2, border_color=maroon,
+                text_color=ivory, highlight_color=HIGHLIGHT_BUTTON_COLOR, radius=10, is_disabled=False):
     """
     Draws a button with rounded corners.
 
@@ -89,12 +97,13 @@ def draw_back_button():
                        BUTTON_HEIGHT)
 
 
-def draw_text_box(text, x, y, width, height, box_color=cornsilk, text_color=saddlebrown, add_border=False):
+def draw_text_box(text, x, y, width, height, box_color=None, text_color=maroon, add_border=False):
     # Create a rectangle for the input box
     input_box_rect = pygame.Rect(x, y, width, height)
 
     # Draw the input box rectangle
-    pygame.draw.rect(screen, box_color, input_box_rect)
+    if box_color is not None:
+        pygame.draw.rect(screen, box_color, input_box_rect)
 
     # Draw the border around the input box if needed
     if add_border:
@@ -105,8 +114,9 @@ def draw_text_box(text, x, y, width, height, box_color=cornsilk, text_color=sadd
 
     # Use the `topright` attribute to align the text to the right within the input box
     padding = 10  # Add padding to the text position
-    text_rect = text_surface.get_rect()  # Get the rect for the text surface
-    text_rect.topright = (input_box_rect.right - padding, input_box_rect.top + padding)  # Align top-right with padding
+    text_rect = text_surface.get_rect(
+        topright=(input_box_rect.right - padding, input_box_rect.top + padding))  # Get the rect for the text surface
+    # text_rect.  # Align top-right with padding
 
     # Blit the text surface onto the input box
     screen.blit(text_surface, text_rect)
@@ -126,7 +136,7 @@ def draw_image(image_path, x, y, width, height):
     screen.blit(image, (x, y))
 
 
-def draw_score_and_health(score, x=30, y=30, health_points=2, max_score=100, text_color=saddlebrown):
+def draw_score_and_health(score, x=30, y=30, health_points=2, max_score=100, text_color=maroon):
     """
     Draws the score and health points aligned to the left of the screen.
 
@@ -183,3 +193,30 @@ def format_questions_count_string(count=1):
         return f"""{count} أسئلة"""
     elif count > 10:
         return f"""{count} سؤال"""
+
+
+def load_image(filename, size):
+    """Loads and scales an image.
+
+    Args:
+        filename (str): The name of the image file.
+        size (tuple): The desired width and height of the scaled image.
+
+    Returns:
+        pygame.Surface: The loaded and scaled image surface.
+    """
+
+    try:
+        image_file_name = pygame.image.load(filename)
+        image = pygame.transform.scale(image_file_name, size)
+        return image
+    except FileNotFoundError:
+        handle_image_load_error(filename)
+        quit()
+    except Exception as e:
+        print(f"Unexpected error loading image {filename}: {e}")
+        quit()
+
+
+def handle_image_load_error(file_name):
+    print(f"Error loading image: {file_name}")

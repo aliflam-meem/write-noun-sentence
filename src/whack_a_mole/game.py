@@ -1,21 +1,20 @@
 import inspect
 import os
 import sys
-import inspect
+
 from gtts import gTTS
-import time
+
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 import pathlib
-import pygame
 from pygame import mixer
 import random
 # from LLM import load_data
 from src.constants import *
-from src.core.utility import draw_score_and_health, draw_title, draw_button
+from src.core.utility import draw_score_and_health, draw_title, draw_button, load_image
 
 
 # from LLM import load_whack_a_mole_data
@@ -28,35 +27,8 @@ title_height = 60
 lines_spacing = 40
 
 
-def handle_image_load_error(file_name):
-    print(f"Error loading image: {file_name}")
-
-
 def handle_font_load_error(font_name, size):
     print(f"Error loading font: {font_name} with size {size}")
-
-
-def load_image(filename, size):
-    """Loads and scales an image.
-
-    Args:
-        filename (str): The name of the image file.
-        size (tuple): The desired width and height of the scaled image.
-
-    Returns:
-        pygame.Surface: The loaded and scaled image surface.
-    """
-
-    try:
-        image_file_name = pygame.image.load(filename)
-        image = pygame.transform.scale(image_file_name, size)
-        return image
-    except FileNotFoundError:
-        handle_image_load_error(filename)
-        quit()
-    except Exception as e:
-        print(f"Unexpected error loading image {filename}: {e}")
-        quit()
 
 
 def load_bomb_image():
@@ -74,11 +46,16 @@ def load_mole_image():
 def load_background_image():
     return load_image(CWD / 'assets/images/background.png', (SCREEN_WIDTH, SCREEN_HEIGHT - 50))
 
-#def load_win_image():
+
+def load_mole_game_thumbnail():
+    return load_image(CWD / 'assets/images/whack_a_mole_thumbnail.jpg', (thumbnail_width, thumbnail_width))
+
+
+# def load_win_image():
 #    return load_image(CWD / 'assets/Win.png',(400,400))
 
 def check_if_sound_finished():
-    if  pygame.mixer.get_busy():
+    if pygame.mixer.get_busy():
         return False
     else:
         return True
@@ -102,7 +79,7 @@ def play_audio(filename):
   mixer.music.set_volume(0.7)
 
   # Start playing the song
-  mixer.music.play()    
+  mixer.music.play()
 
 def generate_gtts(text,number):
     try:
@@ -291,7 +268,7 @@ class Game:
             rendered_question_word = body_font_bold.render(question_word, True, (0, 0, 0))
             screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), title_height+lines_spacing))
             #screen.blit(rendered_question_word, (50, 50))
-            question_text_l2 = [question_text[1], question_word] 
+            question_text_l2 = [question_text[1], question_word]
 
             if self.generate_new_gtts:
                 generate_gtts(question_text[0],1)
@@ -304,12 +281,12 @@ class Game:
             text = self.game_over_text.render('حظ أوفر في المرة القادمة', 1, (255, 255, 255))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2,
                                SCREEN_HEIGHT //  2 - text.get_height() // 2))
-            
+
         if self.game_end:
             text = self.game_over_text.render('انتهت اللعبة', 1, (255, 255, 255))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2,
                                SCREEN_HEIGHT //  2 - text.get_height() // 2))
-            
+
 
 
 # ---------------------------------------
@@ -339,7 +316,7 @@ def whack_a_mole_game_screen():
 
         while in_play:
             # screen.fill((0, 0, 0))
-            draw_title(title, color=BUTTON_FONT_COLOR, title_height=title_height)
+            draw_title(title, title_color=BUTTON_FONT_COLOR, title_height=title_height)
 
             # Doesn't work yet
             back_button = draw_button("رجوع", 30, (title_height - BUTTON_HEIGHT // 1.5 ) / 2, BUTTON_WIDTH - LONG_PADDING,
@@ -356,7 +333,7 @@ def whack_a_mole_game_screen():
                             # if mole.is_correct_answer():
                             clicked_answer = mole.clicked_answer();
                             if clicked_answer == game.questions[game.current_question_index]["answer"]:
-                                #print(clicked_answer)  # for debugging                
+                                #print(clicked_answer)  # for debugging
                                 game.score += 1
                                 mole.move = False
                                 mole.counter = 0
@@ -380,7 +357,7 @@ def whack_a_mole_game_screen():
                 if game.game_over_counter >= 180:
                     in_play = False
 
-            if game.game_end == True: 
+            if game.game_end == True:
                 # turn off the game after 3 seconds
                 game.game_end_counter += 1
                 if game.game_end_counter >= 180:
@@ -413,31 +390,31 @@ def whack_a_mole_game_screen():
             game.draw()
             pygame.display.update()
 
-            audio_1 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l1.mp3'))  
-            audio_2 = pygame.mixer.Sound(os.path.join(CWD , 'assets/audio/gtts/audio_generated_l2.mp3'))  
-            if  game.next_question_index == game.current_question_index and game.next_question_index<=len(game.questions):
-                game.next_question_index+=1
-                if  game.next_question_index > len(game.questions):
+            audio_1 = pygame.mixer.Sound(os.path.join(CWD, 'assets/audio/gtts/audio_generated_l1.mp3'))
+            audio_2 = pygame.mixer.Sound(os.path.join(CWD, 'assets/audio/gtts/audio_generated_l2.mp3'))
+            if game.next_question_index == game.current_question_index and game.next_question_index <= len(
+                game.questions):
+                game.next_question_index += 1
+                if game.next_question_index > len(game.questions):
                     game.game_end = True
 
                 else:
                     audio_1.play()
                     while pygame.mixer.get_busy():
                         pygame.time.delay(1)
-                        pygame.event.poll()              
+                        pygame.event.poll()
                     audio_2.play()
                     while pygame.mixer.get_busy():
                         pygame.time.delay(1)
-                        pygame.event.poll()            
-                
-                      
-            clock.tick(FPS)                  
-      
+                        pygame.event.poll()
+
+            clock.tick(FPS)
+
         pygame.quit()
 
 
     except Exception as e:
         print(f"Error initializing Pygame: {e}")
         return
-    
+
 #whack_a_mole_game_screen()
