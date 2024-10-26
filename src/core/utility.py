@@ -7,7 +7,7 @@ from src.constants import BUTTON_FONT_COLOR, SCREEN_WIDTH, TITLE_HEIGHT, DARK_GR
 
 
 def draw_title(title, title_height=TITLE_HEIGHT, color=BUTTON_FONT_COLOR):
-    title_background_rect = pygame.Rect(0, 0, SCREEN_WIDTH, TITLE_HEIGHT)
+    title_background_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_height)
     pygame.draw.rect(screen, DARK_GRAY, title_background_rect)
 
     title_text = title_font.render(title, True, color)

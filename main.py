@@ -9,7 +9,7 @@ from src.core.utility import draw_title, draw_back_button, draw_button
 from src.snowman.constants import snowman_levels_keys, snowman_levels
 from src.snowman.game import SnowmanGame, validate_answer
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen
-from src.whack_a_mole.game import whack_a_mole_game_screen,whack_a_mole_play_audio, WhackaMoleGame
+from src.whack_a_mole.game import whack_a_mole_game_screen, WhackaMoleGame
 
 
 def quit_game():

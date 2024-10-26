@@ -6,8 +6,10 @@ import pathlib
 import pygame
 from pygame import mixer
 import random
-# from LLM import load_data
-from src.constants import *
+from src.whack_a_mole.LLM import load_whack_a_mole_data
+from src.constants import SCREEN_HEIGHT,SCREEN_WIDTH, screen,body_font,SMALL_PADDING,LONG_PADDING,BUTTON_HEIGHT,\
+                         BUTTON_WIDTH,LOADING_IMAGE,BUTTON_FONT_COLOR,TITLE_HEIGHT,saddlebrown
+
 from src.whack_a_mole.constants import *
 from src.core.utility import draw_score_and_health, draw_title, draw_button
 
@@ -238,19 +240,20 @@ class WhackaMoleGame:
         self.background = load_background_image()
         self.show_up_timer = 0
         self.show_up_end = 100
-
+        self.questions = []
+        self.is_data_loaded = False
         # self.question_item = {
         #    "sentence": "يجلسُ الطالبُ على المقعدِ",
         #    "word": "يجلس",
         #    "answer": "فعل"
         #  }
-        # """
+        """
         self.questions = [
             {"sentence": "يجلسُ الطالبُ على المقعدِ", "word": "يجلس", "answer": "فعل"},
             {"sentence": "تقرأُ المعلمةُ الدرسَ", "word": "تقرأ", "answer": "فعل"},
             # ... add more question items here
         ]
-        # """
+        """
         # self.questions = questions
 
         self.current_question_index = 0
@@ -288,16 +291,16 @@ class WhackaMoleGame:
                 question_dispaly = body_font.render(line, True, (0, 0, 0))
                 question_max_len = max(SMALL_PADDING + SCREEN_WIDTH / 3, question_dispaly.get_width())
                 question.append(question_dispaly)
-            question_background_rect = pygame.Rect(SCREEN_WIDTH / 3 - SMALL_PADDING, TITLE_HEIGHT + SMALL_PADDING / 4,
+            question_background_rect = pygame.Rect(SCREEN_WIDTH / 3 - SMALL_PADDING, WM_TITLE_HEIGHT + SMALL_PADDING / 4,
                                                    question_max_len, TITLE_HEIGHT - SMALL_PADDING)
             pygame.draw.rect(screen, (255, 255, 255), question_background_rect)
             for line in range(len(question)):
-                screen.blit(question[line], (SCREEN_WIDTH / 2.5, TITLE_HEIGHT + (LINES_SPACING * line)))
+                screen.blit(question[line], (SCREEN_WIDTH / 2.5, WM_TITLE_HEIGHT + (LINES_SPACING * line)))
 
             question_word = f"( {question_item['word']} )"
             # print(rendered_question_word.get_width())
-            rendered_question_word = body_font_bold.render(question_word, True, (0, 0, 0))
-            screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), TITLE_HEIGHT+LINES_SPACING))
+            rendered_question_word = body_font.render(question_word, True, (0, 0, 0))
+            screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), WM_TITLE_HEIGHT+LINES_SPACING))
             #screen.blit(rendered_question_word, (50, 50))
             question_text_l2 = [question_text[1], question_word] 
 
@@ -328,17 +331,27 @@ class WhackaMoleGame:
 def whack_a_mole_game_screen(game):
     try:
         title = "لعبة أقسام الكلام"
-        draw_title(title, color=BUTTON_FONT_COLOR, title_height=TITLE_HEIGHT)
+        draw_title(title, color=BUTTON_FONT_COLOR, title_height=WM_TITLE_HEIGHT)
 
-        back_button = draw_button("رجوع", 30, (TITLE_HEIGHT - BUTTON_HEIGHT // 1.5 ) / 2,
+        back_button = draw_button("رجوع", 30, (WM_TITLE_HEIGHT - BUTTON_HEIGHT // 1.5 ) / 2,
                                                 BUTTON_WIDTH - LONG_PADDING, BUTTON_HEIGHT // 1.5 )
-        
-        # questions = load_whack_a_mole_data()
-        # game = Game(questions)
-
         screen.blit(game.background, (0, 60))
-        game.draw()
-        pygame.display.update()
+
+
+        if game.is_data_loaded == False:
+            
+            text = body_font.render('جار تحميل اللعبة', 1, (255, 255, 255))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2 + SMALL_PADDING //2,
+                               SCREEN_HEIGHT //  2 - text.get_height() // 2 +LONG_PADDING ))
+            screen.blit(LOADING_IMAGE, (SCREEN_WIDTH*0.5 -LONG_PADDING //2 , SCREEN_HEIGHT*0.5 -LONG_PADDING))
+            pygame.display.update()  
+            questions = load_whack_a_mole_data()
+            game.questions = questions           
+            game.is_data_loaded = True
+        
+        screen.blit(game.background, (0, 60))
+        game.draw()   
+        pygame.display.update()    
         whack_a_mole_play_audio(game) 
 
         return game

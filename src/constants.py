@@ -30,6 +30,8 @@ BLACK = (0, 0, 0)
 GAME_SCREEN_BG = pygame.image.load("assets/images/main_bg.jpg")
 GAME_SCREEN_BG = pygame.transform.scale(GAME_SCREEN_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
 HEALTH_POINT_IMAGE = pygame.image.load("assets/images/health_heart.png")
+LOADING_IMAGE = pygame.image.load("assets/images/loading.png")
+LOADING_IMAGE = pygame.transform.scale(LOADING_IMAGE, (125, 125))
 
 # Create the Pygame screen object
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
