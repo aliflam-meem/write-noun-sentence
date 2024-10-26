@@ -4,7 +4,7 @@ from ibm_watsonx_ai.foundation_models import Model
 # watsonx API connection¶
 # This cell defines the credentials required to work with watsonx API for Foundation Model inferencing.
 # Action: Provide the IBM Cloud personal API key. For details, see documentation.
-from src.core.json_response_parser import parse_json_response
+from src.core.json_response_parser import parse_specific_json_response
 
 
 def get_credentials():
@@ -217,7 +217,7 @@ def load_game_data(noun_type="""ضمير مفرد""", questions_count="""سؤا�
         allam_response = model.generate_text(prompt=prompt_input,
                                              guardrails=False)
         print("allam_response: ", allam_response)
-        data = parse_json_response(allam_response, "<start_json>", "<end_json>")
+        data = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
         return data
 
     except Exception as e:
