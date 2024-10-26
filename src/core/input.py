@@ -23,10 +23,8 @@ class InputBox:
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            print("down")
             # Always set active to True when clicked
             if self.rect.collidepoint(event.pos):
-
                 self.active = True  # Always activate on click
             else:
                 self.active = False
@@ -35,15 +33,13 @@ class InputBox:
             self.color = self.color_active if self.active else self.color_inactive
 
         if event.type == pygame.KEYDOWN and self.active:
-                if event.key == pygame.K_RETURN:
-                    print(self.text)  # Handle text submission here
-                elif event.key == pygame.K_BACKSPACE:
-                    self.text = self.text[:-1]  # Remove last character
-                else:
-                    self.text += event.unicode  # Add new character to the text
+            if event.key == pygame.K_BACKSPACE:
+                self.text = self.text[:-1]  # Remove last character
+            else:
+                self.text += event.unicode  # Add new character to the text
 
-                # Re-render the text
-                self.txt_surface = self.font.render(self.text, True, self.color)
+        # Re-render the text
+        self.txt_surface = self.font.render(self.text, True, self.color)
 
     def draw(self):
         # Calculate the position to align the text to the right

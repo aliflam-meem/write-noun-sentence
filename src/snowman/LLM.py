@@ -222,4 +222,4 @@ def load_game_data(noun_type="""ضمير مفرد""", questions_count="""سؤا�
 
     except Exception as e:
         print(f"Error: {str(e)}")
-        return
+        return False

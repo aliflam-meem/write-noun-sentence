@@ -2,7 +2,9 @@ import re
 
 import pygame
 
-from src.constants import title_font, SCREEN_WIDTH, SCREEN_HEIGHT, screen, IMAGE_WIDTH
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, IMAGE_WIDTH, YOU_WIN_AUDIO, YOU_LOST_AUDIO, \
+    body_font, RED, GREEN, numbering_font, saddlebrown, SMALL_PADDING
+from src.core.audio_player import play_sound
 from src.core.utility import format_questions_count_string
 from src.snowman.LLM import load_game_data
 from src.snowman.constants import snowman_levels, snowman_levels_keys, snowman_working_directory, SNOWMAN_GAME_RESULT
@@ -11,10 +13,10 @@ from src.snowman.constants import snowman_levels, snowman_levels_keys, snowman_w
 class SnowmanGame:
 
     def __init__(self, level=snowman_levels_keys[2], questions_count=1):
+        self.max_score = 100
         self.help_question_index = 0
-        self.is_correct_answer_displayed = False
         self.submit_button_text = "أجب"
-        self.isWin = None
+        self.is_win = None
         self.points_per_questions = 10
         self.melting_snowman_images = []
         self.melting_image_index = 0
@@ -33,7 +35,7 @@ class SnowmanGame:
         self.load_melting_snowman_images()
 
     def reset_game(self):
-        self.isWin = None
+        self.is_win = None
         self.question_index = 0
         self.score = 0
         self.health_points = 2
@@ -42,14 +44,12 @@ class SnowmanGame:
         self.reset_melting_image_index()
         self.questions = []
         self.reset_information()
-        self.reset_submit_text_and_displayed_answer()
-        self.reset_help_question_index()
+        self.reset_is_answer_displayed()
         self.reset_help_question_index()
 
 
-    def reset_submit_text_and_displayed_answer(self):
+    def reset_is_answer_displayed(self):
         self.is_correct_answer_displayed = False
-        self.submit_button_text = "أجب"
 
     def reset_information(self):
         self.information = ""
@@ -62,6 +62,9 @@ class SnowmanGame:
 
     def get_current_information(self):
         return self.information
+
+    def increase_wrong_answers(self):
+        self.num_of_wrong_answers += 1
 
     def generate_questions_data(self, noun_type):
         # Initialize the list to store all questions
@@ -80,18 +83,48 @@ class SnowmanGame:
 
             # Load the question data for the current batch
             questions_data = load_game_data(noun_type, questions_count_as_string)
-            if type(questions_data) is dict:
-                self.format_questions_data(questions_data)
-                # Process each question in the batch
-            elif type(questions_data) is list:
-                for question_dict in questions_data:
-                    self.format_questions_data(question_dict)
 
-            # Add the processed questions to the final list
-            print("questions data after formatting ", questions_data)
-            questions.extend(questions_data)
+            # Retry if questions_data is not valid (loop until a valid dictionary or list is returned)
+            while type(questions_data) is bool:
+                questions_data = load_game_data(noun_type, questions_count_as_string)
+
+            # Process the questions depending on their type (list or dictionary)
+            if isinstance(questions_data, dict):
+                # Format and update the dictionary directly
+                self.format_questions_data(questions_data)
+                questions.append(questions_data)  # Store the formatted question
+            elif isinstance(questions_data, list):
+                # Process each question in the list
+                for question_dict in questions_data:
+                    self.format_questions_data(question_dict)  # Format each question
+                questions.extend(questions_data)  # Add all formatted questions to the list
+
         return questions
 
+    def format_questions_data(self, question_dict):
+        # Strip the correct answer and clean up
+        question_dict["correct_answer"] = question_dict["correct_answer"].strip()
+
+        # Format the question text (replace series of periods with underscores)
+        question = question_dict["question"]
+        question = re.sub(r'(\.\.\.)+', "_______ ", question)
+
+        # Determine the number of words in the correct answer
+        num_of_answer_words = len(question_dict["correct_answer"].split())
+
+        # Choose the appropriate Arabic word count description
+        if num_of_answer_words == 1:
+            num_words = "كلمة واحدة"
+        elif num_of_answer_words == 2:
+            num_words = "كلمتين"
+        else:
+            num_words = "أكثر من كلمتين"
+
+        # Format the question text with the word count description
+        question = f"املأ الفراغ التالي ب{num_words} بالمبتدأ المناسب.\n{question}"
+
+        # Update the formatted question back into the dictionary
+        question_dict["question"] = question
 
     def initialize_game_with_questions(self):
         for n_type in snowman_levels[self.level]["noun_types"]:
@@ -119,7 +152,7 @@ class SnowmanGame:
 
 
     def get_current_question(self):
-        return self.questions[self.question_index]["question"]
+        return f"السؤال ({self.question_index + 1}) \n{self.questions[self.question_index]['question']}"
 
     def get_current_correct_answer(self):
         return self.questions[self.question_index]["correct_answer"]
@@ -130,7 +163,7 @@ class SnowmanGame:
     def get_all_open_help_questions(self):
         open_questions = ""
         for i in range(self.help_question_index + 1):
-            open_questions += self.get_current_help_questions()[i] + "\n"
+            open_questions += f"{i + 1}- {self.get_current_help_questions()[i]} \n"
         return open_questions
 
     def get_current_grammar(self):
@@ -140,82 +173,75 @@ class SnowmanGame:
         return self.melting_snowman_images[self.melting_image_index]
 
     def is_game_over(self):
-        return self.num_of_wrong_answers == len(self.melting_snowman_images) - 1 or self.reached_last_question()
+        return self.num_of_wrong_answers == len(self.melting_snowman_images) or self.reached_last_question()
 
     def reached_last_question(self):
         return self.question_index == len(self.questions) - 1
 
     def move_to_next_snowman_melting_image(self):
-        self.melting_image_index += 1
+        self.melting_image_index = self.melting_image_index if self.melting_image_index == len(
+            self.melting_snowman_images) - 1 else self.melting_image_index + 1
 
     def move_to_next_help_question(self):
-        self.help_question_index += 1
+        self.opened_help_questions += 1
+        self.help_question_index = self.help_question_index if self.help_question_index == 2 else self.help_question_index + 1
 
     def move_to_next_question(self):
         self.question_index += 1
-        self.reset_melting_image_index()
-        score = self.score + self.points_per_questions - self.opened_help_questions * 2
-        if score < 0:
-            self.score = 0
-        else:
-            self.score = score
+        if not self.is_correct_answer_displayed:
+            self.score += self.points_per_questions - self.opened_help_questions * 2
         self.health_points = 2
         self.opened_help_questions = 0
         self.help_question_index = 0
+        self.reset_information()
+        self.reset_is_answer_displayed()
+        self.reset_help_question_index()
 
-    def display_game_result(self):
-        # Determine the result text
-        print("self.isWin ", self.isWin)
-        result_text = "أحسنت! لقد فُزت!!" if self.isWin else "لقد خسرت!"
-        text_surface = title_font.render(result_text, True, (255, 255, 255))
-        text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    def display_game_result(self, win_state=None):
+        self.is_win = win_state if win_state is not None else self.is_win
+        message = "أحسنت! لقد فُزت!!" if win_state else "لقد خسرت!"
 
-        # Create a small window
-        window_width, window_height = 400, 200
-        window_rect = pygame.Rect(0, 0, window_width, window_height)
-        window_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-        window_surface = pygame.Surface((window_width, window_height))
-        screen.blit(SNOWMAN_GAME_RESULT, window_rect)
+        message_color = GREEN if self.is_win else RED
 
-        # Optionally, draw a border around the window
-        pygame.draw.rect(screen, (200, 200, 200), window_rect, 2)  # Gray border
+        # Load the image
+        image = pygame.image.load(SNOWMAN_GAME_RESULT)
 
-        # Blit the text directly onto the screen
-        screen.blit(text_surface, text_rect)
+        # Scale the image to half the screen size
+        image = pygame.transform.scale(image, (IMAGE_WIDTH, IMAGE_WIDTH))
 
-    def format_questions_data(self, question_dict):
-        print(question_dict)
-        question_dict["correct_answer"] = question_dict["correct_answer"].strip()
-        question = question_dict["question"]
-        # Replace any series of periods (e.g., ...) with '-------'
-        question = re.sub(r'(\.\.\.)+', "_______ ", question)
-        print("question after format: ", question)
+        # Calculate the image position to center it
+        x = (SCREEN_WIDTH - IMAGE_WIDTH) // 2
+        y = (SCREEN_HEIGHT - IMAGE_WIDTH) // 1.5
 
-        # Determine the number of words in the correct answer
-        num_of_answer_words = len(question_dict["correct_answer"].split())
+        # Blit the image onto the screen
+        screen.blit(image, (x, y))
 
-        # Determine the word description in Arabic
-        if num_of_answer_words == 1:
-            num_words = "كلمة واحدة"
-        elif num_of_answer_words == 2:
-            num_words = "كلمتين"
-        else:
-            num_words = "أكثر من كلمتين"
+        message_text = body_font.render(message, True, message_color)
+        # Calculate the message position to center it within the image
+        message_x = x + (IMAGE_WIDTH - message_text.get_width()) // 2
+        message_y = y + (IMAGE_WIDTH - message_text.get_height()) // 2
 
-        # Format the question with the correct word description
-        question = f"املأ الفراغ التالي ب{num_words} بالمبتدأ المناسب.\n{question}"
+        # Blit the message onto the screen
+        screen.blit(message_text, (message_x, message_y))
 
-        # Update the question in the dictionary
-        question_dict["question"] = question
+        score_numbers_text = f"{self.max_score}/{self.score}"
+
+        # Render the score text
+        score_numbers_surface = numbering_font.render(score_numbers_text, True, saddlebrown)
+
+        # Get the width of the score text surface
+        score_numbers_rect = score_numbers_surface.get_rect(
+            topleft=(message_x + SMALL_PADDING, message_y + SMALL_PADDING))
+
+        # Draw the score text on the screen
+        screen.blit(score_numbers_surface, score_numbers_rect)
+
+        audio = YOU_WIN_AUDIO if win_state else YOU_LOST_AUDIO
+        play_sound(audio, 1)
+
 
     def melt_the_snowman(self):
         self.melting_image_index = len(self.melting_snowman_images) - 1
-
-    def get_submit_button_text(self):
-        if self.is_correct_answer_displayed:
-            self.submit_button_text = "أجب"
-        else:
-            self.submit_button_text = "التالي"
 
     def set_correct_answer_as_information(self):
         self.information = "إليك الإجابة الصحيحة: " + self.get_current_correct_answer()
@@ -227,9 +253,20 @@ class SnowmanGame:
         self.move_to_next_help_question()
 
     def set_grammar_as_information(self):
-        self.information = "القاعدة" + "\n" + self.get_current_grammar()
+        self.information = f"القاعدة \n {self.get_current_grammar()}"
+
+    def can_submit_answer(self):
+        return not (self.is_correct_answer_displayed and self.num_of_wrong_answers == len(self.melting_snowman_images))
+
+    def can_proceed_to_next_question(self):
+        return not self.is_game_over()
+
+    def finalize_game(self):
+        if not self.is_correct_answer_displayed:
+            self.score += self.points_per_questions - self.opened_help_questions * 2
+        self.is_win = self.num_of_wrong_answers < len(self.melting_snowman_images)
 
 
-def validate_answer(snowman_current_game, answer_box):
+def is_answer_valid(snowman_current_game, answer_box):
     print("get_current_correct_answer ", snowman_current_game.get_current_correct_answer())
     return snowman_current_game.get_current_correct_answer() == answer_box.text.strip()

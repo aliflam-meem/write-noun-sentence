@@ -3,7 +3,7 @@ import pygame
 
 from src.constants import BUTTON_FONT_COLOR, SCREEN_WIDTH, TITLE_HEIGHT, DARK_GRAY, screen, title_font, \
     subtitle_font, saddlebrown, brown, body_font, BUTTON_COLOR, BUTTON_HEIGHT, BUTTON_WIDTH, LONG_PADDING, cornsilk, \
-    HEALTH_POINT_IMAGE, numbering_font
+    HEALTH_POINT_IMAGE, numbering_font, DISABLED_BUTTON_COLOR
 
 
 def draw_title(title, title_height=TITLE_HEIGHT, color=BUTTON_FONT_COLOR):
@@ -23,7 +23,7 @@ def draw_subtitle(subtitle, x, y, color="white"):
 
 
 def draw_button(text, x, y, width, height, auto_width=False, border_width=2, border_color=saddlebrown,
-                text_color=BUTTON_FONT_COLOR, highlight_color=brown, radius=10):
+                text_color=BUTTON_FONT_COLOR, highlight_color=brown, radius=10, is_disabled=False):
     """
     Draws a button with rounded corners.
 
@@ -63,7 +63,12 @@ def draw_button(text, x, y, width, height, auto_width=False, border_width=2, bor
     pygame.draw.rect(screen, border_color, button_rect, border_width, border_radius=radius)
 
     # Change button color based on hover
-    if button_rect.collidepoint(mouse_pos):
+    if is_disabled:
+        # draw disabled button
+        pygame.draw.rect(screen, DISABLED_BUTTON_COLOR,
+                         (x + border_width, y + border_width, width - 2 * border_width, height - 2 * border_width), 0,
+                         border_radius=radius)
+    elif button_rect.collidepoint(mouse_pos):
         pygame.draw.rect(screen, highlight_color,
                          (x + border_width, y + border_width, width - 2 * border_width, height - 2 * border_width), 0,
                          border_radius=radius)
@@ -91,21 +96,20 @@ def draw_text_box(text, x, y, width, height, box_color=cornsilk, text_color=sadd
     # Draw the input box rectangle
     pygame.draw.rect(screen, box_color, input_box_rect)
 
-    # Draw the border around the input box
+    # Draw the border around the input box if needed
     if add_border:
         pygame.draw.rect(screen, "black", input_box_rect, 2)  # 2 is the border width
 
-    # Render the input text inside the input box
+    # Render the input text
     text_surface = body_font.render(text, True, text_color)
 
-    # Calculate the position to align the text to the right
-    text_width = text_surface.get_width()
-    padding = 10  # You can adjust the padding as needed
-    text_x = input_box_rect.right - text_width - padding  # Align text to the right with padding
-    text_y = input_box_rect.y + padding  # Align the text vertically with padding
+    # Use the `topright` attribute to align the text to the right within the input box
+    padding = 10  # Add padding to the text position
+    text_rect = text_surface.get_rect()  # Get the rect for the text surface
+    text_rect.topright = (input_box_rect.right - padding, input_box_rect.top + padding)  # Align top-right with padding
 
-    # Blit the text surface on the input box (place the text inside the box)
-    screen.blit(text_surface, (text_x, text_y))
+    # Blit the text surface onto the input box
+    screen.blit(text_surface, text_rect)
 
     # Return the input box rectangle for further interactions (e.g., detecting clicks)
     return input_box_rect
@@ -122,7 +126,7 @@ def draw_image(image_path, x, y, width, height):
     screen.blit(image, (x, y))
 
 
-def draw_score_and_health(score,x=30, y=30, health_points=2, max_score=100 , text_color=saddlebrown):
+def draw_score_and_health(score, x=30, y=30, health_points=2, max_score=100, text_color=saddlebrown):
     """
     Draws the score and health points aligned to the left of the screen.
 
