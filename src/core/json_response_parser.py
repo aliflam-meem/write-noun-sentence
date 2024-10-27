@@ -5,8 +5,7 @@ import pygame
 
 
 # in: list, out: reshaped list
-def list_parser(arabic_list, font, font_color): #list of strings, font_asset_path, rgb_color
-    message_font = pygame.font.Font(font, 35)
+def list_parser(arabic_list, message_font, font_color): #list of strings, font_asset_path, rgb_color
     message_font.set_script("Arab")
     message_font.set_direction(pygame.DIRECTION_RTL)
     reshaped_list = []
@@ -18,14 +17,19 @@ def list_parser(arabic_list, font, font_color): #list of strings, font_asset_pat
 
 
 # in string, out: reshaped string
-def string_parser(arabic_string, font, font_color): #string, font_asset_path, rgb_color
+def string_parser(arabic_string, message_font, font_color): #string, font_asset_path, rgb_color
     reshaped_string = ""
-    message_font = pygame.font.Font(font, 35)
     message_font.set_script("Arab")
     message_font.set_direction(pygame.DIRECTION_RTL)
     reshaped_string = message_font.render(arabic_string, True, font_color)
     # print("reshaped the following item: ",reshaped_string)
     return reshaped_string
+
+def split_response_string(string, start_marker, end_marker):
+    """Parses a string containing start and end markers, returning the split in the middle."""
+    start_split_string = string.split(start_marker)
+    end_split_string = start_split_string[1].split(end_marker)
+    return end_split_string[0]
 
 
 def parse_json_response(string, start_marker, end_marker):
@@ -39,11 +43,15 @@ def parse_json_response(string, start_marker, end_marker):
     # Remove leading and trailing spaces from the response
     string = string.encode('utf-8').decode('utf-8').strip()
     # Remove extra tags and brackets.
+    #print("parse json response function, before calling slplit:", string)
+    string = split_response_string(string, start_marker, end_marker)
+    #print("parse json response, after calling split: ", string)
     string = string.replace(start_marker, "").replace(end_marker, "").replace(" [", "").replace("[ ", "").replace(" ]",
                                                                                                             "").replace(
         "] ", "").replace("]", "").replace("[", "")
     dict_str = string.split(",")
     i = 0
+    #print("parse json response, before looping: ", string)
     while i < len(dict_str) - 1:
         key_value_pairs = dict_str[i].split(":")
         d = {}
@@ -53,6 +61,7 @@ def parse_json_response(string, start_marker, end_marker):
         d[key] = value
         dict_list.append(d)
         i += 1
+    print("returned dict: ", dict_list)
     return dict_list
 
 

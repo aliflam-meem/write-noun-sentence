@@ -9,7 +9,7 @@ from src.core.json_response_parser import *
 def get_credentials():
     return {
         "url": "https://eu-de.ml.cloud.ibm.com",
-        "apikey": input("Please enter your api key (hit enter): ")
+        "apikey": "Wse6HoPd7HSMBpK5auMPuYM5c3B1zFeiNTJnfg06q59I" #input("Please enter your api key (hit enter): ")
     }
 
 
@@ -27,7 +27,7 @@ def set_model():
         "repetition_penalty": 1.08
     }
     # Defining the project id or space id
-    project_id = input("PROJECT_ID")
+    project_id = "a9606b37-4f21-492c-90f2-ac1873e40946" #input("PROJECT_ID")
     # Defining the Model object
     model = Model(
         model_id=model_id,
@@ -221,4 +221,4 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     #     print(json_response)
     # except json.decoder.JSONDecodeError as e:
     #      print(f"Error decoding JSON: {e}")
-    return processed_response[0]
+    return processed_response

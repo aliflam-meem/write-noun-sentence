@@ -1,18 +1,20 @@
 import pygame
 
-from src.constants import body_font, YOU_WIN_AUDIO, YOU_LOST_AUDIO, IMAGE_WIDTH
+from src.constants import screen, body_font, YOU_WIN_AUDIO, YOU_LOST_AUDIO, IMAGE_WIDTH
 from src.core.audio_player import play_sound
 
 
-def game_over_card(screen, image_path, message_color, win_state, score, max_score):
+def game_over_card(image_path, message_color, win_state, score, max_score):
     """
-    Prints a message on top of the board, centered horizontally and vertically.
+    Prints the game over scene on top of the board, centered horizontally and vertically.
 
     Args:
-        screen: The Pygame screen object.
         image_path: The path to the image file.
-        message_font: The font object for the message.
         message_color: The color of the message text.
+        win_state: win (True) or lose (False).
+        score: Player's score at the end of the game.
+        max_score : to display it as the base score.
+
     """
     message = "أحسنت! لقد فُزت!!" if win_state else "لقد خسرت!"
     message = message + "\n" + f"{max_score}/{score}"

@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from src.constants import SCREEN_WIDTH, GREEN
+from src.constants import SCREEN_WIDTH, GREEN, screen
 from src.jar_bingo.data import *
 from src.jar_bingo.settings import *
 
@@ -15,7 +15,7 @@ def create_board(board, jellyfish_tiles):
     return board
 
 # Function to draw the game board
-def draw_board(board, screen, background_image):
+def draw_board(board, background_image):
     screen.blit(background_image,
                 (SCREEN_WIDTH - background_image.get_width(), 0))  # (0, 0))  # Blit the background image
     pygame.draw.rect(screen, WHITE, (BOARD_PADDING - 4, BOARD_PADDING + 2, BOARD_WIDTH + 6, BOARD_HEIGHT + 4), 5)

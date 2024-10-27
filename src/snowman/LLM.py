@@ -214,8 +214,8 @@ def load_game_data(noun_type="""ضمير مفرد""", questions_count="""سؤا�
         المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل {noun_type}. ولِّد {questions_count}.
         Output:"""
 
-        allam_response = model.generate_text(prompt=prompt_input,
-                                             guardrails=False)
+        allam_response = model.generate_text(prompt=prompt_input)#,
+                                             #guardrails=False)
         print("allam_response: ", allam_response)
         data = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
         return data

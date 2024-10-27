@@ -1,211 +1,151 @@
-import inspect
-import os
-import sys
-
-from src.core.utility import load_image
-
-
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-
-from src.constants import RED, thumbnail_width
-from core.json_response_parser import *
-from core.audio_player import *
-from src.constants import  SCREEN_HEIGHT
+import pygame
+from src.jar_bingo.settings import JR_TITLE_HEIGHT
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, BUTTON_FONT_COLOR, screen, RED, GAMES_BOARD_SCREEN, JAR_BINGO_GAME
+from src.core.utility import draw_title, draw_back_button
+from src.core.json_response_parser import *
 from src.core.audio_player import *
+from src.jar_bingo.data import *
 from src.jar_bingo.LLM import *
 from src.jar_bingo.board import *
 from src.jar_bingo.game_over import *
-
-# Pygame initialization
-def initialize_game():
-    model = set_model()
-    pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Preposition Quiz Game")
-    # Font and colors
-    font = pygame.font.Font(F_Arial, 32)
-    # sounds
-    pygame.mixer.init()
-    play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
-    # Game state variables
-    board = []
-    clicked_cells = []  # tracked clicked cells in the board to disable them after getting clicked.
-    game_over = False
-    return (model, screen, font, board, clicked_cells, game_over)
+from src.jar_bingo.game_utils import *
 
 
-def initialize_quiz_card():
-    quiz_card_shown = False  # track the state of the quiz card
-    quiz_card_surface = pygame.Surface((QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT), pygame.SRCALPHA, 32)
-    return (quiz_card_shown, quiz_card_surface)
 
+class JBGameComponents:
+    #class attributes: track game components changes.
+    def __init__(self):
+        #initialize Game state variables
+        self.game_state = "initialized"
+        self.model = set_model()
+        self.board = []
+        self.clicked_cells = []  # tracked clicked cells in the board to disable them after getting clicked.
+        self.game_over = False
+        self.quiz_card_shown = False  # track the state of the quiz card
+        self.quiz_choices = []
+        #self.quiz_card_surface = pygame.Surface((QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT), pygame.SRCALPHA, 32)
+        #initialize imgs
+        self.jellyfish_tiles = []  # board tiles
+        self.background_image = None
+        self.initialize_imgs()
+        # Draw on screen
+        self.board = create_board(self.board, self.jellyfish_tiles)
+        self.choice_rects = None
 
-def initialize_imgs():
-    # Load images
-    jellyfish_tiles = []  # board tiles
-    background_image = pygame.image.load(BACKGROUND_IMG)  # Replace with the actual path to your image
-    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-    blue_jellyfish_img = pygame.image.load(BLUE_JELLYFISH_TILE)
-    blue_jellyfish_img = pygame.transform.scale(blue_jellyfish_img, (CELL_SIZE, CELL_SIZE))  # Resize
-    green_jellyfish_img = pygame.image.load(GREEN_JELLYFISH_TILE)
-    green_jellyfish_img = pygame.transform.scale(green_jellyfish_img, (CELL_SIZE, CELL_SIZE))  # Resize
-    red_jellyfish_img = pygame.image.load(RED_JELLYFISH_TILE)
-    red_jellyfish_img = pygame.transform.scale(red_jellyfish_img, (CELL_SIZE, CELL_SIZE))  # Resize
-    jellyfish_tiles.append(blue_jellyfish_img)
-    jellyfish_tiles.append(green_jellyfish_img)
-    jellyfish_tiles.append(red_jellyfish_img)
-    return (background_image, jellyfish_tiles)
+    def initialize_imgs(self):
+        # Load images
+        self.background_image = pygame.image.load(BACKGROUND_IMG)  # Replace with the actual path to your image
+        self.background_image = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        blue_jellyfish_img = pygame.image.load(BLUE_JELLYFISH_TILE)
+        blue_jellyfish_img = pygame.transform.scale(blue_jellyfish_img, (CELL_SIZE, CELL_SIZE))  # Resize
+        green_jellyfish_img = pygame.image.load(GREEN_JELLYFISH_TILE)
+        green_jellyfish_img = pygame.transform.scale(green_jellyfish_img, (CELL_SIZE, CELL_SIZE))  # Resize
+        red_jellyfish_img = pygame.image.load(RED_JELLYFISH_TILE)
+        red_jellyfish_img = pygame.transform.scale(red_jellyfish_img, (CELL_SIZE, CELL_SIZE))  # Resize
+        self.jellyfish_tiles.append(blue_jellyfish_img)
+        self.jellyfish_tiles.append(green_jellyfish_img)
+        self.jellyfish_tiles.append(red_jellyfish_img)
 
-
-# Function to show the quiz card
-def show_quiz_card(model, screen, font, preposition, choices, quiz_card_surface):
-    quiz_card_shown = True
-    # Draw the resized quiz card image onto the screen
-    quiz_card_image = pygame.image.load(QUIZ_IMG)
-    # Resize the quiz card image to fit within the defined QUIZ_CARD_WIDTH and QUIZ_CARD_HEIGHT
-    quiz_card_image = pygame.transform.scale(quiz_card_image, (QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT))
-    screen.blit(quiz_card_image, (QUIZ_CARD_PADDING, QUIZ_CARD_PADDING + 20, QUIZ_CARD_WIDTH,
-                                  QUIZ_CARD_HEIGHT))  # ((screen.get_width() - quiz_card_image.get_width()) // 2, (screen.get_height() - quiz_card_image.get_height()) // 2))
-    pygame.draw.rect(screen, WHITE, (QUIZ_CARD_PADDING, QUIZ_CARD_PADDING + 20, QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT), 4)
-    # change to bring the qestions in bulk
-    question_answer_pair = get_questions(model, preposition, 1, preposition, "")
-    print("question_answer_pair", question_answer_pair)
-    quiz_question = question_answer_pair.get("sentence")
-    correct_answer = question_answer_pair.get("correct_answer")
-    quiz_choices = choices
-    # Adjust drawing positions based on the quiz card image content
-    # question and choices
-    text_margin = 20
-
-    question_text = string_parser(quiz_question, F_Arial, BLACK)
-    question_rect = question_text.get_rect(
-        center=(quiz_card_image.get_width() // 2 + 100, 120 + (CHOICE_RECT_HEIGHT + CHOICE_RECT_PADDING)))
-    screen.blit(question_text, question_rect)
-    # Choice rects and text
-    choice_rects = []
-    for i, choice in enumerate(quiz_choices):
-        choice_text = string_parser(choice, F_Arial, BLACK)
-        # Adjust choice positioning based on margins and number of choices
-        choice_y_position = quiz_card_image.get_height() // 2 + (i + 1) * (choice_text.get_height() // 2)
-        choices_size = pygame.Rect(QUIZ_CARD_PADDING + 100, QUIZ_CARD_HEIGHT + (40 * i),
-                                   QUIZ_CARD_WIDTH - 2 * QUIZ_CARD_PADDING, CHOICE_RECT_HEIGHT)
-        choice_rect = choice_text.get_rect(center=(choices_size.left + choices_size.width // 2,
-                                                   choices_size.top + choices_size.height // 2))  # choice_text.get_rect(center=(quiz_card_image.get_width() // 2, choice_y_position))
-        pygame.draw.rect(screen, LIGHT_BLUE3, choices_size)  # choice fill
-        pygame.draw.rect(screen, DARK_BLUE1, choices_size, 3)  # choice border
-
-        screen.blit(choice_text, choice_rect)
-        choice_rects.append(choice_rect)
-    return quiz_card_shown, choice_rects, correct_answer
-
-
-# Function to check if a cell is clicked
-def check_cell_click(pos):
-    for i in range(BOARD_SIZE):
-        for j in range(BOARD_SIZE):
-            if i * CELL_SIZE < pos[0] < (i + 1) * CELL_SIZE and j * CELL_SIZE < pos[1] < (j + 1) * CELL_SIZE:
-                return i, j
-    return None
-
-
-def load_jar_bingo_game_thumbnail():
-    return load_image(jar_bingo_thumbnail, (thumbnail_width, thumbnail_width))
-
-
-# pause the game
-def pause(clock):
-    pause = True
-    while pause:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:  # enter key to resume
-                    pause = False
-            elif event.type == pygame.QUIT:
-                pause = False
-            else:
-                clock.tick(0)
-
-
-# Game loop
-def main():
-    # intialize game
-    model, screen, font, board, clicked_cells, game_over = initialize_game()
-    background_image, jellyfish_tiles = initialize_imgs()
-    quiz_card_shown, quiz_card_surface = initialize_quiz_card()
-    # Draw on screen
-    board = create_board(board, jellyfish_tiles)
-    screen.fill(WHITE)
-    draw_board(board, screen, background_image)
+    def reset_game(self):
+        #initialize Game state variables
+        self.game_state = "initialized"
+        self.board = []
+        self.clicked_cells = []  # tracked clicked cells in the board to disable them after getting clicked.
+        self.game_over = False
+        self.quiz_card_shown = False  # track the state of the quiz card
+        self.quiz_choices = []
+        #self.quiz_card_surface = pygame.Surface((QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT), pygame.SRCALPHA, 32)
+        #initialize imgs
+        self.jellyfish_tiles = []  # board tiles
+        self.background_image = None
+        self.initialize_imgs()
+        # Draw on screen
+        self.board = create_board(self.board, self.jellyfish_tiles)
+        self.choice_rects = None
+        
+    def draw_bingo_screen(self):
+        screen.fill(WHITE)
+        draw_board(self.board, self.background_image)
+        self.game_state = "running"
+        title = "لعبة بنغو أحرف الجر في المحيط"
+        draw_title(title, title_color=WHITE, title_height=JR_TITLE_HEIGHT)
+        back_button = draw_back_button()
+    #Main
+    def play_jarbingo_game(self, running, back_button, main_game_state):
     # start game
-    clock = pygame.time.Clock()
-    game_state = "running"
-    running = True
-    while running:
+        if self.game_state == "initialized":
+            #redraw game screen
+            self.draw_bingo_screen()
+        clock = pygame.time.Clock()
+        #pause_background_sound(False)
+        #initialize sounds
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                return running, main_game_state
             # pause game
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:  # space key to pause
-                    game_state = "paused"
+                    self.game_state = "paused"
                     pause(clock)
+            elif event.type == pygame.MOUSEBUTTONDOWN and back_button.collidepoint(event.pos):
+                    main_game_state = GAMES_BOARD_SCREEN
+                    return running, main_game_state
             # user clicked on a cell in the board
-            elif event.type == pygame.MOUSEBUTTONDOWN and not quiz_card_shown:
+            elif event.type == pygame.MOUSEBUTTONDOWN and not self.quiz_card_shown:
                 clicked_cell = check_cell_click(event.pos)  # check if the cell has been clicked before.
-                if clicked_cell and all(i != clicked_cell for i in clicked_cells):
-                    clicked_cells.append(clicked_cell)
-                    preposition = board[clicked_cell[0]][clicked_cell[1]][0]
-                    rest_of_prepositions = [element for element in prepositions_1 if element != preposition]
-                    quiz_choices = [preposition] + random.sample(rest_of_prepositions, 2)
-                    quiz_card_shown, choice_rects, correct_answer = show_quiz_card(model, screen, font, preposition,
-                                                                                   quiz_choices, quiz_card_surface)
+                if clicked_cell and all(i != clicked_cell for i in self.clicked_cells):
+                    self.clicked_cells.append(clicked_cell)
+                    print("clicked_cell: ", clicked_cell)
+                    preposition = self.board[clicked_cell[0]][clicked_cell[1]][0]
+                    self.quiz_card_shown, self.choice_rects, self.quiz_choices, correct_answer = show_quiz_card(self.model,self.quiz_card_shown, preposition)
+                    #compare requested preposition and correct answer
+                    print(preposition, correct_answer)
             # user clicked a choice from the quiz card.
-            elif event.type == pygame.MOUSEBUTTONDOWN and quiz_card_shown:
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.quiz_card_shown:
                 # Check if the clicked position is within any of the choice rectangles
-                preposition = board[clicked_cell[0]][clicked_cell[1]][0]
-                for i, choice_rect in enumerate(choice_rects):
+                clicked_cell = check_cell_click(event.pos)
+                preposition = self.board[clicked_cell[0]][clicked_cell[1]][0]
+                for i, choice_rect in enumerate(self.choice_rects):
                     if choice_rect.collidepoint(event.pos):
                         # User selected a choice
-                        selected_choice = quiz_choices[i]
+                        selected_choice = self.quiz_choices[i]
                         # Check if the selected choice is correct
-                        if selected_choice == board[clicked_cell[0]][clicked_cell[1]][0]:
+                        if selected_choice == self.board[clicked_cell[0]][clicked_cell[1]][0]:
                             # Correct answer, do something
                             print("Correct!")
                             # Hide the quiz card and update the game state accordingly
-                            quiz_card_shown = False
+                            self.quiz_card_shown = False
                             correct_cell = clicked_cell
                             # Color the cell of the correctly answered quiz
-                            board[correct_cell[0]][correct_cell[1]] = (
-                                board[correct_cell[0]][correct_cell[1]][0], jellyfish_tiles[1],
+                            self.board[correct_cell[0]][correct_cell[1]] = (
+                                self.board[correct_cell[0]][correct_cell[1]][0], self.jellyfish_tiles[1],
                                 GREEN)  # board[correct_cell[0]][correct_cell[1]][2])
-                            if (check_win(board)):
+                            if (check_win(self.board)):
                                 print("You won")
-                                game_over = True
-                                game_state = "win"
+                                self.game_over = True
+                                self.game_state = "win"
                         else:
                             # Incorrect answer, do something
                             print("Incorrect!")
                             # Handle incorrect answer, e.g., show a message or deduct points
-                            quiz_card_shown = False
+                            self.quiz_card_shown = False
                             incorrect_cell = clicked_cell
                             # Color the cell of the incorrectly answered quiz
-                            board[incorrect_cell[0]][incorrect_cell[1]] = (
-                                board[incorrect_cell[0]][incorrect_cell[1]][0], jellyfish_tiles[2], RED)
-                            if (check_lose(board)):
+                            self.board[incorrect_cell[0]][incorrect_cell[1]] = (
+                                self.board[incorrect_cell[0]][incorrect_cell[1]][0], self.jellyfish_tiles[2], RED)
+                            if (check_lose(self.board)):
                                 print("You lose!")
-                                game_over = True
-                                game_state = "lost"
+                                self.game_over = True
+                                self.game_state = "lose"
 
-                if not quiz_card_shown:
-                    screen.fill(WHITE)
-                    draw_board(board, screen, background_image)
-                if game_over:
-                    if game_state == "win":
-                        game_over_card(screen, WIN_MENU_IMG, GREEN, True)
-                    elif game_state == "lost":
-                        game_over_card(screen, LOSE_MENU_IMG, RED, False)
-
-        pygame.display.flip()
-    pygame.quit()
+                if not self.quiz_card_shown:
+                    self.draw_bingo_screen()
+                if self.game_over:
+                    if self.game_state == "win":
+                        game_over_card(WIN_MENU_IMG, GREEN, True, score = 10, max_score=10)
+                    elif self.game_state == "lose":
+                        game_over_card(LOSE_MENU_IMG, RED, False, score = 0, max_score=10)
+            pygame.display.flip()
+        return running, main_game_state
+        
