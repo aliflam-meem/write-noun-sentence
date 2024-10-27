@@ -85,10 +85,10 @@ def games_board_screen():
 
     # Draw the buttons
     whack_a_mole_button = draw_button("إصابة القنفذ", vocabulary_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
-    prepositions_button = draw_button("بينغو", prepositions_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
+    jar_bingo_button = draw_button("بينغو أحرف الجر", prepositions_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
     snowman_button = draw_button("الرجل الثلجي", snowman_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
 
-    return back_button, whack_a_mole_button, prepositions_button, snowman_button
+    return back_button, whack_a_mole_button, jar_bingo_button, snowman_button
 
 
 def main_menu_screen():
@@ -120,8 +120,8 @@ def main():
     jar_bingo_game = JBGameComponents()
     play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
     pause_background_sound(True)
+    screen.fill("black")  # Set background color of the screen (blocks my screen for some reason?So I moved it outside the while so it doesn't get displayed each time)
     while running:
-        screen.fill("black")  # Set background color of the screen
 
         # Handle different screens based on game state
         if game_state == MAIN_MENU:
@@ -152,6 +152,7 @@ def main():
                         game_state = SNOWMAN_LEVELS
                     if jarbingo_button.collidepoint(event.pos):
                         game_state = JAR_BINGO_GAME
+                        jar_bingo_game.reset_game()
                     if whack_a_mole_button.collidepoint(event.pos):
                         game_state = WHACK_A_MOLE_GAME
 
@@ -252,6 +253,8 @@ def main():
                 snowman_current_game.display_result_and_play_sound()
 
         elif game_state == WHACK_A_MOLE_GAME:
+            screen.fill("black") #suggestion to change it another color.
+
             whack_a_mole_game = whack_a_mole_game_screen(whack_a_mole_game)
 
             for event in pygame.event.get():
@@ -316,8 +319,11 @@ def main():
                 whack_a_mole_game.bomb.show()
 
         elif game_state == JAR_BINGO_GAME:
-            running = jar_bingo_game.play_jarbingo_game(running)
             pause_background_sound(False)
+            running, game_state  = jar_bingo_game.play_jarbingo_game(running, back_button, JAR_BINGO_GAME)
+            if game_state != JAR_BINGO_GAME:
+                pause_background_sound(True)
+
 
         pygame.display.flip()
         clock.tick(60)  # Limit to 60 FPS

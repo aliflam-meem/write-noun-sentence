@@ -17,7 +17,8 @@ WIN_LENGTH = 3  # Adjust this value to change the required winning streak
 
 # paths
 ## images
-### board,tiles,quiz_card
+### title, board,tiles,quiz_card
+JR_TITLE_HEIGHT = 50
 BACKGROUND_IMG = "src/jar_bingo/assets/images/Gemini_Generated_Image_5ivjha5ivjha5ivj.jfif"
 QUIZ_IMG = "src/jar_bingo/assets/images/card_Gemini_Generated_Image_2jadgq2jadgq2jad.jfif"
 BLUE_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_b7o9wwb7o9wwb7o9 (1).jfif"

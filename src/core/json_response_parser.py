@@ -43,12 +43,15 @@ def parse_json_response(string, start_marker, end_marker):
     # Remove leading and trailing spaces from the response
     string = string.encode('utf-8').decode('utf-8').strip()
     # Remove extra tags and brackets.
+    #print("parse json response function, before calling slplit:", string)
     string = split_response_string(string, start_marker, end_marker)
+    #print("parse json response, after calling split: ", string)
     string = string.replace(start_marker, "").replace(end_marker, "").replace(" [", "").replace("[ ", "").replace(" ]",
                                                                                                             "").replace(
         "] ", "").replace("]", "").replace("[", "")
     dict_str = string.split(",")
     i = 0
+    #print("parse json response, before looping: ", string)
     while i < len(dict_str) - 1:
         key_value_pairs = dict_str[i].split(":")
         d = {}
@@ -58,6 +61,7 @@ def parse_json_response(string, start_marker, end_marker):
         d[key] = value
         dict_list.append(d)
         i += 1
+    print("returned dict: ", dict_list)
     return dict_list
 
 
