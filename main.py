@@ -73,7 +73,7 @@ def main():
     running = True
     snowman_current_game = SnowmanGame()
     whack_a_mole_game = WhackaMoleGame()
-
+    initialize_jarbingo_game_in_main()
     while running:
         screen.fill("black")  # Set background color of the screen
 
@@ -242,7 +242,9 @@ def main():
                 for mole in whack_a_mole_game.moles:
                     mole.show()
                 whack_a_mole_game.bomb.show()
-                         
+
+        elif game_state == JAR_BINGO_GAME:
+            print_jarbingo_game_screen()
 
         pygame.display.flip()
         clock.tick(60)  # Limit to 60 FPS

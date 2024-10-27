@@ -1,7 +1,7 @@
 import random
 import pygame
 
-from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, body_font, screen
 from src.core.json_response_parser import *
 from src.core.audio_player import *
 from src.jar_bingo.data import *
@@ -9,49 +9,9 @@ from src.jar_bingo.LLM import *
 from src.jar_bingo.board import *
 from src.jar_bingo.game_over import *
 
-# Pygame initialization
-def initialize_game():
-    model = set_model()
-    pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Preposition Quiz Game")
-    # Font and colors
-    font = pygame.font.Font(F_Arial, 32)
-    # sounds
-    pygame.mixer.init()
-    play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
-    # Game state variables
-    board = []
-    clicked_cells = []  # tracked clicked cells in the board to disable them after getting clicked.
-    game_over = False
-    return (model, screen, font, board, clicked_cells, game_over)
-
-
-def initialize_quiz_card():
-    quiz_card_shown = False  # track the state of the quiz card
-    quiz_card_surface = pygame.Surface((QUIZ_CARD_WIDTH, QUIZ_CARD_HEIGHT), pygame.SRCALPHA, 32)
-    return (quiz_card_shown, quiz_card_surface)
-
-
-def initialize_imgs():
-    # Load images
-    jellyfish_tiles = []  # board tiles
-    background_image = pygame.image.load(BACKGROUND_IMG)  # Replace with the actual path to your image
-    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-    blue_jellyfish_img = pygame.image.load(BLUE_JELLYFISH_TILE)
-    blue_jellyfish_img = pygame.transform.scale(blue_jellyfish_img, (CELL_SIZE, CELL_SIZE))  # Resize
-    green_jellyfish_img = pygame.image.load(GREEN_JELLYFISH_TILE)
-    green_jellyfish_img = pygame.transform.scale(green_jellyfish_img, (CELL_SIZE, CELL_SIZE))  # Resize
-    red_jellyfish_img = pygame.image.load(RED_JELLYFISH_TILE)
-    red_jellyfish_img = pygame.transform.scale(red_jellyfish_img, (CELL_SIZE, CELL_SIZE))  # Resize
-    jellyfish_tiles.append(blue_jellyfish_img)
-    jellyfish_tiles.append(green_jellyfish_img)
-    jellyfish_tiles.append(red_jellyfish_img)
-    return (background_image, jellyfish_tiles)
-
 
 # Function to show the quiz card
-def show_quiz_card(model, screen, font, preposition, choices, quiz_card_surface):
+def show_quiz_card(model, screen, body_font, preposition, choices, quiz_card_surface):
     quiz_card_shown = True
     # Draw the resized quiz card image onto the screen
     quiz_card_image = pygame.image.load(QUIZ_IMG)
@@ -116,17 +76,10 @@ def pause(clock):
 
 
 # Game loop
-def main():
-    # intialize game
-    model, screen, font, board, clicked_cells, game_over = initialize_game()
-    background_image, jellyfish_tiles = initialize_imgs()
-    quiz_card_shown, quiz_card_surface = initialize_quiz_card()
-    # Draw on screen
-    board = create_board(board, jellyfish_tiles)
-    screen.fill(WHITE)
-    draw_board(board, screen, background_image)
+#def main():
+def print_jarbingo_game_screen():
     # start game
-    clock = pygame.time.Clock()
+    #clock = pygame.time.Clock()
     game_state = "running"
     running = True
     while running:
@@ -190,10 +143,9 @@ def main():
                     draw_board(board, screen, background_image)
                 if game_over:
                     if game_state == "win":
-                        game_over_card(screen, WIN_MENU_IMG, font, GREEN, "لقد فزت!",
+                        game_over_card(screen, WIN_MENU_IMG, body_font, GREEN, "لقد فزت!",
                                        "jar_bingo/audio/Fliki_you_win.mp3")
                     elif game_state == "lost":
-                        game_over_card(screen, LOSE_MENU_IMG, font, RED, "حظاً أوفر")
+                        game_over_card(screen, LOSE_MENU_IMG, body_font, RED, "حظاً أوفر")
 
         pygame.display.flip()
-    pygame.quit()

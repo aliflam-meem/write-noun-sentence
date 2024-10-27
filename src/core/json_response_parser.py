@@ -23,6 +23,12 @@ def string_parser(arabic_string, font, font_color): #string, font_asset_path, rg
     # print("reshaped the following item: ",reshaped_string)
     return reshaped_string
 
+def split_response_string(string, start_marker, end_marker):
+    """Parses a string containing start and end markers, returning the split in the middle."""
+    start_split_string = string.split(start_marker)
+    end_split_string = start_split_string[1].split(end_marker)
+    return end_split_string[0]
+
 
 def parse_json_response(string, start_marker, end_marker):
     """Parses a string containing a list of dictionaries into a Python list.
@@ -35,6 +41,7 @@ def parse_json_response(string, start_marker, end_marker):
     # Remove leading and trailing spaces from the response
     string = string.encode('utf-8').decode('utf-8').strip()
     # Remove extra tags and brackets.
+    string = split_response_string(string, start_marker, end_marker)
     string = string.replace(start_marker, "").replace(end_marker, "").replace(" [", "").replace("[ ", "").replace(" ]",
                                                                                                             "").replace(
         "] ", "").replace("]", "").replace("[", "")
