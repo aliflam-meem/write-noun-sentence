@@ -1,10 +1,19 @@
-import random
-import pygame
+import inspect
+import os
+import sys
 
-from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, body_font, screen
-from src.core.json_response_parser import *
+from src.core.utility import load_image
+
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+
+from src.constants import RED, thumbnail_width, body_font, screen
+from core.json_response_parser import *
+from core.audio_player import *
+from src.constants import  SCREEN_HEIGHT
 from src.core.audio_player import *
-from src.jar_bingo.data import *
 from src.jar_bingo.LLM import *
 from src.jar_bingo.board import *
 from src.jar_bingo.game_over import *
@@ -59,6 +68,10 @@ def check_cell_click(pos):
             if i * CELL_SIZE < pos[0] < (i + 1) * CELL_SIZE and j * CELL_SIZE < pos[1] < (j + 1) * CELL_SIZE:
                 return i, j
     return None
+
+
+def load_jar_bingo_game_thumbnail():
+    return load_image(jar_bingo_thumbnail, (thumbnail_width, thumbnail_width))
 
 
 # pause the game
@@ -143,9 +156,8 @@ def print_jarbingo_game_screen():
                     draw_board(board, screen, background_image)
                 if game_over:
                     if game_state == "win":
-                        game_over_card(screen, WIN_MENU_IMG, body_font, GREEN, "لقد فزت!",
-                                       "jar_bingo/audio/Fliki_you_win.mp3")
+                        game_over_card(screen, WIN_MENU_IMG, GREEN, True)
                     elif game_state == "lost":
-                        game_over_card(screen, LOSE_MENU_IMG, body_font, RED, "حظاً أوفر")
+                        game_over_card(screen, LOSE_MENU_IMG, RED, False)
 
         pygame.display.flip()

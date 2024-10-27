@@ -1,13 +1,13 @@
 from src.constants import SCREEN_WIDTH, IMAGE_WIDTH, SMALL_PADDING, BUTTON_WIDTH, LONG_PADDING, SMALL_BUTTON_HEIGHT, \
-    SCREEN_HEIGHT, GAME_SCREEN_BG, screen, BUTTON_HEIGHT, TITLE_HEIGHT, SCOREBAR_HEIGHT, cornsilk, brown
+    SCREEN_HEIGHT, screen, BUTTON_HEIGHT, TITLE_HEIGHT, SCOREBAR_HEIGHT, thumbnail_width, BUTTON_COLOR
 from src.core.input import InputBox
 from src.core.utility import draw_title, draw_back_button, draw_subtitle, draw_button, draw_text_box, \
-    draw_score_and_health
-from src.snowman.constants import snowman_levels
+    draw_score_and_health, load_image
+from src.snowman.constants import snowman_levels, SNOWMAN_GAME_SCREEN_BG, snowman_thumbnail, SNOWMAN_GAME_SCREEN_BG_TRA
 
 
 def snowman_levels_screen():
-    screen.blit(GAME_SCREEN_BG, (0, 0))
+    screen.blit(load_snowman_game_background(), (0, 0))
     draw_title("لعبة الرجل الثلجي")
 
     # List the games buttons
@@ -25,7 +25,7 @@ def snowman_levels_screen():
 
     back_button = draw_back_button()
     # 10 pixels is a magic number, right indent
-    draw_subtitle("أشكال المبتدأ", SCREEN_WIDTH - edge_space - 10, y_coordinate - 90, brown)
+    draw_subtitle("أشكال المبتدأ", SCREEN_WIDTH - edge_space - 10, y_coordinate - 90, BUTTON_COLOR)
 
     # Draw menu buttons
     al_atareef_button = draw_button(snowman_levels["al_atareef"]["title"], al_atareef_button_x,
@@ -38,9 +38,9 @@ def snowman_levels_screen():
     return back_button, al_atareef_button, demonstratives_button, pronouns_button
 
 
-def draw_question_interface(answer_box, question_text, snowman_image):
+def draw_question_interface(answer_box, question_text, snowman_image, is_submit_button_enabled):
     # Space between elements
-    space_between_elements = 20
+    space_between_elements = 30
 
     question_box_width = SCREEN_WIDTH - IMAGE_WIDTH - SMALL_PADDING
     question_box_height = 130
@@ -53,27 +53,30 @@ def draw_question_interface(answer_box, question_text, snowman_image):
 
     # Calculate positions for the buttons (right-aligned and horizontally aligned)
     answer_box_y = question_text_y + question_box_height + space_between_elements  # Below question text
+    answer_box_x = question_text_x + BUTTON_WIDTH / 2 + SMALL_PADDING
     answer_box.set_rect_y(answer_box_y)
-    answer_box.set_rect_x(question_text_x + BUTTON_WIDTH / 2 + SMALL_PADDING)
-    answer_button_x = question_text_x  # Right-most button
-    answer_button = draw_button("أجب", answer_button_x, answer_box_y, BUTTON_WIDTH / 2, SMALL_BUTTON_HEIGHT)
+    answer_box.set_rect_x(answer_box_x)
+    submit_answer_button_x = question_text_x  # Right-most button
+    submit_answer_button = draw_button("أجب", submit_answer_button_x, answer_box_y, BUTTON_WIDTH / 2,
+                                       SMALL_BUTTON_HEIGHT, is_disabled=not is_submit_button_enabled)
 
     # Draw image to the left of the buttons
     image_x = 0  # Image aligned to the left of screen
     image_y = question_text_y + SCOREBAR_HEIGHT  # Aligned vertically with the question text
 
-    screen.blit(snowman_image, image_x, image_y)
+    screen.blit(snowman_image, (image_x, image_y))
 
     # Return the interface elements (for any potential further processing)
     return {
-        "answer_button": answer_button,
+        "submit_answer_button": submit_answer_button,
         "button_y": answer_box_y + answer_box.rect.height + space_between_elements,
+        "information_area_x": answer_box_x
     }
 
 
-def draw_helping_buttons(y):
+def draw_helping_buttons(y, is_next_question_button_enabled):
     # Space between elements
-    space_between_elements = 20
+    space_between_elements = 30
 
     # Calculate the right-most x-coordinate for alignment
     right_alignment_x = SCREEN_WIDTH - SMALL_PADDING
@@ -85,20 +88,28 @@ def draw_helping_buttons(y):
     correct_button = draw_button("الإجابة الصحيحة", correct_button_x, y, BUTTON_WIDTH, SMALL_BUTTON_HEIGHT, True)
     grammar_button_x = correct_button.x - BUTTON_WIDTH - space_between_elements  # Left-most button
     grammar_button = draw_button("القاعدة", grammar_button_x, y, BUTTON_WIDTH, SMALL_BUTTON_HEIGHT, True)
+    next_question_button_x = grammar_button.x - BUTTON_WIDTH - space_between_elements  # Left-most button
+    next_question_button = draw_button("السؤال التالي", next_question_button_x, y, BUTTON_WIDTH,
+                                       SMALL_BUTTON_HEIGHT, True, is_disabled=not is_next_question_button_enabled)
 
-    return correct_button, help_button, grammar_button
+    return correct_button, help_button, grammar_button, next_question_button
 
 
-def snowman_game_screen(answer_box, question, title, score, health_points, image_path):
-    screen.fill(cornsilk)
+def snowman_game_screen(answer_box, question, title, score, health_points, image,
+                        information_area_content, is_submit_button_enabled, is_next_question_button_enabled):
+    background = load_snowman_game_background(True)
+    screen.blit(background, (0, 0))
     draw_title(title)
     back_button = draw_back_button()
     score_y = TITLE_HEIGHT + SMALL_PADDING
     draw_score_and_health(score, y=score_y, health_points=health_points)
-    elements = draw_question_interface(answer_box, question, image_path)
-    buttons = draw_helping_buttons(elements["button_y"])
+    elements = draw_question_interface(answer_box, question, image, is_submit_button_enabled)
+    buttons = draw_helping_buttons(elements["button_y"], is_next_question_button_enabled)
+    information_area_y = SMALL_BUTTON_HEIGHT + elements["button_y"] + SMALL_PADDING
+    draw_text_box(information_area_content, answer_box.rect.x, information_area_y, answer_box.rect.width,
+                  answer_box.rect.height)
 
-    return back_button, buttons
+    return back_button, buttons, elements["submit_answer_button"]
 
 
 def create_input_box():
@@ -110,3 +121,13 @@ def create_input_box():
 
     # Create an instance of InputBox instead of using draw_input_box
     return InputBox(input_box_x, input_box_y, input_box_width, input_box_height)
+
+
+def load_snowman_game_thumbnail():
+    return load_image(snowman_thumbnail, (thumbnail_width, thumbnail_width))
+
+
+def load_snowman_game_background(transparent=False):
+    if transparent:
+        return load_image(SNOWMAN_GAME_SCREEN_BG_TRA, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    return load_image(SNOWMAN_GAME_SCREEN_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
