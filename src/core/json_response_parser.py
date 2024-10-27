@@ -5,8 +5,7 @@ import pygame
 
 
 # in: list, out: reshaped list
-def list_parser(arabic_list, font, font_color): #list of strings, font_asset_path, rgb_color
-    message_font = pygame.font.Font(font, 35)
+def list_parser(arabic_list, message_font, font_color): #list of strings, font_asset_path, rgb_color
     message_font.set_script("Arab")
     message_font.set_direction(pygame.DIRECTION_RTL)
     reshaped_list = []
@@ -18,9 +17,8 @@ def list_parser(arabic_list, font, font_color): #list of strings, font_asset_pat
 
 
 # in string, out: reshaped string
-def string_parser(arabic_string, font, font_color): #string, font_asset_path, rgb_color
+def string_parser(arabic_string, message_font, font_color): #string, font_asset_path, rgb_color
     reshaped_string = ""
-    message_font = pygame.font.Font(font, 35)
     message_font.set_script("Arab")
     message_font.set_direction(pygame.DIRECTION_RTL)
     reshaped_string = message_font.render(arabic_string, True, font_color)
