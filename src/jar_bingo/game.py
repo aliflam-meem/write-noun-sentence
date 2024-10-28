@@ -1,7 +1,7 @@
 import pygame
 from src.jar_bingo.constants import JR_TITLE_HEIGHT
-from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, RED, GAMES_BOARD_SCREEN, JAR_BINGO_GAME
-from src.core.utility import draw_title, draw_back_button, draw_button, load_loading_image
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, RED, GAMES_BOARD_SCREEN, maroon 
+from src.core.utility import draw_title, draw_back_button, draw_button, load_loading_image, draw_score_and_health
 from src.core.json_response_parser import *
 from src.core.audio_player import *
 from src.jar_bingo.data import *
@@ -25,6 +25,7 @@ class JBGameComponents:
         self.quiz_card_shown = False  # track the state of the quiz card
         self.quiz_choices = []
         self.model = None
+        self.score = 0
         #bg sound button
         self.music_button = None
         # self.music_button = pygame.image.load(BG_MUSIC_BUTTON)
@@ -56,7 +57,7 @@ class JBGameComponents:
         if jar_bingo_initial:
             #redraw game screen
             self.draw_bingo_screen()
-            load_loading_image(text_message = 'جار تحميل اللعبة', text_color = WHITE, scale_x=225, scale_y=225)
+            load_loading_image(text_message = 'جار تحميل اللعبة', text_color = WHITE, scale_x=200, scale_y=200)
             self.model = set_model()
         #initialize Game state variables
         self.game_state = "restart"
@@ -67,6 +68,7 @@ class JBGameComponents:
         self.game_over = False
         self.quiz_card_shown = False  # track the state of the quiz card
         self.quiz_choices = []
+        self.score = 0
         #bg sound button
         #self.music_button = pygame.image.load(BG_MUSIC_BUTTON)
         #self.music_button = pygame.transform.scale(self.music_button, (80, 80))
@@ -84,19 +86,17 @@ class JBGameComponents:
         draw_board(self.board, self.background_image)
         self.game_state = "running"
         title = "لعبة بنغو أحرف الجر في المحيط"
-        draw_title(title, title_color=WHITE,background_color=DARK_BLUE1 , title_height=JR_TITLE_HEIGHT)
-        draw_back_button()
-        #draw music button
-        self.music_button = draw_button("الصوت", SCREEN_WIDTH - 100, 10,60,50, border_width=2, border_color=MID_BLUE1,
-                text_color=WHITE, button_color= MID_BLUE2, highlight_color=BLACK, radius=5)
-        #screen.blit(self.music_button, (20, 100))
+        draw_title(title, title_height=JR_TITLE_HEIGHT, title_color=WHITE, padding = 200, border_radius=25, background_color=DARK_TEAL)
+        draw_back_button(button_height=30)
+        #score and health
+        draw_score_and_health(self.score, x=900, y=70, health_points=3, max_score=100, text_color=TURQUOISE_BLUE)
+        #draw music button 
+        self.music_button = draw_button("الصوت", SCREEN_WIDTH - 100, 10,60,50, border_width=2, border_color=DARK_TEAL,
+                text_color=TURQUOISE_BLUE, button_color= DARK_TEAL, highlight_color=BLACK, radius=5)
 
     #Main
     def play_jar_bingo_game(self, running, back_button, main_game_state):
         # start game
-        # if self.game_state == "initialized" or self.game_state == "restart":
-        #     #redraw game screen
-        #     self.draw_bingo_screen()
         self.game_state = "running"
         clock = pygame.time.Clock()
         #initialize sounds
@@ -153,6 +153,7 @@ class JBGameComponents:
                                 # Color the cell of the correctly answered quiz
                                 self.board[correct_cell[0]][correct_cell[1]] = (
                                     self.board[correct_cell[0]][correct_cell[1]][0], self.jellyfish_tiles[1], GREEN)
+                                self.score = self.score + 5
                                 #reset the value
                                 self.clicked_cell = None
                                 if (check_win(self.board)):
@@ -181,12 +182,12 @@ class JBGameComponents:
                 if self.game_over:
                     if self.game_state == "win":
                         self.draw_bingo_screen()
-                        game_over_card(WIN_MENU_IMG, GREEN, True, score = 10, max_score=10)
+                        game_over_card(WIN_MENU_IMG, LIGHT_GREEN, True, score = self.score, max_score=100)
                         self.game_state = "game_over" 
                         
                     elif self.game_state == "lose":
                         self.draw_bingo_screen()
-                        game_over_card(LOSE_MENU_IMG, RED, False, score = 0, max_score=10)
+                        game_over_card(LOSE_MENU_IMG, RED, False, score = self.score, max_score=100)
                         self.game_state = "game_over" 
                     else:
                         print("waiting for the player")

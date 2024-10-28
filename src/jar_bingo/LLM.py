@@ -164,8 +164,16 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
         while processed_response == None:
             generated_response = model.generate_text(prompt=prompt_input)  # guardrails=False
             print("generated_response: ", generated_response)
+            #if both keys don't get generated, regenerate again
+            if "sentence" not in generated_response:
+                append_string_to_file("Missing_sentence", "src/jar_bingo/assets/jar_bingo_questions.txt")
+                continue
+            if "correct_answer" not in generated_response:
+                append_string_to_file("Missing_correct_answer", "src/jar_bingo/assets/jar_bingo_questions.txt")
+                continue
             processed_response = parse_coupled_json_response(generated_response, "<start>", "<end>")
             print("processed_response:", processed_response)
+
     except IndexError as i:
         print("An error occurred:", i)
     except Exception as e:

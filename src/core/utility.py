@@ -91,7 +91,7 @@ def draw_button(text, x, y, width, height, auto_width=False, border_width=2, bor
     return button_rect
 
 
-def draw_back_button():
+def draw_back_button(button_height= BUTTON_HEIGHT):
     return draw_button("رجوع", 30, (TITLE_HEIGHT - BUTTON_HEIGHT) / 2, BUTTON_WIDTH - LONG_PADDING,
                        BUTTON_HEIGHT)
 
@@ -240,4 +240,4 @@ def load_loading_image(text_message = 'جار تحميل اللعبة', text_col
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2 + SMALL_PADDING // 2,
                                SCREEN_HEIGHT // 2 - text.get_height() // 2 + LONG_PADDING))
     screen.blit(transformed_loading_image, (SCREEN_WIDTH * 0.5 - LONG_PADDING // 2, SCREEN_HEIGHT * 0.5 - LONG_PADDING))
-    #pygame.display.update()
+    pygame.display.update()
