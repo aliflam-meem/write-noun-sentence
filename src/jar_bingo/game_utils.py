@@ -93,8 +93,8 @@ def show_quiz_card(model, quiz_card_shown, preposition):
     # change to bring the qestions in bulk
     question_answer_pair = get_questions(model, preposition, 1, preposition, "")
     print("question_answer_pair", question_answer_pair)
-    quiz_question = question_answer_pair[0].get("sentence")
-    correct_answer = question_answer_pair[1].get("correct_answer")
+    quiz_question = question_answer_pair[0].get("sentence") #currently supports 1 question
+    correct_answer = question_answer_pair[0].get("correct_answer")
     print("correct answer in func ", correct_answer)
     # Adjust drawing positions based on the quiz card image content
     # question

@@ -1,6 +1,7 @@
 from ibm_watsonx_ai.foundation_models import Model
 
 from src.core.json_response_parser import *
+from src.core.output import append_string_to_file
 
 
 # watsonx API connection¶
@@ -71,11 +72,12 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     يجب أن يتماثل حرف الجر في الجملة وحرف الجر في الإجابة الصحيحة.
     اكتب الجملة بحيث يكون للفراغ إجابة واحدة صحيحة فقط وهي حرف الجر المذكور.
     اكتب حرف الجر المستبدل في الجملة في مكان الإجابة الصحيحة.
-    Output: <start>
+    Output:
+    <start>
     [
     {{ "sentence": "سأل المعلم _ الواجب.", "correct_answer": "عن" }},
     {{ "sentence": " _ قريبٍ ستُدرِكُ الحقيقة.", "correct_answer": "عن" }},
-    {{ "sentence": " غبت _ الدار ساعة.", "correct_answer": "عن" }},
+    {{ "sentence": " غبت _ الدار ساعة.", "correct_answer": "عن" }}
     ]
     <end>
 
@@ -88,9 +90,10 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     يجب أن يتماثل حرف الجر في الجملة وحرف الجر في الإجابة الصحيحة.
     اكتب الجملة بحيث يكون للفراغ إجابة واحدة صحيحة فقط وهي حرف الجر المذكور.
     اكتب حرف الجر المستبدل في الجملة في مكان الإجابة الصحيحة.
-    Output:  <start>
+    Output:
+    <start>
     [
-    {{ "sentence": "كتب أحمد _ اللوح الأخضر.", "correct_answer": "على" }},
+    {{ "sentence": "كتب أحمد _ اللوح الأخضر.", "correct_answer": "على" }}
     ]
     <end>
 
@@ -103,10 +106,11 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     يجب أن يتماثل حرف الجر في الجملة وحرف الجر في الإجابة الصحيحة.
     اكتب الجملة بحيث يكون للفراغ إجابة واحدة صحيحة فقط وهي حرف الجر المذكور.
     اكتب حرف الجر المستبدل في الجملة في مكان الإجابة الصحيحة.
-    Output: <start>
+    Output:
+    <start>
     [
         {{ "sentence": "أنا أحب الذهاب _ المدرسة.", "correct_answer": "إلى" }},
-        {{ "sentence": "ضم هذا المال _ مالك.", "correct_answer": "إلى" }},
+        {{ "sentence": "ضم هذا المال _ مالك.", "correct_answer": "إلى" }}
     ]
     <end>
 
@@ -119,9 +123,10 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     يجب أن يتماثل حرف الجر في الجملة وحرف الجر في الإجابة الصحيحة.
     اكتب الجملة بحيث يكون للفراغ إجابة واحدة صحيحة فقط وهي حرف الجر المذكور.
     اكتب حرف الجر المستبدل في الجملة في مكان الإجابة الصحيحة.
-    Output: <start>
+    Output:
+    <start>
     [
-        {{ "sentence": "قرأتُ سورة _ القرآن.", "correct_answer": "من" }},
+        {{ "sentence": "قرأتُ سورة _ القرآن.", "correct_answer": "من" }}
     ]
     <end>
 
@@ -134,10 +139,11 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
     يجب أن يتماثل حرف الجر في الجملة وحرف الجر في الإجابة الصحيحة.
     اكتب الجملة بحيث يكون للفراغ إجابة واحدة صحيحة فقط وهي حرف الجر المذكور.
     اكتب حرف الجر المستبدل في الجملة في مكان الإجابة الصحيحة.
-    Output: <start>
+    Output:
+    <start>
     [
         {{ "sentence": "سنبقى _ السيارة حتى يتوقف المطر.", "correct_answer": "في" }},
-    {{ "sentence": "الغِنى كلُّه _ القناعة.", "correct_answer": "في" }},
+    {{ "sentence": "الغِنى كلُّه _ القناعة.", "correct_answer": "في" }}
     ]
     <end>
 
@@ -154,21 +160,20 @@ def get_questions(model, _lvl_prep, _sentence_count, _correct_example, _with_jar
 
     print("Submitting generation request...")
     try:
-        generated_response = model.generate_text(prompt=prompt_input)  # guardrails=False
-        # Remove spaces before "[" and after "]"
-        processed_response = parse_coupled_json_response(generated_response, "<start>", "<end>")
-        print("processed_response:", processed_response)
+        processed_response = None
+        while processed_response == None:
+            generated_response = model.generate_text(prompt=prompt_input)  # guardrails=False
+            print("generated_response: ", generated_response)
+            processed_response = parse_coupled_json_response(generated_response, "<start>", "<end>")
+            print("processed_response:", processed_response)
     except IndexError as i:
         print("An error occurred:", i)
     except Exception as e:
         print("An error occurred:", e)
-    # try:
-    #     json_response = json.loads(processed_response)
-    #     print(json_response)
-    # except json.decoder.JSONDecodeError as e:
-    #      print(f"Error decoding JSON: {e}")
+    output_string = processed_response[0].get("sentence")+"/"+ processed_response[0].get("correct_answer")
+    print(output_string)
+    append_string_to_file(output_string, "src/jar_bingo/assets/jar_bingo_questions.txt")
     return processed_response
-
 
 
 #----- Other prepositions

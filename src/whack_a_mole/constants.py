@@ -10,3 +10,5 @@ X_OFFSET = 120
 Y_OFFSET = 260
 WM_TITLE_HEIGHT = 60
 LINES_SPACING = 40
+
+BACKYARD_CHIRP = "src/whack_a_mole/assets/backyard-birds-mix-20347-pixabay.com.mp3"

@@ -4,7 +4,7 @@ import pygame
 
 from src.constants import SCREEN_WIDTH, GREEN, screen
 from src.jar_bingo.data import *
-from src.jar_bingo.settings import *
+from src.jar_bingo.constants import *
 
 
 # Function to create the game board
@@ -18,19 +18,19 @@ def create_board(board, jellyfish_tiles):
 def draw_board(board, background_image):
     screen.blit(background_image,
                 (SCREEN_WIDTH - background_image.get_width(), 0))  # (0, 0))  # Blit the background image
-    pygame.draw.rect(screen, WHITE, (BOARD_PADDING - 4, BOARD_PADDING + 2, BOARD_WIDTH + 6, BOARD_HEIGHT + 4), 5)
+    pygame.draw.rect(screen, WHITE, (BOARD_PADDING - 4, BOARD_PADDING + 2, BOARD_WIDTH + 6, BOARD_HEIGHT + 5),
+                     border_radius=10, width=8)
     for i in range(BOARD_SIZE):
         for j in range(BOARD_SIZE):
-            # print(board[i][j][1])
             fill_cell = board[i][j][1]
             color_cell = board[i][j][2]
             # No need to draw text as prepositions are replaced with images
             pygame.draw.rect(screen, color_cell, (
             BOARD_PADDING + i * CELL_SIZE, BOARD_PADDING + j * CELL_SIZE, CELL_SIZE,
-            CELL_SIZE))  # (i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE))  # cell color fill
+            CELL_SIZE)) 
             pygame.draw.rect(screen, DARK_BLUE1,
                              (BOARD_PADDING + i * CELL_SIZE, BOARD_PADDING + j * CELL_SIZE, CELL_SIZE, CELL_SIZE),
-                             2)  # (i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE), 2)  # border
+                             border_radius=5, width=2) 
             # Blit the jellyfish image on each cell
             screen.blit(fill_cell, (BOARD_PADDING + i * CELL_SIZE, BOARD_PADDING + j * CELL_SIZE))
 

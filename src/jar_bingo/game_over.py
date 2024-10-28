@@ -52,7 +52,7 @@ def game_over_card(image_path, message_color, win_state, score, max_score):
 
     # Blit the score
     score_message = f"{max_score}/{score}"
-    score_message_text = body_font.render(message, True, message_color)
+    score_message_text = body_font.render(score_message, True, message_color)
     height_score_padding = 50
     # Calculate the message position to center it within the image
     score_message_x = x + (IMAGE_WIDTH - score_message_text.get_width()) // 2 
@@ -63,4 +63,4 @@ def game_over_card(image_path, message_color, win_state, score, max_score):
     #Play the audio
     audio = YOU_WIN_AUDIO if win_state else YOU_LOST_AUDIO
     print("play game over sounds.")
-    play_sound(audio)
+    play_sound(audio, 0.7)

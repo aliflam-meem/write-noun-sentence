@@ -1,7 +1,7 @@
 import pygame
-from src.jar_bingo.settings import JR_TITLE_HEIGHT
-from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, BUTTON_FONT_COLOR, screen, RED, GAMES_BOARD_SCREEN, JAR_BINGO_GAME
-from src.core.utility import draw_title, draw_back_button, draw_button
+from src.jar_bingo.constants import JR_TITLE_HEIGHT
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, RED, GAMES_BOARD_SCREEN, JAR_BINGO_GAME
+from src.core.utility import draw_title, draw_back_button, draw_button, load_loading_image
 from src.core.json_response_parser import *
 from src.core.audio_player import *
 from src.jar_bingo.data import *
@@ -17,14 +17,14 @@ class JBGameComponents:
     def __init__(self):
         #initialize Game state variables
         self.game_state = "initialized"
-        self.model = set_model()
+        self.loading = False
         self.board = []
         self.clicked_cells = []  # tracked clicked cells in the board to disable them after getting clicked.
         self.clicked_cell = None
         self.game_over = False
         self.quiz_card_shown = False  # track the state of the quiz card
         self.quiz_choices = []
-
+        self.model = None
         #bg sound button
         self.music_button = None
         # self.music_button = pygame.image.load(BG_MUSIC_BUTTON)
@@ -52,9 +52,15 @@ class JBGameComponents:
         self.jellyfish_tiles.append(green_jellyfish_img)
         self.jellyfish_tiles.append(red_jellyfish_img)
 
-    def reset_game(self):
+    def restart_game(self, jar_bingo_initial):
+        if jar_bingo_initial:
+            #redraw game screen
+            self.draw_bingo_screen()
+            load_loading_image(text_message = 'جار تحميل اللعبة', text_color = WHITE, scale_x=225, scale_y=225)
+            self.model = set_model()
         #initialize Game state variables
-        self.game_state = "initialized"
+        self.game_state = "restart"
+        self.loading = False
         self.board = []
         self.clicked_cells = []  # tracked clicked cells in the board to disable them after getting clicked.
         self.clicked_cell = None
@@ -78,18 +84,20 @@ class JBGameComponents:
         draw_board(self.board, self.background_image)
         self.game_state = "running"
         title = "لعبة بنغو أحرف الجر في المحيط"
-        draw_title(title, title_color=WHITE, title_height=JR_TITLE_HEIGHT)
+        draw_title(title, title_color=WHITE,background_color=DARK_BLUE1 , title_height=JR_TITLE_HEIGHT)
         draw_back_button()
         #draw music button
         self.music_button = draw_button("الصوت", SCREEN_WIDTH - 100, 10,60,50, border_width=2, border_color=MID_BLUE1,
                 text_color=WHITE, button_color= MID_BLUE2, highlight_color=BLACK, radius=5)
         #screen.blit(self.music_button, (20, 100))
+
     #Main
-    def play_jarbingo_game(self, running, back_button, main_game_state):
+    def play_jar_bingo_game(self, running, back_button, main_game_state):
         # start game
-        if self.game_state == "initialized":
-            #redraw game screen
-            self.draw_bingo_screen()
+        # if self.game_state == "initialized" or self.game_state == "restart":
+        #     #redraw game screen
+        #     self.draw_bingo_screen()
+        self.game_state = "running"
         clock = pygame.time.Clock()
         #initialize sounds
         for event in pygame.event.get():
@@ -151,7 +159,6 @@ class JBGameComponents:
                                     print("You won")
                                     self.game_over = True
                                     self.game_state = "win"
-                                    game_over_card(WIN_MENU_IMG, GREEN, True, score = 10, max_score=10)
                             else:
                                 # Incorrect answer, do something
                                 print("Incorrect!")
@@ -172,9 +179,16 @@ class JBGameComponents:
                 if not self.quiz_card_shown and not self.game_over:
                     self.draw_bingo_screen()
                 if self.game_over:
-                    if self.game_state == "win":#do nothing for now. 
-                        print("waiting for the player")
-                    elif self.game_state == "lose":#do nothing for now. 
+                    if self.game_state == "win":
+                        self.draw_bingo_screen()
+                        game_over_card(WIN_MENU_IMG, GREEN, True, score = 10, max_score=10)
+                        self.game_state = "game_over" 
+                        
+                    elif self.game_state == "lose":
+                        self.draw_bingo_screen()
+                        game_over_card(LOSE_MENU_IMG, RED, False, score = 0, max_score=10)
+                        self.game_state = "game_over" 
+                    else:
                         print("waiting for the player")
                         
             pygame.display.flip()
