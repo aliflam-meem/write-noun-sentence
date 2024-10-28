@@ -1,6 +1,7 @@
 import re
 
 import pygame
+from thefuzz import fuzz
 
 from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, IMAGE_WIDTH, YOU_WIN_AUDIO, YOU_LOST_AUDIO, \
     body_font, RED, GREEN, numbering_font, SMALL_PADDING
@@ -283,7 +284,6 @@ class SnowmanGame:
             self.is_result_sound_played = True
             self.play_result_sound()
 
-
-def is_answer_valid(snowman_current_game, answer_box):
-    print("get_current_correct_answer ", snowman_current_game.get_current_correct_answer())
-    return snowman_current_game.get_current_correct_answer() == answer_box.text.strip()
+    def is_answer_valid(self, answer_box):
+        print("get_current_correct_answer ", self.get_current_correct_answer())
+        return fuzz.ratio(self.get_current_correct_answer(), answer_box.text.strip()) == 100

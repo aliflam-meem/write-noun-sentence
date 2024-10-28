@@ -4,14 +4,14 @@ import pygame
 
 from src.constants import screen, GAME_SCREEN_BG, SCREEN_WIDTH, BUTTON_WIDTH, BUTTON_HEIGHT, SCREEN_HEIGHT, \
     MENU_BUTTON_WIDTH, SMALL_PADDING, MAIN_MENU, GAMES_BOARD_SCREEN, \
-    WHACK_A_MOLE_GAME, PREPOSITION_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME, gainsboro
+    WHACK_A_MOLE_GAME, PREPOSITION_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME, gainsboro, GAME_SCREEN_SECONDARY_BG
 from src.core.utility import draw_title, draw_back_button, draw_button
 from src.jar_bingo.game import load_jar_bingo_game_thumbnail
 from src.snowman.constants import snowman_levels_keys, snowman_levels
-from src.whack_a_mole.game import WhackaMoleGame
-from src.snowman.game import SnowmanGame, is_answer_valid
+from src.snowman.game import SnowmanGame
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
     load_snowman_game_thumbnail
+from src.whack_a_mole.game import WhackaMoleGame
 from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail
 
 
@@ -23,7 +23,7 @@ def quit_game():
 # Function to handle the game screen
 def games_board_screen():
     # Draw background and title
-    screen.blit(GAME_SCREEN_BG, (0, 0))
+    screen.blit(GAME_SCREEN_SECONDARY_BG, (0, 0))
     draw_title("قائمة الألعاب")
 
     # Draw a "Back to Menu" button
@@ -159,8 +159,7 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         game_state = GAMES_BOARD_SCREEN
-                    if back_button.collidepoint(event.pos):
-                        game_state = MAIN_MENU
+                        print(game_state)
                     if al_atareef_button.collidepoint(event.pos):
                         game_state = SNOWMAN_GAME
                         snowman_current_game.level = snowman_levels_keys[0]
@@ -213,7 +212,7 @@ def main():
                             if not snowman_current_game.is_correct_answer_displayed or \
                                 (
                                     snowman_current_game.is_correct_answer_displayed and snowman_current_game.reached_last_question()):
-                                if is_answer_valid(snowman_current_game, answer_box):
+                                if snowman_current_game.is_answer_valid(answer_box):
                                     if snowman_current_game.reached_last_question():
                                         # We've reached the last question already --> show final score and result
                                         snowman_current_game.finalize_game()

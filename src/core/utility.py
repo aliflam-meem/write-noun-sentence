@@ -3,11 +3,11 @@ import pygame
 
 from src.constants import SCREEN_WIDTH, TITLE_HEIGHT, screen, title_font, \
     subtitle_font, body_font, BUTTON_COLOR, BUTTON_HEIGHT, BUTTON_WIDTH, LONG_PADDING, HEALTH_POINT_IMAGE, \
-    numbering_font, DISABLED_BUTTON_COLOR, silverfiligree, barelyblue, ivory, maroon, \
+    numbering_font, DISABLED_BUTTON_COLOR, silverfiligree, ivory, maroon, \
     HIGHLIGHT_BUTTON_COLOR
 
 
-def draw_title(title, title_height=TITLE_HEIGHT, title_color=barelyblue, padding=160,
+def draw_title(title, title_height=TITLE_HEIGHT, title_color=ivory, padding=160,
                border_radius=30, background_color=silverfiligree):
     # Define the width of the background rectangle with padding on the left and right
     rect_width = SCREEN_WIDTH - 2 * padding
