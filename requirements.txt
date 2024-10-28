@@ -7,5 +7,6 @@ gTTS==2.5.3
 thefuzz=0.22.1
 
 gtts==2.5.3
-google.ai.generativelanguage
+google-ai-generativelanguage
+google-generativeai
 mkl-service #github dep

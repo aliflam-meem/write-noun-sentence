@@ -12,7 +12,7 @@ from src.snowman.constants import snowman_levels_keys, snowman_levels
 from src.whack_a_mole.game import WhackaMoleGame
 from src.snowman.game import SnowmanGame, is_answer_valid
 from src.jar_bingo.game import JBGameComponents
-from src.jar_bingo.settings import BACKGROUND_SEA_SHP
+from src.jar_bingo.constants import BACKGROUND_SEA_SHP
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
     load_snowman_game_thumbnail
 from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail
@@ -117,9 +117,13 @@ def main():
     running = True
     snowman_current_game = SnowmanGame()
     whack_a_mole_game = WhackaMoleGame()
+    #jar_bingo_game
     jar_bingo_game = JBGameComponents()
     play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
     pause_background_sound(True)
+    bingo_bg_sound_state = True
+    jar_bingo_initial = True
+    #-----------------
     screen.fill("black")  # Set background color of the screen (blocks my screen for some reason?So I moved it outside the while so it doesn't get displayed each time)
     while running:
 
@@ -152,7 +156,10 @@ def main():
                         game_state = SNOWMAN_LEVELS
                     if jarbingo_button.collidepoint(event.pos):
                         game_state = JAR_BINGO_GAME
-                        jar_bingo_game.reset_game()
+                        jar_bingo_game.restart_game(jar_bingo_initial)
+                        bingo_bg_sound_state = True
+                        if jar_bingo_initial == True:
+                            jar_bingo_initial = False
                     if whack_a_mole_button.collidepoint(event.pos):
                         game_state = WHACK_A_MOLE_GAME
 
@@ -319,11 +326,11 @@ def main():
                 whack_a_mole_game.bomb.show()
 
         elif game_state == JAR_BINGO_GAME:
-            pause_background_sound(False)
-            running, game_state  = jar_bingo_game.play_jarbingo_game(running, back_button, JAR_BINGO_GAME)
+            if bingo_bg_sound_state:#resume the bg sound.
+                pause_background_sound(False)
+            running, game_state, bingo_bg_sound_state  = jar_bingo_game.play_jar_bingo_game(running, back_button, JAR_BINGO_GAME)
             if game_state != JAR_BINGO_GAME:
                 pause_background_sound(True)
-
 
         pygame.display.flip()
         clock.tick(60)  # Limit to 60 FPS
