@@ -100,7 +100,7 @@ def check_win(board):
                     break
             if consecutive_green == WIN_LENGTH:
                 return True
-
+    print("consecutive_green", consecutive_green)
     return False
 
 

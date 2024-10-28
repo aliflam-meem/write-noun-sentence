@@ -32,7 +32,7 @@ def split_response_string(string, start_marker, end_marker):
     return end_split_string[0]
 
 
-def parse_json_response(string, start_marker, end_marker):
+def parse_coupled_json_response(string, start_marker, end_marker):
     """Parses a string containing a list of dictionaries into a Python list.
     Args:             string: The input string.
                       start_marker: the string which marks the start of the json object.
@@ -51,16 +51,25 @@ def parse_json_response(string, start_marker, end_marker):
         "] ", "").replace("]", "").replace("[", "")
     dict_str = string.split(",")
     i = 0
-    #print("parse json response, before looping: ", string)
+    print("parse json response, before looping: ", string)
     while i < len(dict_str) - 1:
-        key_value_pairs = dict_str[i].split(":")
         d = {}
-        key = key_value_pairs[0].strip().replace(" ", "").replace("'", "").replace('"', '').replace("{", "").replace(
-            "}", "")
-        value = key_value_pairs[1].strip().replace("'", "").replace('"', '').replace("{", "").replace("}", "")
-        d[key] = value
-        dict_list.append(d)
+        #if LLM returned the json object correctly having both sentence and correct answer
+        if len(dict_str) >=2 :
+            key_value_pairs = dict_str[i].split(":")
+            key = key_value_pairs[0].strip().replace(" ", "").replace("'", "").replace('"', '').replace("{", "").replace(
+                "}", "")
+            value = key_value_pairs[1].strip().replace("'", "").replace('"', '').replace("{", "").replace("}", "")
+            d[key] = value
+            dict_list.append(d)
+        else:
+            d["sentence"] = "لقد حدث خطأ في توليد السؤال ):"
+            dict_list.append(d)
+            d["correct_answer"] = "لقد حدث خطأ في توليد الإجابة ):" 
+            dict_list.append(d)
+            break
         i += 1
+
     print("returned dict: ", dict_list)
     return dict_list
 

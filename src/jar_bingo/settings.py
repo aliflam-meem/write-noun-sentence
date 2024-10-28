@@ -25,6 +25,7 @@ BLUE_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_b7o9ww
 GREEN_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_3n68uq3n68uq3n68.jfif"
 RED_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_501zw2501zw2501z.jfif"
 jar_bingo_thumbnail = "src/jar_bingo/assets/images/jar_bingo_thumbnail.png"
+BG_MUSIC_BUTTON = "src/jar_bingo/assets/images/music_button.png"
 ### Game Over
 WIN_MENU_IMG = "src/jar_bingo/assets/images/win_Gemini_Generated_Image_rw3exvrw3exvrw3e.jfif"
 LOSE_MENU_IMG = "src/jar_bingo/assets/images/lose_Gemini_Generated_Image_8m9gt98m9gt98m9g.jfif"

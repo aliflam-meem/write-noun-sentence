@@ -31,7 +31,7 @@ def draw_subtitle(subtitle, x, y, color="white"):
 
 
 def draw_button(text, x, y, width, height, auto_width=False, border_width=2, border_color=maroon,
-                text_color=ivory, highlight_color=HIGHLIGHT_BUTTON_COLOR, radius=10, is_disabled=False):
+                text_color=ivory, button_color=BUTTON_COLOR, highlight_color=HIGHLIGHT_BUTTON_COLOR, radius=10, is_disabled=False):
     """
     Draws a button with rounded corners.
 
@@ -81,7 +81,7 @@ def draw_button(text, x, y, width, height, auto_width=False, border_width=2, bor
                          (x + border_width, y + border_width, width - 2 * border_width, height - 2 * border_width), 0,
                          border_radius=radius)
     else:
-        pygame.draw.rect(screen, BUTTON_COLOR,
+        pygame.draw.rect(screen, button_color,
                          (x + border_width, y + border_width, width - 2 * border_width, height - 2 * border_width), 0,
                          border_radius=radius)
 

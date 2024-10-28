@@ -3,7 +3,7 @@ import pygame
 from src.constants import screen, body_font, YOU_WIN_AUDIO, YOU_LOST_AUDIO, IMAGE_WIDTH
 from src.core.audio_player import play_sound
 
-
+LOSE_MENU_IMG, RED, False, score = 0, max_score=10)
 def game_over_card(image_path, message_color, win_state, score, max_score):
     """
     Prints the game over scene on top of the board, centered horizontally and vertically.
