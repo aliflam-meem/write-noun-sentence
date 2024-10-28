@@ -1,10 +1,9 @@
 # Function to draw the title with background
 import pygame
-
-from src.constants import SCREEN_WIDTH, TITLE_HEIGHT, screen, title_font, \
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, TITLE_HEIGHT, screen, title_font, \
     subtitle_font, body_font, BUTTON_COLOR, BUTTON_HEIGHT, BUTTON_WIDTH, LONG_PADDING, HEALTH_POINT_IMAGE, \
     numbering_font, DISABLED_BUTTON_COLOR, silverfiligree, ivory, maroon, \
-    HIGHLIGHT_BUTTON_COLOR
+    HIGHLIGHT_BUTTON_COLOR, barelyblue,HIGHLIGHT_BUTTON_COLOR, SMALL_PADDING, BLACK,LOADING_IMAGE
 
 
 def draw_title(title, title_height=TITLE_HEIGHT, title_color=ivory, padding=160,
@@ -31,7 +30,7 @@ def draw_subtitle(subtitle, x, y, color="white"):
 
 
 def draw_button(text, x, y, width, height, auto_width=False, border_width=2, border_color=maroon,
-                text_color=ivory, highlight_color=HIGHLIGHT_BUTTON_COLOR, radius=10, is_disabled=False):
+                text_color=ivory, button_color=BUTTON_COLOR, highlight_color=HIGHLIGHT_BUTTON_COLOR, radius=10, is_disabled=False):
     """
     Draws a button with rounded corners.
 
@@ -81,7 +80,7 @@ def draw_button(text, x, y, width, height, auto_width=False, border_width=2, bor
                          (x + border_width, y + border_width, width - 2 * border_width, height - 2 * border_width), 0,
                          border_radius=radius)
     else:
-        pygame.draw.rect(screen, BUTTON_COLOR,
+        pygame.draw.rect(screen, button_color,
                          (x + border_width, y + border_width, width - 2 * border_width, height - 2 * border_width), 0,
                          border_radius=radius)
 
@@ -92,9 +91,9 @@ def draw_button(text, x, y, width, height, auto_width=False, border_width=2, bor
     return button_rect
 
 
-def draw_back_button():
+def draw_back_button(button_height= BUTTON_HEIGHT):
     return draw_button("رجوع", 30, (TITLE_HEIGHT - BUTTON_HEIGHT) / 2, BUTTON_WIDTH - LONG_PADDING,
-                       BUTTON_HEIGHT)
+                       button_height)
 
 
 def draw_text_box(text, x, y, width, height, box_color=None, text_color=maroon, add_border=False):
@@ -220,3 +219,25 @@ def load_image(filename, size):
 
 def handle_image_load_error(file_name):
     print(f"Error loading image: {file_name}")
+
+def load_loading_image(text_message = 'جار تحميل اللعبة', text_color = BLACK, loading_image_path="", scale_x=125, scale_y=125):
+    """
+    Args:
+
+    text_message: 'جار تحميل اللعبة'
+    text_color: Message color.
+    loading_image: loading image path.
+    scale_x: image x-axis scale.
+    scale_y: image y-axis scale.
+    """
+    if loading_image_path =="":
+        transformed_loading_image = LOADING_IMAGE
+    else:
+        loading_image = pygame.image.load(loading_image_path)
+        transformed_loading_image = pygame.transform.scale(loading_image, (scale_x, scale_y))
+
+    text = body_font.render(text_message, 1, text_color)
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2 + SMALL_PADDING // 2,
+                               SCREEN_HEIGHT // 2 - text.get_height() // 2 + LONG_PADDING))
+    screen.blit(transformed_loading_image, (SCREEN_WIDTH * 0.5 - LONG_PADDING // 2, SCREEN_HEIGHT * 0.5 - LONG_PADDING))
+    pygame.display.update()

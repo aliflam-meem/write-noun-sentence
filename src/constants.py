@@ -1,8 +1,9 @@
 # Constants
 import pygame
 
-
+#initilize
 pygame.init()
+pygame.mixer.init()
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 700
@@ -33,6 +34,7 @@ creamy = (100, 99, 81)
 salmon = (250, 128, 114)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+BLACK = (0 ,0 ,0)
 BUTTON_FONT_COLOR = (251, 246, 246)
 BUTTON_COLOR = (168, 78, 74)
 DISABLED_BUTTON_COLOR = (206, 177, 176)
@@ -69,7 +71,7 @@ body_font_bold.set_direction(pygame.DIRECTION_RTL)
 MAIN_MENU = "menu"
 GAMES_BOARD_SCREEN = "games_board_screen"
 SNOWMAN_LEVELS = "snowman_levels"
-PREPOSITION_GAME = "preposition_game"
+JAR_BINGO_GAME = "jar_bingo_game"
 WHACK_A_MOLE_GAME = "whack_a_mole_game"
 SNOWMAN_GAME = "snowman_game"
 

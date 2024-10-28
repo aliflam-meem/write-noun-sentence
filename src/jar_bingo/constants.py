@@ -1,8 +1,10 @@
 # Game constants
+
+JR_TITLE_HEIGHT = 50
 ## Board
 CELL_SIZE = 200  # 200
 BOARD_SIZE = 3  # Initial board size
-BOARD_PADDING = 55  # Added padding for the board
+BOARD_PADDING = 80  # Added padding for the board
 BOARD_WIDTH = 600
 BOARD_HEIGHT = 600
 
@@ -17,13 +19,14 @@ WIN_LENGTH = 3  # Adjust this value to change the required winning streak
 
 # paths
 ## images
-### board,tiles,quiz_card
+### title, board,tiles,quiz_card
 BACKGROUND_IMG = "src/jar_bingo/assets/images/Gemini_Generated_Image_5ivjha5ivjha5ivj.jfif"
 QUIZ_IMG = "src/jar_bingo/assets/images/card_Gemini_Generated_Image_2jadgq2jadgq2jad.jfif"
 BLUE_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_b7o9wwb7o9wwb7o9 (1).jfif"
 GREEN_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_3n68uq3n68uq3n68.jfif"
 RED_JELLYFISH_TILE = "src/jar_bingo/assets/images/Gemini_Generated_Image_501zw2501zw2501z.jfif"
 jar_bingo_thumbnail = "src/jar_bingo/assets/images/jar_bingo_thumbnail.png"
+BG_MUSIC_BUTTON = "src/jar_bingo/assets/images/music_button.png"
 ### Game Over
 WIN_MENU_IMG = "src/jar_bingo/assets/images/win_Gemini_Generated_Image_rw3exvrw3exvrw3e.jfif"
 LOSE_MENU_IMG = "src/jar_bingo/assets/images/lose_Gemini_Generated_Image_8m9gt98m9gt98m9g.jfif"
@@ -46,3 +49,6 @@ MID_BLUE3 = (0, 200, 255)
 LIGHT_BLUE1 = (0, 255, 255)
 LIGHT_BLUE2 = (128, 255, 255)
 LIGHT_BLUE3 = (192, 255, 255)
+TURQUOISE_BLUE = (0, 255, 255)
+DARK_TEAL = (0, 128, 128)
+LIGHT_GREEN = (144, 238, 144)

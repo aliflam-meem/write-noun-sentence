@@ -4,11 +4,14 @@ import pygame
 
 from src.constants import screen, GAME_SCREEN_BG, SCREEN_WIDTH, BUTTON_WIDTH, BUTTON_HEIGHT, SCREEN_HEIGHT, \
     MENU_BUTTON_WIDTH, SMALL_PADDING, MAIN_MENU, GAMES_BOARD_SCREEN, \
-    WHACK_A_MOLE_GAME, PREPOSITION_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME, gainsboro, GAME_SCREEN_SECONDARY_BG
+    WHACK_A_MOLE_GAME, JAR_BINGO_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME, gainsboro, GAME_SCREEN_SECONDARY_BG
 from src.core.utility import draw_title, draw_back_button, draw_button
-from src.jar_bingo.game import load_jar_bingo_game_thumbnail
+from src.core.audio_player import play_background_sound, pause_background_sound
+from src.jar_bingo.game_utils import load_jar_bingo_game_thumbnail
 from src.snowman.constants import snowman_levels_keys, snowman_levels
 from src.snowman.game import SnowmanGame
+from src.jar_bingo.game import JBGameComponents
+from src.jar_bingo.constants import BACKGROUND_SEA_SHP
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
     load_snowman_game_thumbnail
 from src.whack_a_mole.game import WhackaMoleGame
@@ -82,10 +85,10 @@ def games_board_screen():
 
     # Draw the buttons
     whack_a_mole_button = draw_button("إصابة القنفذ", vocabulary_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
-    prepositions_button = draw_button("بينغو", prepositions_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
+    jar_bingo_button = draw_button("بينغو أحرف الجر", prepositions_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
     snowman_button = draw_button("الرجل الثلجي", snowman_button_x, y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
 
-    return back_button, whack_a_mole_button, prepositions_button, snowman_button
+    return back_button, whack_a_mole_button, jar_bingo_button, snowman_button
 
 
 def main_menu_screen():
@@ -114,9 +117,15 @@ def main():
     running = True
     snowman_current_game = SnowmanGame()
     whack_a_mole_game = WhackaMoleGame()
-
+    #jar_bingo_game
+    jar_bingo_game = JBGameComponents()
+    play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
+    pause_background_sound(True)
+    bingo_bg_sound_state = True
+    jar_bingo_initial = True
+    #-----------------
+    screen.fill("black")  # Set background color of the screen (blocks my screen for some reason?So I moved it outside the while so it doesn't get displayed each time)
     while running:
-        screen.fill("black")  # Set background color of the screen
 
         # Handle different screens based on game state
         if game_state == MAIN_MENU:
@@ -135,7 +144,7 @@ def main():
                         quit_game()
 
         elif game_state == GAMES_BOARD_SCREEN:
-            back_button, whack_a_mole_button, prepositions_button, snowman_button = games_board_screen()
+            back_button, whack_a_mole_button, jarbingo_button, snowman_button = games_board_screen()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -145,8 +154,12 @@ def main():
                         game_state = MAIN_MENU
                     if snowman_button.collidepoint(event.pos):
                         game_state = SNOWMAN_LEVELS
-                    if prepositions_button.collidepoint(event.pos):
-                        game_state = PREPOSITION_GAME
+                    if jarbingo_button.collidepoint(event.pos):
+                        game_state = JAR_BINGO_GAME
+                        jar_bingo_game.restart_game(jar_bingo_initial)
+                        bingo_bg_sound_state = True
+                        if jar_bingo_initial == True:
+                            jar_bingo_initial = False
                     if whack_a_mole_button.collidepoint(event.pos):
                         game_state = WHACK_A_MOLE_GAME
 
@@ -159,7 +172,6 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         game_state = GAMES_BOARD_SCREEN
-                        print(game_state)
                     if al_atareef_button.collidepoint(event.pos):
                         game_state = SNOWMAN_GAME
                         snowman_current_game.level = snowman_levels_keys[0]
@@ -246,6 +258,8 @@ def main():
                 snowman_current_game.display_result_and_play_sound()
 
         elif game_state == WHACK_A_MOLE_GAME:
+            screen.fill("black") #suggestion to change it another color.
+
             whack_a_mole_game = whack_a_mole_game_screen(whack_a_mole_game)
 
             for event in pygame.event.get():
@@ -309,6 +323,12 @@ def main():
                     mole.show()
                 whack_a_mole_game.bomb.show()
 
+        elif game_state == JAR_BINGO_GAME:
+            if bingo_bg_sound_state:#resume the bg sound.
+                pause_background_sound(False)
+            running, game_state, bingo_bg_sound_state  = jar_bingo_game.play_jar_bingo_game(running, back_button, JAR_BINGO_GAME)
+            if game_state != JAR_BINGO_GAME:
+                pause_background_sound(True)
 
         pygame.display.flip()
         clock.tick(60)  # Limit to 60 FPS
