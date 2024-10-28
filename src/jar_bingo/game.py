@@ -81,8 +81,8 @@ class JBGameComponents:
         draw_title(title, title_color=WHITE, title_height=JR_TITLE_HEIGHT)
         draw_back_button()
         #draw music button
-        self.music_button = draw_button("الصوت", SCREEN_WIDTH - 50, 10, 50, 70, border_width=2, border_color=MID_BLUE1,
-                text_color=WHITE, button_color= MID_BLUE1_BLUE3, highlight_color=BLACK, radius=5)
+        self.music_button = draw_button("الصوت", SCREEN_WIDTH - 100, 10,60,50, border_width=2, border_color=MID_BLUE1,
+                text_color=WHITE, button_color= MID_BLUE2, highlight_color=BLACK, radius=5)
         #screen.blit(self.music_button, (20, 100))
     #Main
     def play_jarbingo_game(self, running, back_button, main_game_state):
@@ -96,78 +96,80 @@ class JBGameComponents:
             if event.type == pygame.QUIT:
                 running = False
                 return running, main_game_state, self.bg_sound
-            # pause game
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:  # space key to pause
-                    self.game_state = "paused"
-                    pause(clock)
+            # bg sound on/off
             elif event.type == pygame.MOUSEBUTTONDOWN and self.music_button.collidepoint(event.pos):
-                print("in music button collid")
-                if self.bg_sound:
-                    print("pausing the bg sound.")
-                    pause_background_sound(True)
-                    self.bg_sound = False
-                else:
-                    print("resuming the bg sound.")
-                    pause_background_sound(False)
-                    self.bg_sound = True
+                    if self.bg_sound:
+                        print("pausing the bg sound.")
+                        pause_background_sound(True)
+                        self.bg_sound = False
+                    else:
+                        print("resuming the bg sound.")
+                        pause_background_sound(False)
+                        self.bg_sound = True
             #Back to games menu
             elif event.type == pygame.MOUSEBUTTONDOWN and back_button.collidepoint(event.pos):
                     main_game_state = GAMES_BOARD_SCREEN
                     return running, main_game_state, self.bg_sound
-            # user clicked on a cell in the board
-            elif event.type == pygame.MOUSEBUTTONDOWN and not self.quiz_card_shown:
-                self.clicked_cell = check_cell_click(event.pos)  # check if the cell has been clicked before.
-                if  self.clicked_cell and all(i !=  self.clicked_cell for i in self.clicked_cells):
-                    self.clicked_cells.append( self.clicked_cell)
-                    print("clicked_cell: ",  self.clicked_cell)
+            #game in progress
+            elif not self.game_over:
+                # user clicked on a cell in the board
+                # pause game
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:  # space key to pause
+                        self.game_state = "paused"
+                        pause(clock)
+                elif event.type == pygame.MOUSEBUTTONDOWN and not self.quiz_card_shown:
+                    self.clicked_cell = check_cell_click(event.pos)  # check if the cell has been clicked before.
+                    if  self.clicked_cell and all(i !=  self.clicked_cell for i in self.clicked_cells):
+                        self.clicked_cells.append( self.clicked_cell)
+                        print("clicked_cell: ",  self.clicked_cell)
+                        preposition = self.board[ self.clicked_cell[0]][ self.clicked_cell[1]][0]
+                        self.quiz_card_shown, self.choice_rects, self.quiz_choices, correct_answer = show_quiz_card(self.model,self.quiz_card_shown, preposition)
+                        #compare requested preposition and correct answer
+                        print(preposition, correct_answer)
+                # user clicked a choice from the quiz card.
+                elif event.type == pygame.MOUSEBUTTONDOWN and self.quiz_card_shown:
+                    # Check if the clicked position is within any of the choice rectangles
                     preposition = self.board[ self.clicked_cell[0]][ self.clicked_cell[1]][0]
-                    self.quiz_card_shown, self.choice_rects, self.quiz_choices, correct_answer = show_quiz_card(self.model,self.quiz_card_shown, preposition)
-                    #compare requested preposition and correct answer
-                    print(preposition, correct_answer)
-            # user clicked a choice from the quiz card.
-            elif event.type == pygame.MOUSEBUTTONDOWN and self.quiz_card_shown:
-                # Check if the clicked position is within any of the choice rectangles
-                preposition = self.board[ self.clicked_cell[0]][ self.clicked_cell[1]][0]
-                for i, choice_rect in enumerate(self.choice_rects):
-                    if choice_rect.collidepoint(event.pos):
-                        # User selected a choice
-                        selected_choice = self.quiz_choices[i]
-                        # Check if the selected choice is correct
-                        if selected_choice == self.board[ self.clicked_cell[0]][ self.clicked_cell[1]][0]:
-                            # Correct answer, do something
-                            print("Correct!")
-                            # Hide the quiz card and update the game state accordingly
-                            self.quiz_card_shown = False
-                            correct_cell =  self.clicked_cell
-                            # Color the cell of the correctly answered quiz
-                            self.board[correct_cell[0]][correct_cell[1]] = (
-                                self.board[correct_cell[0]][correct_cell[1]][0], self.jellyfish_tiles[1], GREEN)
-                            #reset the value
-                            self.clicked_cell = None
-                            if (check_win(self.board)):
-                                print("You won")
-                                self.game_over = True
-                                self.game_state = "win"
-                                game_over_card(WIN_MENU_IMG, GREEN, True, score = 10, max_score=10)
-                        else:
-                            # Incorrect answer, do something
-                            print("Incorrect!")
-                            # Handle incorrect answer, e.g., show a message or deduct points
-                            self.quiz_card_shown = False
-                            incorrect_cell =  self.clicked_cell
-                            # Color the cell of the incorrectly answered quiz
-                            self.board[incorrect_cell[0]][incorrect_cell[1]] = (
-                                self.board[incorrect_cell[0]][incorrect_cell[1]][0], self.jellyfish_tiles[2], RED)
-                            #reset the value
-                            self.clicked_cell = None
-                            if (check_lose(self.board)):
-                                print("You lose!")
-                                self.game_over = True
-                                self.game_state = "lose"
-                                game_over_card(LOSE_MENU_IMG, RED, False, score = 0, max_score=10)
-                                
-                if not self.quiz_card_shown:
+                    for i, choice_rect in enumerate(self.choice_rects):
+                        if choice_rect.collidepoint(event.pos):
+                            # User selected a choice
+                            selected_choice = self.quiz_choices[i]
+                            # Check if the selected choice is correct
+                            if selected_choice == self.board[ self.clicked_cell[0]][ self.clicked_cell[1]][0]:
+                                # Correct answer, do something
+                                print("Correct!")
+                                # Hide the quiz card and update the game state accordingly
+                                self.quiz_card_shown = False
+                                correct_cell =  self.clicked_cell
+                                # Color the cell of the correctly answered quiz
+                                self.board[correct_cell[0]][correct_cell[1]] = (
+                                    self.board[correct_cell[0]][correct_cell[1]][0], self.jellyfish_tiles[1], GREEN)
+                                #reset the value
+                                self.clicked_cell = None
+                                if (check_win(self.board)):
+                                    print("You won")
+                                    self.game_over = True
+                                    self.game_state = "win"
+                                    game_over_card(WIN_MENU_IMG, GREEN, True, score = 10, max_score=10)
+                            else:
+                                # Incorrect answer, do something
+                                print("Incorrect!")
+                                # Handle incorrect answer, e.g., show a message or deduct points
+                                self.quiz_card_shown = False
+                                incorrect_cell =  self.clicked_cell
+                                # Color the cell of the incorrectly answered quiz
+                                self.board[incorrect_cell[0]][incorrect_cell[1]] = (
+                                    self.board[incorrect_cell[0]][incorrect_cell[1]][0], self.jellyfish_tiles[2], RED)
+                                #reset the value
+                                self.clicked_cell = None
+                                if (check_lose(self.board)):
+                                    print("You lose!")
+                                    self.game_over = True
+                                    self.game_state = "lose"
+                                    game_over_card(LOSE_MENU_IMG, RED, False, score = 0, max_score=10)
+
+                if not self.quiz_card_shown and not self.game_over:
                     self.draw_bingo_screen()
                 if self.game_over:
                     if self.game_state == "win":#do nothing for now. 

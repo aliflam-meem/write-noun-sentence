@@ -51,24 +51,31 @@ def parse_coupled_json_response(string, start_marker, end_marker):
         "] ", "").replace("]", "").replace("[", "")
     dict_str = string.split(",")
     i = 0
-    print("parse json response, before looping: ", string)
-    while i < len(dict_str) - 1:
-        d = {}
+    print("parse json response, before looping: ", dict_str)
+
         #if LLM returned the json object correctly having both sentence and correct answer
-        if len(dict_str) >=2 :
+    try:
+        print(len(dict_str) - 1)
+        while i < len(dict_str) - 1:
+            d = {}
             key_value_pairs = dict_str[i].split(":")
             key = key_value_pairs[0].strip().replace(" ", "").replace("'", "").replace('"', '').replace("{", "").replace(
                 "}", "")
+            print("key",key)
             value = key_value_pairs[1].strip().replace("'", "").replace('"', '').replace("{", "").replace("}", "")
             d[key] = value
+            print("value",value)
             dict_list.append(d)
-        else:
-            d["sentence"] = "لقد حدث خطأ في توليد السؤال ):"
-            dict_list.append(d)
-            d["correct_answer"] = "لقد حدث خطأ في توليد الإجابة ):" 
-            dict_list.append(d)
-            break
-        i += 1
+            i += 1
+        print(dict_list[0], dict_list[1])
+    except Exception:
+        dict_list=[]
+        d = {}
+        d["sentence"] = "لقد حدث خطأ في توليد السؤال ):"
+        dict_list.append(d)
+        d["correct_answer"] = "لقد حدث خطأ في توليد الإجابة ):" 
+        dict_list.append(d)
+        
 
     print("returned dict: ", dict_list)
     return dict_list
