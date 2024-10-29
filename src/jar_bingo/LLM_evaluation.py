@@ -2,15 +2,14 @@
 """
 Install an additional SDK for JSON schema support Google AI Python SDK
 
-$ pip install google.ai.generativelanguage
+$ pip install google-ai-generativelanguage
 """
-import os
 
 import google.generativeai as genai
 from google.ai.generativelanguage_v1beta.types import content
 
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+genai.configure(api_key="AIzaSyAoUKm4Cs-3-U_usiZ2J6HX8eAmLv-5MPA")#os.environ["GEMINI_API_KEY"])
 
 # Create the model
 generation_config = {

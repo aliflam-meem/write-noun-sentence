@@ -1,6 +1,6 @@
 import json
 import re
-
+import ast
 import pygame
 
 
@@ -32,37 +32,48 @@ def split_response_string(string, start_marker, end_marker):
     return end_split_string[0]
 
 
-def parse_json_response(string, start_marker, end_marker):
+def parse_coupled_json_response(string, start_marker, end_marker):
     """Parses a string containing a list of dictionaries into a Python list.
     Args:             string: The input string.
                       start_marker: the string which marks the start of the json object.
                       end_marker: the string which marks the end of the json object.
     Returns:            A list of dictionaries.
     """
-    dict_list = []
     # Remove leading and trailing spaces from the response
     string = string.encode('utf-8').decode('utf-8').strip()
     # Remove extra tags and brackets.
     #print("parse json response function, before calling slplit:", string)
     string = split_response_string(string, start_marker, end_marker)
-    #print("parse json response, after calling split: ", string)
-    string = string.replace(start_marker, "").replace(end_marker, "").replace(" [", "").replace("[ ", "").replace(" ]",
+    try:
+        json_response = json.loads(string)
+        print(json_response)
+        parsed_dict = json_response
+        print("json parsed parsed_dict", parsed_dict)
+    except json.decoder.JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
+        string = string.replace(start_marker, "").replace(end_marker, "").replace(" [", "").replace("[ ", "").replace(" ]",
                                                                                                             "").replace(
-        "] ", "").replace("]", "").replace("[", "")
-    dict_str = string.split(",")
-    i = 0
-    #print("parse json response, before looping: ", string)
-    while i < len(dict_str) - 1:
-        key_value_pairs = dict_str[i].split(":")
-        d = {}
-        key = key_value_pairs[0].strip().replace(" ", "").replace("'", "").replace('"', '').replace("{", "").replace(
-            "}", "")
-        value = key_value_pairs[1].strip().replace("'", "").replace('"', '').replace("{", "").replace("}", "")
-        d[key] = value
-        dict_list.append(d)
-        i += 1
-    print("returned dict: ", dict_list)
-    return dict_list
+        "] ", "").replace("]", "").replace("[", "").replace("\n", "").replace("'","")
+        
+        print("parse json response, before looping: ", string)
+        # Parse the string using ast.literal_eval()
+        i = 0
+        #if LLM returned the json object correctly having both sentence and correct answer
+        try:
+            parsed_dict = ast.literal_eval(f'""{string}""')
+            print("dictionary length",len(parsed_dict.items))
+
+            print(parsed_dict[0], parsed_dict[1])
+        except Exception:
+            parsed_dict=[]
+            d = {}
+            d["sentence"] = "لقد حدث خطأ في توليد السؤال ):"
+            parsed_dict.append(d)
+            d["correct_answer"] = "لقد حدث خطأ في توليد الإجابة ):" 
+            parsed_dict.append(d)
+
+    print("returned dict: ", parsed_dict)
+    return parsed_dict
 
 
 def parse_specific_json_response(string, start_marker="<start>", end_marker="<end>"):
