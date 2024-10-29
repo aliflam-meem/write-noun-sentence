@@ -15,7 +15,8 @@ from src.jar_bingo.game import JBGameComponents
 from src.jar_bingo.constants import BACKGROUND_SEA_SHP
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
     load_snowman_game_thumbnail
-from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail
+from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail, display_game_result
+from src.whack_a_mole.constants import WM_MUSIC
 
 
 def quit_game():
@@ -123,6 +124,9 @@ def main():
     pause_background_sound(True)
     bingo_bg_sound_state = True
     jar_bingo_initial = True
+
+    play_background_sound(WM_MUSIC, volume=0.5)
+    pause_background_sound(True)
     #-----------------
     screen.fill("black")  # Set background color of the screen (blocks my screen for some reason?So I moved it outside the while so it doesn't get displayed each time)
     while running:
@@ -162,6 +166,7 @@ def main():
                             jar_bingo_initial = False
                     if whack_a_mole_button.collidepoint(event.pos):
                         game_state = WHACK_A_MOLE_GAME
+                        whack_a_mole_game.reset_game()
 
         elif game_state == SNOWMAN_LEVELS:
             back_button, al_atareef_button, demonstratives_button, pronouns_button = snowman_levels_screen()
@@ -260,7 +265,6 @@ def main():
                 snowman_current_game.display_result_and_play_sound()
 
         elif game_state == WHACK_A_MOLE_GAME:
-            screen.fill("black") #suggestion to change it another color.
 
             whack_a_mole_game = whack_a_mole_game_screen(whack_a_mole_game)
 
@@ -292,17 +296,21 @@ def main():
                         whack_a_mole_game.bomb.move = False
                         whack_a_mole_game.bomb.counter = 0
 
+            if whack_a_mole_game.game_over:
+                pause_background_sound(True)
+                display_game_result(whack_a_mole_game)
+
+            if whack_a_mole_game.game_end:
+                pause_background_sound(True)
+                display_game_result(whack_a_mole_game)
+
+
             if whack_a_mole_game.lives <= 0:
                 whack_a_mole_game.game_over = True
 
-            #if whack_a_mole_game.game_end == True:
-                # turn off the game after 3 seconds
-                #whack_a_mole_game.game_end_counter += 1
-                #if whack_a_mole_game.game_end_counter >= 180:
-                #    in_play = False
 
             if not whack_a_mole_game.game_over and not whack_a_mole_game.game_end:
-                whack_a_mole_game.show_up_timer += 1
+                whack_a_mole_game.show_up_timer += 2
                 if whack_a_mole_game.show_up_timer >= whack_a_mole_game.show_up_end:
                     # holes that are already taken
                     taken_holes = [mole.hole_num
@@ -324,6 +332,9 @@ def main():
                 for mole in whack_a_mole_game.moles:
                     mole.show()
                 whack_a_mole_game.bomb.show()
+
+            if game_state != WHACK_A_MOLE_GAME:
+                pause_background_sound(True)
 
         elif game_state == JAR_BINGO_GAME:
             if bingo_bg_sound_state:#resume the bg sound.
