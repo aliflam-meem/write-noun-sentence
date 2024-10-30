@@ -64,7 +64,7 @@ def load_whack_a_mole_data():
             credentials=get_credentials(),
             project_id=project_id,
         )
-        sentenses_count = """10"""
+        sentenses_count = """2"""
 
         prompt_input = f"""التزم بقواعد اللغة العربية في كتابة الجمل
         اطبع الجمل بتنسيق JSON كقائمة قواميس
