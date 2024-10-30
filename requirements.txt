@@ -9,4 +9,5 @@ thefuzz=0.22.1
 gtts==2.5.3
 google-ai-generativelanguage
 google-generativeai
+protobuf==3.19.1
 mkl-service #github dep
