@@ -40,7 +40,7 @@ def game_over_card(image_path, message_color, win_state, score, max_score):
     # Blit the image onto the screen
     screen.blit(image, (x, y))
 
-    message = "أحسنت! لقد فُزت!!" if win_state else "لقد خسرت!"
+    message = "أحسنت! لقد فُزت!!" if win_state else "حظاً أوفر في المرة القادمة!"
     print("game over",message)
     
     message_text = body_font.render(message, True, message_color)

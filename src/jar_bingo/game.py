@@ -1,6 +1,6 @@
 import pygame
 from src.jar_bingo.constants import JR_TITLE_HEIGHT
-from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, RED, GAMES_BOARD_SCREEN, maroon 
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, RED, GAMES_BOARD_SCREEN, ORANGE, maroon 
 from src.core.utility import draw_title, draw_back_button, draw_button, load_loading_image, draw_score_and_health
 from src.core.json_response_parser import *
 from src.core.audio_player import *
@@ -160,6 +160,10 @@ class JBGameComponents:
                                     print("You won")
                                     self.game_over = True
                                     self.game_state = "win"
+                                if (check_lose(self.board)):
+                                    print("You lose!")
+                                    self.game_over = True
+                                    self.game_state = "lose"
                             else:
                                 # Incorrect answer, do something
                                 print("Incorrect!")
@@ -175,7 +179,10 @@ class JBGameComponents:
                                     print("You lose!")
                                     self.game_over = True
                                     self.game_state = "lose"
-                                    game_over_card(LOSE_MENU_IMG, RED, False, score = 0, max_score=10)
+                                if (check_win(self.board)):
+                                    print("You won")
+                                    self.game_over = True
+                                    self.game_state = "win"
 
                 if not self.quiz_card_shown and not self.game_over:
                     self.draw_bingo_screen()
@@ -187,7 +194,7 @@ class JBGameComponents:
                         
                     elif self.game_state == "lose":
                         self.draw_bingo_screen()
-                        game_over_card(LOSE_MENU_IMG, RED, False, score = self.score, max_score=100)
+                        game_over_card(LOSE_MENU_IMG, ORANGE, False, score = self.score, max_score=100)
                         self.game_state = "game_over" 
                     else:
                         print("waiting for the player")
