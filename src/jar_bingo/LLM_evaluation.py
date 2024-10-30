@@ -20,7 +20,7 @@ generation_config = {
   "response_schema": content.Schema(
     type=content.Type.OBJECT,
     enum="[]",
-    required="["sentence"]",
+    required="""["sentence"]""",
   properties = {
                  "sentence": content.Schema(
                    type=content.Type.STRING,
@@ -47,7 +47,7 @@ chat_session = model.start_chat(
   ]
 )
 
-response = chat_session.send_message("INSERT_INPUT_HERE")
+response = chat_session.send_message(["أستمتع _ السباحة في البحر."])
 
 print(response.text)
 
