@@ -74,6 +74,7 @@ SNOWMAN_LEVELS = "snowman_levels"
 JAR_BINGO_GAME = "jar_bingo_game"
 WHACK_A_MOLE_GAME = "whack_a_mole_game"
 SNOWMAN_GAME = "snowman_game"
+SNOWMAN_LOADING_SCREEN = "snowman_loading_screen"
 
 # Audio
 YOU_WIN_AUDIO = "assets/audio/Fliki_you_win.mp3"

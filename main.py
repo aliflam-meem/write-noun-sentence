@@ -4,16 +4,17 @@ import pygame
 
 from src.constants import screen, GAME_SCREEN_BG, SCREEN_WIDTH, BUTTON_WIDTH, BUTTON_HEIGHT, SCREEN_HEIGHT, \
     MENU_BUTTON_WIDTH, SMALL_PADDING, MAIN_MENU, GAMES_BOARD_SCREEN, \
-    WHACK_A_MOLE_GAME, JAR_BINGO_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME, gainsboro, GAME_SCREEN_SECONDARY_BG
-from src.core.utility import draw_title, draw_back_button, draw_button
+    WHACK_A_MOLE_GAME, JAR_BINGO_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME, gainsboro, GAME_SCREEN_SECONDARY_BG, \
+    SNOWMAN_LOADING_SCREEN
 from src.core.audio_player import play_background_sound, pause_background_sound
+from src.core.utility import draw_title, draw_back_button, draw_button, load_loading_image
+from src.jar_bingo.constants import BACKGROUND_SEA_SHP
+from src.jar_bingo.game import JBGameComponents
 from src.jar_bingo.game_utils import load_jar_bingo_game_thumbnail
 from src.snowman.constants import snowman_levels_keys, snowman_levels
 from src.snowman.game import SnowmanGame
-from src.jar_bingo.game import JBGameComponents
-from src.jar_bingo.constants import BACKGROUND_SEA_SHP
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
-    load_snowman_game_thumbnail
+    load_snowman_game_thumbnail, snowman_loading_game_screen
 from src.whack_a_mole.game import WhackaMoleGame
 from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail
 
@@ -112,6 +113,7 @@ def main_menu_screen():
 def main():
     global game_state
     game_state = MAIN_MENU  # Start with the menu screen
+    show_snowman_loading_screen = True
     answer_box = create_input_box()
     clock = pygame.time.Clock()
     running = True
@@ -123,8 +125,8 @@ def main():
     pause_background_sound(True)
     bingo_bg_sound_state = True
     jar_bingo_initial = True
-    #-----------------
-    screen.fill("black")  # Set background color of the screen (blocks my screen for some reason?So I moved it outside the while so it doesn't get displayed each time)
+    # -----------------
+    # screen.fill("black")  # Set background color of the screen (blocks my screen for some reason?So I moved it outside the while so it doesn't get displayed each time)
     while running:
 
         # Handle different screens based on game state
@@ -173,27 +175,33 @@ def main():
                     if back_button.collidepoint(event.pos):
                         game_state = GAMES_BOARD_SCREEN
                     if al_atareef_button.collidepoint(event.pos):
-                        game_state = SNOWMAN_GAME
-                        snowman_current_game.level = snowman_levels_keys[0]
+                        game_state = SNOWMAN_LOADING_SCREEN
+                        show_snowman_loading_screen = True
                         snowman_current_game.questions_count_per_type = 2
-                        snowman_current_game.reset_game()
-                        snowman_current_game.initialize_game_with_questions()
+                        # snowman_current_game.reset_game(snowman_levels_keys[0])
                         answer_box.clear()
                     if demonstratives_button.collidepoint(event.pos):
-                        game_state = SNOWMAN_GAME
-                        snowman_current_game.level = snowman_levels_keys[1]
-                        snowman_current_game.questions_count_per_type = 2
-                        snowman_current_game.reset_game()
-                        snowman_current_game.initialize_game_with_questions()
+                        game_state = SNOWMAN_LOADING_SCREEN
+                        show_snowman_loading_screen = True
+                        snowman_current_game.questions_count_per_type = 10
+                        # snowman_current_game.reset_game(snowman_levels_keys[1])
                         answer_box.clear()
                     if pronouns_button.collidepoint(event.pos):
-                        game_state = SNOWMAN_GAME
-                        snowman_current_game.level = snowman_levels_keys[2]
-                        snowman_current_game.questions_count_per_type = 2
-                        snowman_current_game.reset_game()
-                        snowman_current_game.initialize_game_with_questions()
+                        game_state = SNOWMAN_LOADING_SCREEN
+                        show_snowman_loading_screen = True
+                        snowman_current_game.questions_count_per_type = 3
+                        # snowman_current_game.reset_game(snowman_levels_keys[2])
                         answer_box.clear()
-
+        elif game_state == SNOWMAN_LOADING_SCREEN:
+            title = snowman_levels[snowman_levels_keys[1]]["title"]
+            if snowman_current_game.get_current_question() == "" and show_snowman_loading_screen:
+                print("show_snowman_loading_screen")
+                show_snowman_loading_screen = False
+                snowman_loading_game_screen(title)
+                load_loading_image()
+                snowman_current_game.reset_game(snowman_levels_keys[1])
+            elif snowman_current_game.get_current_question() != "":
+                game_state = SNOWMAN_GAME
         elif game_state == SNOWMAN_GAME:
             title = snowman_levels[snowman_current_game.level]["title"]
             stop_game_interaction = snowman_current_game.is_win is not None
@@ -205,8 +213,20 @@ def main():
                                                                              snowman_current_game.get_current_melting_snowman_image(),
                                                                              snowman_current_game.get_current_information(),
                                                                              snowman_current_game.can_submit_answer(),
-                                                                             snowman_current_game.can_proceed_to_next_question())
+                                                                             snowman_current_game.can_proceed_to_next_question(),
+                                                                             snowman_current_game.waiting_for_next_question)
             correct_button, help_button, grammar_button, next_question_button = buttons
+
+            # Automatically advance if we are waiting and a new question becomes available
+            if snowman_current_game.waiting_for_next_question \
+                and len(snowman_current_game.questions) > snowman_current_game.question_index + 1:
+                # Move to the next question
+                answer_box.clear()
+                snowman_current_game.move_to_next_question()
+
+            # If max questions are reached, disable waiting for next question
+            if len(snowman_current_game.questions) == snowman_current_game.total_questions_count:
+                snowman_current_game.waiting_for_next_question = False
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -230,9 +250,7 @@ def main():
                                         snowman_current_game.finalize_game()
                                         snowman_current_game.display_result_and_play_sound()
                                     else:
-                                        # Move to the next question
-                                        answer_box.clear()
-                                        snowman_current_game.move_to_next_question()
+                                        snowman_current_game.is_user_answer_correct = True
                                 else:
                                     if snowman_current_game.health_points > 0:
                                         snowman_current_game.health_points -= 1

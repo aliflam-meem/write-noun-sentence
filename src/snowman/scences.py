@@ -1,8 +1,8 @@
 from src.constants import SCREEN_WIDTH, IMAGE_WIDTH, SMALL_PADDING, BUTTON_WIDTH, LONG_PADDING, SMALL_BUTTON_HEIGHT, \
-    SCREEN_HEIGHT, screen, BUTTON_HEIGHT, TITLE_HEIGHT, SCOREBAR_HEIGHT, thumbnail_width, BUTTON_COLOR
+    SCREEN_HEIGHT, screen, BUTTON_HEIGHT, TITLE_HEIGHT, SCOREBAR_HEIGHT, thumbnail_width, BUTTON_COLOR, maroon
 from src.core.input import InputBox
 from src.core.utility import draw_title, draw_back_button, draw_subtitle, draw_button, draw_text_box, \
-    draw_score_and_health, load_image
+    draw_score_and_health, load_image, load_loading_image
 from src.snowman.constants import snowman_levels, SNOWMAN_GAME_SCREEN_BG, snowman_thumbnail, SNOWMAN_GAME_SCREEN_BG_TRA
 
 
@@ -74,7 +74,7 @@ def draw_question_interface(answer_box, question_text, snowman_image, is_submit_
     }
 
 
-def draw_helping_buttons(y, is_next_question_button_enabled):
+def draw_helping_buttons(y, is_next_question_button_enabled, waiting_for_next_question):
     # Space between elements
     space_between_elements = 30
 
@@ -92,19 +92,30 @@ def draw_helping_buttons(y, is_next_question_button_enabled):
     next_question_button = draw_button("السؤال التالي", next_question_button_x, y, BUTTON_WIDTH,
                                        SMALL_BUTTON_HEIGHT, True, is_disabled=not is_next_question_button_enabled)
 
+    # Display the spinner only if waiting_for_next_question is True and we haven't reached max questions
+    if waiting_for_next_question:
+        load_loading_image(text_message="جاري تحميل السؤال التالي", text_color=maroon)
+
     return correct_button, help_button, grammar_button, next_question_button
 
 
-def snowman_game_screen(answer_box, question, title, score, health_points, image,
-                        information_area_content, is_submit_button_enabled, is_next_question_button_enabled):
+def snowman_loading_game_screen(title):
     background = load_snowman_game_background(True)
     screen.blit(background, (0, 0))
     draw_title(title)
     back_button = draw_back_button()
+
+    return back_button
+
+
+def snowman_game_screen(answer_box, question, title, score, health_points, image,
+                        information_area_content, is_submit_button_enabled,
+                        is_next_question_button_enabled, waiting_for_next_question):
+    back_button = snowman_loading_game_screen(title)
     score_y = TITLE_HEIGHT + SMALL_PADDING
     draw_score_and_health(score, y=score_y, health_points=health_points)
     elements = draw_question_interface(answer_box, question, image, is_submit_button_enabled)
-    buttons = draw_helping_buttons(elements["button_y"], is_next_question_button_enabled)
+    buttons = draw_helping_buttons(elements["button_y"], is_next_question_button_enabled, waiting_for_next_question)
     information_area_y = SMALL_BUTTON_HEIGHT + elements["button_y"] + SMALL_PADDING
     draw_text_box(information_area_content, answer_box.rect.x, information_area_y, answer_box.rect.width,
                   answer_box.rect.height)
