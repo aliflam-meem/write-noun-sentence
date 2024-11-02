@@ -6,6 +6,7 @@ SNOWMAN_GAME_RESULT = snowman_working_directory / 'assets/images/snowman_game_re
 SNOWMAN_GAME_SCREEN_BG = snowman_working_directory / 'assets/images/cartoon_style_snowy_landscape.jpg'
 SNOWMAN_GAME_SCREEN_BG_TRA = snowman_working_directory / 'assets/images/cartoon_style_snowy_landscape_transparent.png'
 snowman_thumbnail = snowman_working_directory / 'assets/images/snowman_thumbnail.jpg'
+CHECK_MARK_IMAGE_PATH = snowman_working_directory / 'assets/images/check_mark.png'
 
 snowman_levels_keys = ["al_atareef", "demonstratives", "pronouns"]
 snowman_levels = {

@@ -1,6 +1,7 @@
+import ast
 import json
 import re
-import ast
+
 import pygame
 
 
@@ -54,7 +55,7 @@ def parse_coupled_json_response(string, start_marker, end_marker):
         string = string.replace(start_marker, "").replace(end_marker, "").replace(" [", "").replace("[ ", "").replace(" ]",
                                                                                                             "").replace(
         "] ", "").replace("]", "").replace("[", "").replace("\n", "").replace("'","")
-        
+
         print("parse json response, before looping: ", string)
         # Parse the string using ast.literal_eval()
         i = 0
@@ -69,7 +70,7 @@ def parse_coupled_json_response(string, start_marker, end_marker):
             d = {}
             d["sentence"] = "لقد حدث خطأ في توليد السؤال ):"
             parsed_dict.append(d)
-            d["correct_answer"] = "لقد حدث خطأ في توليد الإجابة ):" 
+            d["correct_answer"] = "لقد حدث خطأ في توليد الإجابة ):"
             parsed_dict.append(d)
 
     print("returned dict: ", parsed_dict)
@@ -85,8 +86,8 @@ def parse_specific_json_response(string, start_marker="<start>", end_marker="<en
     """
     # Remove leading and trailing spaces from the response
     string = get_substring_delimited_by(string, start_marker, end_marker)
-    print("string after slicing")
-    print(string)
+    # print("string after slicing")
+    # print(string)
     # Remove extra tags and brackets.
     string = string.replace(" [", "[").replace("[ ", "[").replace(" ]", "]").replace(
         "] ", "]").replace("\n", "").replace("\t", "")

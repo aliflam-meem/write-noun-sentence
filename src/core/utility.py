@@ -2,11 +2,11 @@
 import pygame
 from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, TITLE_HEIGHT, screen, title_font, \
     subtitle_font, body_font, BUTTON_COLOR, BUTTON_HEIGHT, BUTTON_WIDTH, LONG_PADDING, HEALTH_POINT_IMAGE, \
-    numbering_font, DISABLED_BUTTON_COLOR, silverfiligree, barelyblue, ivory, maroon, \
-    HIGHLIGHT_BUTTON_COLOR, SMALL_PADDING, BLACK, LOADING_IMAGE
+    numbering_font, DISABLED_BUTTON_COLOR, silverfiligree, ivory, maroon, \
+    HIGHLIGHT_BUTTON_COLOR, barelyblue,HIGHLIGHT_BUTTON_COLOR, SMALL_PADDING, BLACK,LOADING_IMAGE
 
 
-def draw_title(title, title_height=TITLE_HEIGHT, title_color=barelyblue, padding=160,
+def draw_title(title, title_height=TITLE_HEIGHT, title_color=ivory, padding=160,
                border_radius=30, background_color=silverfiligree):
     # Define the width of the background rectangle with padding on the left and right
     rect_width = SCREEN_WIDTH - 2 * padding
@@ -93,7 +93,7 @@ def draw_button(text, x, y, width, height, auto_width=False, border_width=2, bor
 
 def draw_back_button(button_height= BUTTON_HEIGHT):
     return draw_button("رجوع", 30, (TITLE_HEIGHT - BUTTON_HEIGHT) / 2, BUTTON_WIDTH - LONG_PADDING,
-                       BUTTON_HEIGHT)
+                       button_height)
 
 
 def draw_text_box(text, x, y, width, height, box_color=None, text_color=maroon, add_border=False):
@@ -227,8 +227,8 @@ def load_loading_image(text_message = 'جار تحميل اللعبة', text_col
     text_message: 'جار تحميل اللعبة'
     text_color: Message color.
     loading_image: loading image path.
-    scale_x: image x-axis scale. 
-    scale_y: image y-axis scale. 
+    scale_x: image x-axis scale.
+    scale_y: image y-axis scale.
     """
     if loading_image_path =="":
         transformed_loading_image = LOADING_IMAGE

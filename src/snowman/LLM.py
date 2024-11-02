@@ -14,7 +14,7 @@ def get_credentials():
     }
 
 
-def set_model():
+def set_model(output_queue):
     # Defining the model id
     model_id = "sdaia/allam-1-13b-instruct"
     # Defining the model parameters
@@ -42,13 +42,12 @@ def set_model():
         credentials=get_credentials(),
         project_id=project_id,
     )
-    return model
+    output_queue.put(model)
 
 
 # Defining the inferencing input
-def load_game_data(noun_type="""ضمير مفرد""", questions_count="""سؤال واحد"""):
+def load_game_data(model, noun_type="""ضمير مفرد""", questions_count="""سؤال واحد"""):
     try:
-        model = set_model()
 
         prompt_input = f"""لنلعب لعبة باللغة العربية وهي تأليف جملة اسمية بسيطة. المطلوب إكمال جملة تبدأ بأحد أشكال المبتدأ.
 
@@ -215,9 +214,10 @@ def load_game_data(noun_type="""ضمير مفرد""", questions_count="""سؤا�
         Output:"""
 
         allam_response = model.generate_text(prompt=prompt_input)#,
-                                             #guardrails=False)
+        # guardrails=False)
         print("allam_response: ", allam_response)
         data = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
+        # append_string_to_file(data, snowman_working_directory / 'assets/files/generated_questions.txt')
         return data
 
     except Exception as e:
