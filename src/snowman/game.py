@@ -1,5 +1,6 @@
 import queue
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pygame
@@ -8,15 +9,19 @@ from thefuzz import fuzz
 from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, IMAGE_WIDTH, YOU_WIN_AUDIO, YOU_LOST_AUDIO, \
     body_font, RED, GREEN, numbering_font, SMALL_PADDING
 from src.core.audio_player import play_sound
+from src.core.output import append_string_to_file
 from src.core.utility import format_questions_count_string
 from src.snowman.LLM import load_game_data, set_model
-from src.snowman.constants import snowman_levels, snowman_levels_keys, snowman_working_directory, SNOWMAN_GAME_RESULT
+from src.snowman.constants import snowman_levels, snowman_levels_keys, snowman_working_directory, SNOWMAN_GAME_RESULT, \
+    snow_melting_sound
 
 
 class SnowmanGame:
 
     def __init__(self, level=snowman_levels_keys[2], questions_count=1):
         # Flag to track if the user clicked "Next" but no new question is ready
+        self.elapsed_time_model = 0
+        self.is_sound_on = False
         self.executor = ThreadPoolExecutor(max_workers=2)  # Create a thread pool with 2 workers
         self.llm_thread = None  # Future to hold the result of the LLM thread
         self.output_queue = queue.Queue()
@@ -98,6 +103,9 @@ class SnowmanGame:
         if self.llm_thread and not self.llm_thread.done():
             print("Waiting for LLM model to be set...")
             self.llm_thread.result()  # This will block until the LLM model setup is complete
+            elapsed_time_model = time.time() - self.start
+            string_to_append = f'********* \nThe time elapsed for setting up the snowman model is {elapsed_time_model}'
+            append_string_to_file(string_to_append, snowman_working_directory / 'assets/files/latency.txt')
 
         # Now check if the model is set
         if not self.LLM_model:
@@ -105,12 +113,14 @@ class SnowmanGame:
             print(" done setting llm ", self.LLM_model)
 
         # Start question generation using the executor
+        self.start = time.time()
         self.executor.submit(self.initialize_game_with_questions)
 
 
     def start_setting_llm_model_thread(self):
         print("start_setting_llm_model_thread")
         # Submit the LLM model setup to the executor
+        self.start = time.time()
         self.llm_thread = self.executor.submit(set_model, self.output_queue)
 
     def generate_questions_data(self, noun_type, total_questions_count=None):
@@ -190,6 +200,9 @@ class SnowmanGame:
             needed_count = self.total_questions_count - len(self.questions)
             print("needed_count", needed_count)
             self.questions.extend(self.generate_questions_data(first_noun_type, needed_count))
+        elapsed_time_generation = time.time() - self.start
+        string_to_append = f'The time elapsed for generating {self.total_questions_count} question is {elapsed_time_generation}'
+        append_string_to_file(string_to_append, snowman_working_directory / 'assets/files/latency.txt')
 
     def load_melting_snowman_images(self):
         img = pygame.image.load(snowman_working_directory / 'assets/images/complete.png')
@@ -248,6 +261,8 @@ class SnowmanGame:
     def move_to_next_snowman_melting_image(self):
         self.melting_image_index = self.melting_image_index if self.melting_image_index == len(
             self.melting_snowman_images) - 1 else self.melting_image_index + 1
+        if self.melting_image_index < len(self.melting_snowman_images) - 1:
+            play_sound(snow_melting_sound, fade_ms=50)
 
     def move_to_next_help_question(self):
         self.opened_help_questions += 1

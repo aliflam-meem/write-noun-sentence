@@ -1,0 +1,10 @@
+The time elapsed for setting up the snowman model is 17.269702434539795
+The time elapsed for generating 10 question is 47.177892208099365
+The time elapsed for generating 10 question is 39.438801527023315
+********* 
+The time elapsed for setting up the snowman model is 15.461761474609375
+The time elapsed for generating 10 question is 26.67679214477539
+********* 
+The time elapsed for setting up the snowman model is 32.389442443847656
+The time elapsed for generating 10 question is 28.282120943069458
+The time elapsed for generating 10 question is 38.526496171951294

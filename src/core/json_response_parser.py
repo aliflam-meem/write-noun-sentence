@@ -98,7 +98,7 @@ def parse_specific_json_response(string, start_marker="<start>", end_marker="<en
     data = json.loads(data)
     print("data : ", data)
     print(type(data))
-    return data
+    return data, search
 
 
 def get_substring_delimited_by(text, start_word, end_word):

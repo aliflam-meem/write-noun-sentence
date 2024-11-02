@@ -2,7 +2,7 @@ from src.constants import SCREEN_WIDTH, IMAGE_WIDTH, SMALL_PADDING, BUTTON_WIDTH
     SCREEN_HEIGHT, screen, BUTTON_HEIGHT, TITLE_HEIGHT, SCOREBAR_HEIGHT, thumbnail_width, BUTTON_COLOR
 from src.core.input import InputBox
 from src.core.utility import draw_title, draw_back_button, draw_subtitle, draw_button, draw_text_box, \
-    draw_score_and_health, load_image
+    draw_score_and_health, load_image, draw_sound_button
 from src.snowman.constants import snowman_levels, SNOWMAN_GAME_SCREEN_BG, snowman_thumbnail, SNOWMAN_GAME_SCREEN_BG_TRA, \
     CHECK_MARK_IMAGE_PATH
 
@@ -25,6 +25,7 @@ def snowman_levels_screen():
     pronouns_button_x = demonstratives_button_x - BUTTON_WIDTH - space_between_buttons
 
     back_button = draw_back_button()
+    sound_button = draw_sound_button()
     # 10 pixels is a magic number, right indent
     draw_subtitle("أشكال المبتدأ", SCREEN_WIDTH - edge_space - 10, y_coordinate - 90, BUTTON_COLOR)
 
@@ -36,7 +37,7 @@ def snowman_levels_screen():
     pronouns_button = draw_button(snowman_levels["pronouns"]["title"], pronouns_button_x,
                                   y_coordinate, BUTTON_WIDTH, BUTTON_HEIGHT)
 
-    return back_button, al_atareef_button, demonstratives_button, pronouns_button
+    return back_button, al_atareef_button, demonstratives_button, pronouns_button, sound_button
 
 
 def draw_question_interface(answer_box, question_text, snowman_image, is_submit_button_enabled, is_user_answer_correct):
@@ -115,6 +116,7 @@ def snowman_game_screen(answer_box, question, title, score, health_points, image
                         information_area_content, is_submit_button_enabled,
                         is_next_question_button_enabled, is_user_answer_correct):
     back_button = snowman_loading_game_screen(title)
+    sound_button = draw_sound_button()
     score_y = TITLE_HEIGHT + SMALL_PADDING
     draw_score_and_health(score, y=score_y, health_points=health_points)
     elements = draw_question_interface(answer_box, question, image, is_submit_button_enabled, is_user_answer_correct)
@@ -123,7 +125,7 @@ def snowman_game_screen(answer_box, question, title, score, health_points, image
     draw_text_box(information_area_content, answer_box.rect.x, information_area_y, answer_box.rect.width,
                   answer_box.rect.height)
 
-    return back_button, buttons, elements["submit_answer_button"]
+    return back_button, buttons, elements["submit_answer_button"], sound_button
 
 
 def create_input_box():

@@ -5,6 +5,8 @@ from ibm_watsonx_ai.foundation_models import Model
 # This cell defines the credentials required to work with watsonx API for Foundation Model inferencing.
 # Action: Provide the IBM Cloud personal API key. For details, see documentation.
 from src.core.json_response_parser import parse_specific_json_response
+from src.core.output import append_string_to_file
+from src.snowman.constants import snowman_working_directory
 
 
 def get_credentials():
@@ -213,11 +215,11 @@ def load_game_data(model, noun_type="""ضمير مفرد""", questions_count="""
         المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل {noun_type}. ولِّد {questions_count}.
         Output:"""
 
-        allam_response = model.generate_text(prompt=prompt_input)#,
+        allam_response = model.generate_text(prompt=prompt_input)  # ,
         # guardrails=False)
         print("allam_response: ", allam_response)
-        data = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
-        # append_string_to_file(data, snowman_working_directory / 'assets/files/generated_questions.txt')
+        data, string_result = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
+        append_string_to_file(string_result, snowman_working_directory / 'assets/files/generated_questions.txt')
         return data
 
     except Exception as e:

@@ -11,13 +11,13 @@ def pause_background_sound(pause):
         pygame.mixer.music.pause()
     else:
        pygame.mixer.music.unpause()
-    
+
 
 def stop_background_sound():
     pygame.mixer.music.stop()
 
 
-def play_sound(path, volume=0.5):
+def play_sound(path, volume=0.5, fade_ms=0):
     audio = pygame.mixer.Sound(path)
     audio.set_volume(volume)
-    audio.play()
+    audio.play(fade_ms=fade_ms)
