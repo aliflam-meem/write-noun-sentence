@@ -178,30 +178,31 @@ def main():
                         game_state = SNOWMAN_LOADING_SCREEN
                         show_snowman_loading_screen = True
                         snowman_current_game.questions_count_per_type = 2
-                        # snowman_current_game.reset_game(snowman_levels_keys[0])
+                        snowman_current_game.level = snowman_levels_keys[0]
                         answer_box.clear()
                     if demonstratives_button.collidepoint(event.pos):
                         game_state = SNOWMAN_LOADING_SCREEN
                         show_snowman_loading_screen = True
                         snowman_current_game.questions_count_per_type = 10
-                        # snowman_current_game.reset_game(snowman_levels_keys[1])
+                        snowman_current_game.level = snowman_levels_keys[1]
                         answer_box.clear()
                     if pronouns_button.collidepoint(event.pos):
                         game_state = SNOWMAN_LOADING_SCREEN
                         show_snowman_loading_screen = True
                         snowman_current_game.questions_count_per_type = 3
-                        # snowman_current_game.reset_game(snowman_levels_keys[2])
+                        snowman_current_game.level = snowman_levels_keys[2]
                         answer_box.clear()
         elif game_state == SNOWMAN_LOADING_SCREEN:
             title = snowman_levels[snowman_levels_keys[1]]["title"]
             if snowman_current_game.get_current_question() == "" and show_snowman_loading_screen:
-                print("show_snowman_loading_screen")
                 show_snowman_loading_screen = False
                 snowman_loading_game_screen(title)
                 load_loading_image()
-                snowman_current_game.reset_game(snowman_levels_keys[1])
+                snowman_current_game.reset_game()
             elif snowman_current_game.get_current_question() != "":
                 game_state = SNOWMAN_GAME
+
+            # print(snowman_current_game.get_current_question(), show_snowman_loading_screen, len(snowman_current_game.questions))
         elif game_state == SNOWMAN_GAME:
             title = snowman_levels[snowman_current_game.level]["title"]
             stop_game_interaction = snowman_current_game.is_win is not None
@@ -214,17 +215,24 @@ def main():
                                                                              snowman_current_game.get_current_information(),
                                                                              snowman_current_game.can_submit_answer(),
                                                                              snowman_current_game.can_proceed_to_next_question(),
-                                                                             snowman_current_game.waiting_for_next_question)
+                                                                             snowman_current_game.waiting_for_next_question,
+                                                                             snowman_current_game.is_user_answer_correct)
             correct_button, help_button, grammar_button, next_question_button = buttons
 
             # Automatically advance if we are waiting and a new question becomes available
+            print("questions) > snowman_current_game.question_index + 1 ",
+                  snowman_current_game.waiting_for_next_question \
+                  and len(snowman_current_game.questions) > snowman_current_game.question_index + 1)
             if snowman_current_game.waiting_for_next_question \
-                and len(snowman_current_game.questions) > snowman_current_game.question_index + 1:
+                and len(snowman_current_game.questions) > snowman_current_game.question_index + 1 \
+                and not snowman_current_game.reset_questions_list():
                 # Move to the next question
                 answer_box.clear()
                 snowman_current_game.move_to_next_question()
 
             # If max questions are reached, disable waiting for next question
+            print("len(snowman_current_game.questions) == snowman_current_game.total_questions_count ",
+                  len(snowman_current_game.questions) == snowman_current_game.total_questions_count)
             if len(snowman_current_game.questions) == snowman_current_game.total_questions_count:
                 snowman_current_game.waiting_for_next_question = False
 
@@ -234,6 +242,7 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         game_state = SNOWMAN_LEVELS
+                        snowman_current_game.reset_questions_list()
                     # Handle the game button if the game isn't over and the result screen isn't displayed yet
                     if not stop_game_interaction:
                         if next_question_button.collidepoint(event.pos) and not snowman_current_game.is_game_over():

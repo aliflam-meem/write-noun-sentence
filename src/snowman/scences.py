@@ -3,7 +3,8 @@ from src.constants import SCREEN_WIDTH, IMAGE_WIDTH, SMALL_PADDING, BUTTON_WIDTH
 from src.core.input import InputBox
 from src.core.utility import draw_title, draw_back_button, draw_subtitle, draw_button, draw_text_box, \
     draw_score_and_health, load_image, load_loading_image
-from src.snowman.constants import snowman_levels, SNOWMAN_GAME_SCREEN_BG, snowman_thumbnail, SNOWMAN_GAME_SCREEN_BG_TRA
+from src.snowman.constants import snowman_levels, SNOWMAN_GAME_SCREEN_BG, snowman_thumbnail, SNOWMAN_GAME_SCREEN_BG_TRA, \
+    CHECK_MARK_IMAGE_PATH
 
 
 def snowman_levels_screen():
@@ -38,7 +39,9 @@ def snowman_levels_screen():
     return back_button, al_atareef_button, demonstratives_button, pronouns_button
 
 
-def draw_question_interface(answer_box, question_text, snowman_image, is_submit_button_enabled):
+def draw_question_interface(answer_box, question_text, snowman_image, is_submit_button_enabled, is_user_answer_correct):
+    check_mark_image = load_image(CHECK_MARK_IMAGE_PATH, (30, 30))
+
     # Space between elements
     space_between_elements = 30
 
@@ -48,8 +51,7 @@ def draw_question_interface(answer_box, question_text, snowman_image, is_submit_
     # Draw question text (right-aligned)
     question_text_x = IMAGE_WIDTH  # Aligned with buttons
     question_text_y = TITLE_HEIGHT + SMALL_PADDING  # Top quarter of the screen for question text
-    draw_text_box(question_text, question_text_x, question_text_y, question_box_width,
-                  question_box_height)
+    draw_text_box(question_text, question_text_x, question_text_y, question_box_width, question_box_height)
 
     # Calculate positions for the buttons (right-aligned and horizontally aligned)
     answer_box_y = question_text_y + question_box_height + space_between_elements  # Below question text
@@ -60,10 +62,15 @@ def draw_question_interface(answer_box, question_text, snowman_image, is_submit_
     submit_answer_button = draw_button("أجب", submit_answer_button_x, answer_box_y, BUTTON_WIDTH / 2,
                                        SMALL_BUTTON_HEIGHT, is_disabled=not is_submit_button_enabled)
 
-    # Draw image to the left of the buttons
+    # Draw check mark image if the answer is correct
+    if is_user_answer_correct:
+        check_mark_x = submit_answer_button_x - check_mark_image.get_width() - SMALL_PADDING  # Position to the left of the button
+        check_mark_y = answer_box_y  # Align vertically with the button
+        screen.blit(check_mark_image, (check_mark_x, check_mark_y))
+
+    # Draw snowman image to the left of the buttons
     image_x = 0  # Image aligned to the left of screen
     image_y = question_text_y + SCOREBAR_HEIGHT  # Aligned vertically with the question text
-
     screen.blit(snowman_image, (image_x, image_y))
 
     # Return the interface elements (for any potential further processing)
@@ -94,7 +101,7 @@ def draw_helping_buttons(y, is_next_question_button_enabled, waiting_for_next_qu
 
     # Display the spinner only if waiting_for_next_question is True and we haven't reached max questions
     if waiting_for_next_question:
-        load_loading_image(text_message="جاري تحميل السؤال التالي", text_color=maroon)
+        load_loading_image(text_message="", text_color=maroon)
 
     return correct_button, help_button, grammar_button, next_question_button
 
@@ -110,11 +117,12 @@ def snowman_loading_game_screen(title):
 
 def snowman_game_screen(answer_box, question, title, score, health_points, image,
                         information_area_content, is_submit_button_enabled,
-                        is_next_question_button_enabled, waiting_for_next_question):
+                        is_next_question_button_enabled, waiting_for_next_question,
+                        is_user_answer_correct):
     back_button = snowman_loading_game_screen(title)
     score_y = TITLE_HEIGHT + SMALL_PADDING
     draw_score_and_health(score, y=score_y, health_points=health_points)
-    elements = draw_question_interface(answer_box, question, image, is_submit_button_enabled)
+    elements = draw_question_interface(answer_box, question, image, is_submit_button_enabled, is_user_answer_correct)
     buttons = draw_helping_buttons(elements["button_y"], is_next_question_button_enabled, waiting_for_next_question)
     information_area_y = SMALL_BUTTON_HEIGHT + elements["button_y"] + SMALL_PADDING
     draw_text_box(information_area_content, answer_box.rect.x, information_area_y, answer_box.rect.width,

@@ -1,3 +1,4 @@
+import queue
 import re
 import threading
 
@@ -16,6 +17,7 @@ class SnowmanGame:
 
     def __init__(self, level=snowman_levels_keys[2], questions_count=1):
         # Flag to track if the user clicked "Next" but no new question is ready
+        self.output_queue = queue.Queue()
         self.LLM_model = None
         self.levels_keys = snowman_levels_keys
         self.waiting_for_next_question = False
@@ -43,8 +45,7 @@ class SnowmanGame:
         self.start_setting_llm_model_thread()
         self.load_melting_snowman_images()
 
-    def reset_game(self, level):
-        self.level = level
+    def reset_game(self):
         self.is_win = None
         self.question_index = 0
         self.score = 0
@@ -52,12 +53,16 @@ class SnowmanGame:
         self.opened_help_questions = 0
         self.num_of_wrong_answers = 0
         self.reset_melting_image_index()
-        self.questions = []
+        self.reset_questions_list()
         self.reset_information()
         self.reset_is_answer_displayed()
+        self.reset_is_user_answer_correct()
         self.reset_help_question_index()
         self.reset_is_result_sound_played()
         self.start_question_generation_thread()
+
+    def reset_questions_list(self):
+        self.questions = []
 
     def reset_is_result_sound_played(self):
         self.is_result_sound_played = False
@@ -85,30 +90,38 @@ class SnowmanGame:
         self.num_of_wrong_answers += 1
 
     def start_question_generation_thread(self):
-        self.llm_model_thread.join()
         print("start_question_generation_thread")
+        if self.llm_model_thread.is_alive():
+            print(" beofr join")
+            self.llm_model_thread.join()
+            print("after join")
+        if not self.LLM_model:
+            self.LLM_model = self.output_queue.get()
+            print(" done setting llm ", self.LLM_model)
         question_generation_thread = threading.Thread(target=self.initialize_game_with_questions, daemon=True)
         question_generation_thread.start()
 
 
     def start_setting_llm_model_thread(self):
         print("start_setting_llm_model_thread")
-        self.llm_model_thread = threading.Thread(target=set_model, daemon=True)
+        self.llm_model_thread = threading.Thread(target=set_model, args=(self.output_queue,), daemon=True)
         self.llm_model_thread.start()
 
-    def generate_questions_data(self, noun_type):
+    def generate_questions_data(self, noun_type, total_questions_count=None):
         print("generate_questions_data")
         # Initialize the list to store all questions
         questions = []
 
         # Process the questions in chunks of x number
-        total_questions_count = self.questions_count_per_type
+        total_questions_count = self.questions_count_per_type if total_questions_count is None else total_questions_count
 
         # Generate questions in batches of 5 until we run out of questions
+        print("range(0, total_questions_count, self.max_questions_count_per_type) ",
+              range(0, total_questions_count, self.max_questions_count_per_type))
         for i in range(0, total_questions_count, self.max_questions_count_per_type):
             # Determine how many questions to generate in the current batch
             questions_to_generate = min(self.max_questions_count_per_type, total_questions_count - i)
-
+            print("questions_to_generate ", questions_to_generate)
             # Format the questions count string (assuming it's for UI or logging)
             questions_count_as_string = format_questions_count_string(questions_to_generate)
 
@@ -121,10 +134,12 @@ class SnowmanGame:
 
             # Process the questions depending on their type (list or dictionary)
             if isinstance(questions_data, dict):
+                print(isinstance(questions_data, dict))
                 # Format and update the dictionary directly
                 self.format_questions_data(questions_data)
                 questions.append(questions_data)  # Store the formatted question
             elif isinstance(questions_data, list):
+                print(isinstance(questions_data, list))
                 # Process each question in the list
                 for question_dict in questions_data:
                     self.format_questions_data(question_dict)  # Format each question
@@ -160,6 +175,13 @@ class SnowmanGame:
     def initialize_game_with_questions(self):
         for n_type in snowman_levels[self.level]["noun_types"]:
             self.questions.extend(self.generate_questions_data(n_type))
+
+        # Get the first noun type from the current level
+        first_noun_type = snowman_levels[self.level]["noun_types"][0]
+        # If more questions are needed, genrate more questions so the list reaches the desired count
+        if len(self.questions) < self.total_questions_count:
+            needed_count = self.total_questions_count - len(self.questions)
+            self.questions.extend(self.generate_questions_data(first_noun_type), needed_count)
 
     def load_melting_snowman_images(self):
         img = pygame.image.load(snowman_working_directory / 'assets/images/complete.png')
@@ -212,6 +234,8 @@ class SnowmanGame:
         return self.are_all_answers_wrong() or self.reached_last_question()
 
     def reached_last_question(self):
+        print("self.question_index ", self.question_index)
+        print("self.total_questions_count - 1 ", self.total_questions_count - 1)
         return self.question_index == self.total_questions_count - 1
 
     def move_to_next_snowman_melting_image(self):
@@ -235,8 +259,10 @@ class SnowmanGame:
             self.help_question_index = 0
             self.reset_information()
             self.reset_is_answer_displayed()
+            self.reset_is_user_answer_correct()
             self.reset_help_question_index()
             self.waiting_for_next_question = False
+
             # Set flag to wait for the next question if there isn't one yet and we haven't reached max questions
         elif len(self.questions) < self.total_questions_count:
             self.waiting_for_next_question = True
