@@ -35,6 +35,7 @@ salmon = (250, 128, 114)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLACK = (0 ,0 ,0)
+ORANGE = (255, 127, 0)
 BUTTON_FONT_COLOR = (251, 246, 246)
 BUTTON_COLOR = (168, 78, 74)
 DISABLED_BUTTON_COLOR = (206, 177, 176)
@@ -46,6 +47,12 @@ GAME_SCREEN_SECONDARY_BG = pygame.transform.scale(GAME_SCREEN_SECONDARY_BG, (SCR
 HEALTH_POINT_IMAGE = pygame.image.load("assets/images/health_heart.png")
 LOADING_IMAGE = pygame.image.load("assets/images/loading.png")
 LOADING_IMAGE = pygame.transform.scale(LOADING_IMAGE, (125, 125))
+'''
+SOUND_ON_IMAGE = pygame.image.load("assets/images/sound_oN.png")
+SOUND_ON_IMAGE = pygame.transform.scale(SOUND_ON_IMAGE, (30, 30))
+SOUND_OFF_IMAGE = pygame.image.load("assets/images/sound_off.png")
+SOUND_OFF_IMAGE = pygame.transform.scale(SOUND_OFF_IMAGE, (30, 30))
+'''
 
 # Create the Pygame screen object
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
