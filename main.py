@@ -201,9 +201,8 @@ def main():
                 snowman_current_game.reset_game()
             elif snowman_current_game.get_current_question() != "":
                 game_state = SNOWMAN_GAME
-
-            # print(snowman_current_game.get_current_question(), show_snowman_loading_screen, len(snowman_current_game.questions))
         elif game_state == SNOWMAN_GAME:
+            print(len(snowman_current_game.questions))
             title = snowman_levels[snowman_current_game.level]["title"]
             stop_game_interaction = snowman_current_game.is_win is not None
             back_button, buttons, submit_answer_button = snowman_game_screen(answer_box,
@@ -220,19 +219,19 @@ def main():
             correct_button, help_button, grammar_button, next_question_button = buttons
 
             # Automatically advance if we are waiting and a new question becomes available
-            print("questions) > snowman_current_game.question_index + 1 ",
-                  snowman_current_game.waiting_for_next_question \
-                  and len(snowman_current_game.questions) > snowman_current_game.question_index + 1)
+            # print("questions) > snowman_current_game.question_index + 1 ",
+            #       snowman_current_game.waiting_for_next_question \
+            #       and len(snowman_current_game.questions) > snowman_current_game.question_index + 1)
             if snowman_current_game.waiting_for_next_question \
                 and len(snowman_current_game.questions) > snowman_current_game.question_index + 1 \
-                and not snowman_current_game.reset_questions_list():
+                and not snowman_current_game.reached_last_question():
                 # Move to the next question
                 answer_box.clear()
                 snowman_current_game.move_to_next_question()
 
             # If max questions are reached, disable waiting for next question
-            print("len(snowman_current_game.questions) == snowman_current_game.total_questions_count ",
-                  len(snowman_current_game.questions) == snowman_current_game.total_questions_count)
+            # print("len(snowman_current_game.questions) == snowman_current_game.total_questions_count ",
+            #       len(snowman_current_game.questions) == snowman_current_game.total_questions_count)
             if len(snowman_current_game.questions) == snowman_current_game.total_questions_count:
                 snowman_current_game.waiting_for_next_question = False
 

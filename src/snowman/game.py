@@ -1,6 +1,6 @@
 import queue
 import re
-import threading
+from concurrent.futures import ThreadPoolExecutor
 
 import pygame
 from thefuzz import fuzz
@@ -17,6 +17,8 @@ class SnowmanGame:
 
     def __init__(self, level=snowman_levels_keys[2], questions_count=1):
         # Flag to track if the user clicked "Next" but no new question is ready
+        self.executor = ThreadPoolExecutor(max_workers=2)  # Create a thread pool with 2 workers
+        self.llm_thread = None  # Future to hold the result of the LLM thread
         self.output_queue = queue.Queue()
         self.LLM_model = None
         self.levels_keys = snowman_levels_keys
@@ -91,21 +93,25 @@ class SnowmanGame:
 
     def start_question_generation_thread(self):
         print("start_question_generation_thread")
-        if self.llm_model_thread.is_alive():
-            print(" beofr join")
-            self.llm_model_thread.join()
-            print("after join")
+
+        # Check if LLM model is being set
+        if self.llm_thread and not self.llm_thread.done():
+            print("Waiting for LLM model to be set...")
+            self.llm_thread.result()  # This will block until the LLM model setup is complete
+
+        # Now check if the model is set
         if not self.LLM_model:
             self.LLM_model = self.output_queue.get()
             print(" done setting llm ", self.LLM_model)
-        question_generation_thread = threading.Thread(target=self.initialize_game_with_questions, daemon=True)
-        question_generation_thread.start()
+
+        # Start question generation using the executor
+        self.executor.submit(self.initialize_game_with_questions)
 
 
     def start_setting_llm_model_thread(self):
         print("start_setting_llm_model_thread")
-        self.llm_model_thread = threading.Thread(target=set_model, args=(self.output_queue,), daemon=True)
-        self.llm_model_thread.start()
+        # Submit the LLM model setup to the executor
+        self.llm_thread = self.executor.submit(set_model, self.output_queue)
 
     def generate_questions_data(self, noun_type, total_questions_count=None):
         print("generate_questions_data")
@@ -174,6 +180,7 @@ class SnowmanGame:
 
     def initialize_game_with_questions(self):
         for n_type in snowman_levels[self.level]["noun_types"]:
+            print(n_type)
             self.questions.extend(self.generate_questions_data(n_type))
 
         # Get the first noun type from the current level
@@ -181,7 +188,8 @@ class SnowmanGame:
         # If more questions are needed, genrate more questions so the list reaches the desired count
         if len(self.questions) < self.total_questions_count:
             needed_count = self.total_questions_count - len(self.questions)
-            self.questions.extend(self.generate_questions_data(first_noun_type), needed_count)
+            print("needed_count", needed_count)
+            self.questions.extend(self.generate_questions_data(first_noun_type, needed_count))
 
     def load_melting_snowman_images(self):
         img = pygame.image.load(snowman_working_directory / 'assets/images/complete.png')
@@ -235,7 +243,6 @@ class SnowmanGame:
 
     def reached_last_question(self):
         print("self.question_index ", self.question_index)
-        print("self.total_questions_count - 1 ", self.total_questions_count - 1)
         return self.question_index == self.total_questions_count - 1
 
     def move_to_next_snowman_melting_image(self):
