@@ -15,15 +15,9 @@ from src.snowman.constants import snowman_levels_keys, snowman_levels
 from src.snowman.game import SnowmanGame
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
     load_snowman_game_thumbnail, snowman_loading_game_screen
-from src.whack_a_mole.game import WhackaMoleGame
-from src.snowman.game import SnowmanGame, is_answer_valid
-from src.jar_bingo.game import JBGameComponents
-from src.jar_bingo.constants import BACKGROUND_SEA_SHP
-from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
-    load_snowman_game_thumbnail
-from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail, display_game_result
 from src.whack_a_mole.constants import WM_MUSIC
-from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail
+from src.whack_a_mole.game import WhackaMoleGame
+from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail, display_game_result
 
 
 def quit_game():
