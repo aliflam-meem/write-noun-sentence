@@ -5,7 +5,7 @@ import pygame
 from src.constants import screen, GAME_SCREEN_BG, SCREEN_WIDTH, BUTTON_WIDTH, BUTTON_HEIGHT, SCREEN_HEIGHT, \
     MENU_BUTTON_WIDTH, SMALL_PADDING, MAIN_MENU, GAMES_BOARD_SCREEN, \
     WHACK_A_MOLE_GAME, JAR_BINGO_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME, gainsboro, GAME_SCREEN_SECONDARY_BG, \
-    SNOWMAN_LOADING_SCREEN
+    SNOWMAN_LOADING_SCREEN, maroon
 from src.core.audio_player import play_background_sound, pause_background_sound
 from src.core.utility import draw_title, draw_back_button, draw_button, load_loading_image
 from src.jar_bingo.constants import BACKGROUND_SEA_SHP
@@ -202,7 +202,7 @@ def main():
             if snowman_current_game.get_current_question() == "" and show_snowman_loading_screen:
                 show_snowman_loading_screen = False
                 snowman_loading_game_screen(title)
-                load_loading_image()
+                load_loading_image(text_color=maroon)
                 snowman_current_game.reset_game()
             elif snowman_current_game.get_current_question() != "":
                 game_state = SNOWMAN_GAME
