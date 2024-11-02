@@ -198,6 +198,7 @@ def main():
                         snowman_current_game.level = snowman_levels_keys[2]
                         answer_box.clear()
         elif game_state == SNOWMAN_LOADING_SCREEN:
+            pause_background_sound(False)
             title = snowman_levels[snowman_levels_keys[1]]["title"]
             if snowman_current_game.get_current_question() == "" and show_snowman_loading_screen:
                 show_snowman_loading_screen = False
@@ -219,7 +220,6 @@ def main():
                                                                              snowman_current_game.get_current_information(),
                                                                              snowman_current_game.can_submit_answer(),
                                                                              snowman_current_game.can_proceed_to_next_question(),
-                                                                             snowman_current_game.waiting_for_next_question,
                                                                              snowman_current_game.is_user_answer_correct)
             correct_button, help_button, grammar_button, next_question_button = buttons
 
@@ -259,6 +259,7 @@ def main():
                                     snowman_current_game.is_correct_answer_displayed and snowman_current_game.reached_last_question()):
                                 if snowman_current_game.is_answer_valid(answer_box):
                                     if snowman_current_game.reached_last_question():
+                                        pause_background_sound(True)
                                         # We've reached the last question already --> show final score and result
                                         snowman_current_game.finalize_game()
                                         snowman_current_game.display_result_and_play_sound()
@@ -271,6 +272,7 @@ def main():
                                         snowman_current_game.increase_wrong_answers()
                                         snowman_current_game.move_to_next_snowman_melting_image()
                                         if snowman_current_game.are_all_answers_wrong():
+                                            pause_background_sound(True)
                                             # We've reached the last question already or the snowman has melted --> show
                                             # final score and result
                                             snowman_current_game.finalize_game()
@@ -285,7 +287,11 @@ def main():
 
                 answer_box.handle_event(event)
             answer_box.draw()
+            # Display the spinner only if waiting_for_next_question is True and we haven't reached max questions
+            if snowman_current_game.waiting_for_next_question:
+                load_loading_image(text_message="", text_color=maroon)
             if snowman_current_game.is_win is not None:
+                pause_background_sound(True)
                 snowman_current_game.display_result_and_play_sound()
 
         elif game_state == WHACK_A_MOLE_GAME:
