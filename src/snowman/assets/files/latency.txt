@@ -8,3 +8,32 @@ The time elapsed for generating 10 question is 26.67679214477539
 The time elapsed for setting up the snowman model is 32.389442443847656
 The time elapsed for generating 10 question is 28.282120943069458
 The time elapsed for generating 10 question is 38.526496171951294
+The time elapsed for generating 10 question is 33.657273292541504
+The time elapsed for generating 10 question is 71.49794864654541
+********* 
+The time elapsed for setting up the snowman model is 10.97438931465149
+The time elapsed for generating 10 question is 58.13085913658142
+The time elapsed for generating 10 question is 27.587496757507324
+The time elapsed for generating 10 question is 27.954229593276978
+********* 
+The time elapsed for setting up the snowman model is 7.4307897090911865
+The time elapsed for generating 10 question is 28.164289236068726
+The time elapsed for generating 10 question is 37.651395320892334
+The time elapsed for generating 10 question is 53.90392184257507
+The time elapsed for generating 10 question is 43.35519051551819
+The time elapsed for generating 10 question is 24.908918142318726
+The time elapsed for generating 10 question is 33.209089040756226
+The time elapsed for generating 10 question is 41.48570418357849
+The time elapsed for generating 10 question is 39.401477098464966
+The time elapsed for generating 10 question is 58.927891969680786
+The time elapsed for generating 10 question is 68.08219933509827
+The time elapsed for generating 10 question is 29.72459650039673
+The time elapsed for generating 10 question is 36.09862661361694
+********* 
+The time elapsed for setting up the snowman model is 9.146035194396973
+The time elapsed for generating 10 question is 49.7697651386261
+********* 
+The time elapsed for setting up the snowman model is 11.609959840774536
+********* 
+The time elapsed for setting up the snowman model is 8.028019905090332
+The time elapsed for generating 10 question is 36.92659640312195

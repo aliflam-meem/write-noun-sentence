@@ -98,7 +98,7 @@ def draw_back_button(button_height=BUTTON_HEIGHT):
                        button_height)
 
 
-def draw_sound_button(x_cor, y_cor, button_width, button_height=BUTTON_HEIGHT, border_color=maroon,
+def draw_sound_button(x_cor=None, y_cor=None, button_width=None, button_height=BUTTON_HEIGHT, border_color=maroon,
                       text_color=ivory, button_color=BUTTON_COLOR, highlight_color=HIGHLIGHT_BUTTON_COLOR, radius=10):
     width = BUTTON_WIDTH - LONG_PADDING if not button_width else button_width
     right_margin = 25
@@ -199,13 +199,13 @@ def draw_score_and_health(score, x=30, y=30, health_points=2, max_score=100, tex
 
 def format_questions_count_string(count=1):
     if count == 1:
-        return "سؤال واحد"
+        return "تمرين واحد"
     elif count == 2:
-        return "سؤالين"
+        return "تمرينين مختلفين"
     elif count > 2 and count <= 10:
-        return f"""{count} أسئلة"""
+        return f"""{count} تمارين مختلفة"""
     elif count > 10:
-        return f"""{count} سؤال"""
+        return f"""{count} تمرين مختلف"""
 
 
 def load_image(filename, size):

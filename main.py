@@ -211,7 +211,6 @@ def main():
             elif snowman_current_game.get_current_question() != "":
                 game_state = SNOWMAN_GAME
         elif game_state == SNOWMAN_GAME:
-            print(len(snowman_current_game.questions))
             title = snowman_levels[snowman_current_game.level]["title"]
             stop_game_interaction = snowman_current_game.is_win is not None
             back_button, buttons, submit_answer_button, sound_button = snowman_game_screen(answer_box,

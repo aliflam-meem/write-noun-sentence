@@ -44,7 +44,7 @@ class SnowmanGame:
         self.is_user_answer_correct = False
         self.level = level
         self.questions_count_per_type = questions_count
-        self.max_questions_count_per_type = 4
+        self.max_questions_count_per_type = 3
         self.information = ""
         self.is_correct_answer_displayed = False
         self.is_result_sound_played = False
@@ -132,8 +132,6 @@ class SnowmanGame:
         total_questions_count = self.questions_count_per_type if total_questions_count is None else total_questions_count
 
         # Generate questions in batches of 5 until we run out of questions
-        print("range(0, total_questions_count, self.max_questions_count_per_type) ",
-              range(0, total_questions_count, self.max_questions_count_per_type))
         for i in range(0, total_questions_count, self.max_questions_count_per_type):
             # Determine how many questions to generate in the current batch
             questions_to_generate = min(self.max_questions_count_per_type, total_questions_count - i)
@@ -255,14 +253,13 @@ class SnowmanGame:
         return self.are_all_answers_wrong() or self.reached_last_question()
 
     def reached_last_question(self):
-        print("self.question_index ", self.question_index)
         return self.question_index == self.total_questions_count - 1
 
     def move_to_next_snowman_melting_image(self):
         self.melting_image_index = self.melting_image_index if self.melting_image_index == len(
             self.melting_snowman_images) - 1 else self.melting_image_index + 1
         if self.melting_image_index < len(self.melting_snowman_images) - 1:
-            play_sound(snow_melting_sound, fade_ms=50)
+            play_sound(snow_melting_sound, volume=1)
 
     def move_to_next_help_question(self):
         self.opened_help_questions += 1
