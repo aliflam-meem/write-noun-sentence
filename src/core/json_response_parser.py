@@ -63,8 +63,9 @@ def parse_coupled_json_response(string, start_marker, end_marker):
         try:
             parsed_dict = ast.literal_eval(f'""{string}""')
             print("dictionary length",len(parsed_dict.items))
-
             print(parsed_dict[0], parsed_dict[1])
+            removed_prep_sentence_dict = add_ablank_inthe_sentence(parsed_dict)
+            parsed_dict = removed_prep_sentence_dict
         except Exception:
             parsed_dict=[]
             d = {}
@@ -92,7 +93,6 @@ def parse_specific_json_response(string, start_marker="<start>", end_marker="<en
     string = string.replace(" [", "[").replace("[ ", "[").replace(" ]", "]").replace(
         "] ", "]").replace("\n", "").replace("\t", "")
     string = re.sub(' +', " ", string)
-
     search = json.dumps(string)
     data = json.loads(search)
     data = json.loads(data)
@@ -115,3 +115,13 @@ def get_substring_delimited_by(text, start_word, end_word):
 
     # Extract the substring between the two words
     return text[start_index:end_index].strip()
+
+def add_ablank_inthe_sentence(parsed_dict):
+    """
+    Takes the question dictionary, edit the question to include a blank space and returns the whole dictionary.
+    """
+    sentence= parsed_dict["sentence"]
+    prep = parsed_dict["correct_answer"]
+    sentence = sentence.replace(prep, "___")
+    parsed_dict["sentence"] = sentence
+    return parsed_dict
