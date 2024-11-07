@@ -42,6 +42,8 @@ DISABLED_BUTTON_COLOR = (206, 177, 176)
 HIGHLIGHT_BUTTON_COLOR = (170, 119, 117)
 GAME_SCREEN_BG = pygame.image.load("assets/images/main_bg.jpg")
 GAME_SCREEN_BG = pygame.transform.scale(GAME_SCREEN_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
+GAME_SCREEN_SECONDARY_BG = pygame.image.load("assets/images/secondary_bg.jpg")
+GAME_SCREEN_SECONDARY_BG = pygame.transform.scale(GAME_SCREEN_SECONDARY_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
 HEALTH_POINT_IMAGE = pygame.image.load("assets/images/health_heart.png")
 LOADING_IMAGE = pygame.image.load("assets/images/loading.png")
 LOADING_IMAGE = pygame.transform.scale(LOADING_IMAGE, (125, 125))
@@ -79,6 +81,7 @@ SNOWMAN_LEVELS = "snowman_levels"
 JAR_BINGO_GAME = "jar_bingo_game"
 WHACK_A_MOLE_GAME = "whack_a_mole_game"
 SNOWMAN_GAME = "snowman_game"
+SNOWMAN_LOADING_SCREEN = "snowman_loading_screen"
 
 # Audio
 YOU_WIN_AUDIO = "assets/audio/Fliki_you_win.mp3"
