@@ -84,3 +84,7 @@ Missing_correct_answer
 هذا الطفل _ الكتابَ يمسك بقوة./على
 Missing_correct_answer
 ذهبتُ _ الحديقة لألعبَ هناك./إلى
+Missing_correct_answer
+وضع _ المفتاح فوق الطاولة./على
+Missing_correct_answer
+أعجبني _ الكتاب الجديد./عن
