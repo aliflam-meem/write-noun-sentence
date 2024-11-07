@@ -138,7 +138,7 @@ class JBGameComponents:
                         self.quiz_card_shown, self.choice_rects, self.quiz_choices, correct_answer = show_quiz_card(
                             self.model, self.quiz_card_shown, preposition)
                         # compare requested preposition and correct answer
-                        print(preposition, correct_answer)
+                        print("preposition & correct answer: ",preposition, correct_answer)
                 # user clicked a choice from the quiz card.
                 elif event.type == pygame.MOUSEBUTTONDOWN and self.quiz_card_shown:
                     # Check if the clicked position is within any of the choice rectangles

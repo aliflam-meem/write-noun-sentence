@@ -10,7 +10,7 @@ from src.jar_bingo.constants import *
 # Function to create the game board
 def create_board(board, jellyfish_tiles):
     # board = [[(random.choice(prepositions_1), LIGHT_BLUE3) for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
-    board = [[(random.choice(prepositions_1), jellyfish_tiles[0], LIGHT_BLUE3) for _ in range(BOARD_SIZE)] for _ in
+    board = [[(random.choice(prepositions_single_letters), jellyfish_tiles[0], LIGHT_BLUE3) for _ in range(BOARD_SIZE)] for _ in
              range(BOARD_SIZE)]
     return board
 

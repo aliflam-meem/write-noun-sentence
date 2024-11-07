@@ -21,13 +21,18 @@ def check_cell_click(pos):
                 return i, j
     return None
 
-def prepare_board_prepositions_list(preposition):
+def prepare_board_prepositions_list(preposition, prep_parts_list):
     """
     Generate quiz_choices, two randomly generated prepositions -execluding from the list the correct choice-,
                 and then added to them the correct choice.
     """
-    rest_of_prepositions = [element for element in prepositions_1 if element != preposition]
-    quiz_choices = [preposition] + random.sample(rest_of_prepositions, 2)
+    if len(prep_parts_list) > 1:
+        print("prep_parts_list[1]", prep_parts_list[1])
+        rest_of_prepositions = [element+prep_parts_list[1] for element in prepositions_single_letters if element != preposition]
+        quiz_choices = [preposition] + random.sample(rest_of_prepositions, 2)
+    else:
+        rest_of_prepositions = [element for element in prepositions_2 if element != preposition]
+        quiz_choices = [preposition] + random.sample(rest_of_prepositions, 2)
     return quiz_choices
 
 def draw_quiz_card():
@@ -46,10 +51,11 @@ def draw_quiz_card():
     return quiz_card_image
 
 def show_quiz_card_question(quiz_card_image, quiz_question):
-    question_text = string_parser(quiz_question, body_font, BLACK)
+    question_text = string_parser(quiz_question, body_font, BLACK, quiz_card_image.get_width())
     question_rect = question_text.get_rect(
         center=(quiz_card_image.get_width() // 2 + 100, 120 + (CHOICE_RECT_HEIGHT + CHOICE_RECT_PADDING)))
     screen.blit(question_text, question_rect)
+    
 
 def show_quiz_card_choices(quiz_choices):
     """
@@ -64,7 +70,7 @@ def show_quiz_card_choices(quiz_choices):
     """
     choice_rects = []
     for i, choice in enumerate(quiz_choices):
-        choice_text = string_parser(choice, body_font, BLACK)
+        choice_text = string_parser(choice, body_font, BLACK,0)
         # Adjust choice positioning based on margins and number of choices
         choices_size = pygame.Rect(QUIZ_CARD_PADDING + 100, QUIZ_CARD_HEIGHT + (40 * i),
                                    QUIZ_CARD_WIDTH - 2 * QUIZ_CARD_PADDING, CHOICE_RECT_HEIGHT)
@@ -92,16 +98,16 @@ def show_quiz_card(model, quiz_card_shown, preposition):
     quiz_card_image = draw_quiz_card()
     # change to bring the qestions in bulk
     #load_loading_image(text_message = "جار تحميل السؤال ...", text_color = WHITE, scale_x=100, scale_y=100)
-    question_answer_pair = get_questions(model, preposition, 1, preposition, "")
+    question_answer_pair, prep_parts_list = get_questions(model,"المبتدئ",preposition)
     print("question_answer_pair", question_answer_pair)
-    quiz_question = question_answer_pair[0].get("sentence") #currently supports 1 question
-    correct_answer = question_answer_pair[0].get("correct_answer")
+    quiz_question = question_answer_pair["sentence"] #currently supports 1 question
+    correct_answer = question_answer_pair["correct_answer"]
     print("correct answer in func ", correct_answer)
     # Adjust drawing positions based on the quiz card image content
     # question
     show_quiz_card_question(quiz_card_image, quiz_question)
     # Choice rects and text
-    quiz_choices = prepare_board_prepositions_list(preposition)
+    quiz_choices = prepare_board_prepositions_list(correct_answer,prep_parts_list)
     choice_rects =  show_quiz_card_choices(quiz_choices)
     return quiz_card_shown, choice_rects, quiz_choices, correct_answer
 
