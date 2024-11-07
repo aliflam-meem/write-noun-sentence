@@ -13,7 +13,7 @@ from src.core.output import append_string_to_file
 from src.core.utility import format_questions_count_string
 from src.snowman.LLM import load_game_data, set_model
 from src.snowman.constants import snowman_levels, snowman_levels_keys, snowman_working_directory, SNOWMAN_GAME_RESULT, \
-    snow_melting_sound
+    snow_melting_sound, SINGULARITY_FORMATS
 
 
 class SnowmanGame:
@@ -123,7 +123,7 @@ class SnowmanGame:
         self.start = time.time()
         self.llm_thread = self.executor.submit(set_model, self.output_queue)
 
-    def generate_questions_data(self, noun_type, total_questions_count=None):
+    def generate_questions_data(self, noun_type, singularity_format, total_questions_count=None):
         print("generate_questions_data")
         # Initialize the list to store all questions
         questions = []
@@ -140,11 +140,12 @@ class SnowmanGame:
             questions_count_as_string = format_questions_count_string(questions_to_generate)
 
             # Load the question data for the current batch
-            questions_data = load_game_data(self.LLM_model, noun_type, questions_count_as_string)
+            questions_data = load_game_data(self.LLM_model, noun_type, questions_count_as_string, singularity_format)
 
             # Retry if questions_data is not valid (loop until a valid dictionary or list is returned)
             while type(questions_data) is bool:
-                questions_data = load_game_data(self.LLM_model, noun_type, questions_count_as_string)
+                questions_data = load_game_data(self.LLM_model, noun_type, questions_count_as_string,
+                                                singularity_format)
 
             # Process the questions depending on their type (list or dictionary)
             if isinstance(questions_data, dict):
@@ -189,7 +190,11 @@ class SnowmanGame:
     def initialize_game_with_questions(self):
         for n_type in snowman_levels[self.level]["noun_types"]:
             print(n_type)
-            self.questions.extend(self.generate_questions_data(n_type))
+            if n_type in snowman_levels[snowman_levels_keys[0]]["noun_types"]:
+                singularity_format = SINGULARITY_FORMATS[n_type]
+                self.questions.extend(self.generate_questions_data(n_type, singularity_format))
+            else:
+                self.questions.extend(self.generate_questions_data(n_type))
 
         # Get the first noun type from the current level
         first_noun_type = snowman_levels[self.level]["noun_types"][0]
@@ -197,7 +202,11 @@ class SnowmanGame:
         if len(self.questions) < self.total_questions_count:
             needed_count = self.total_questions_count - len(self.questions)
             print("needed_count", needed_count)
-            self.questions.extend(self.generate_questions_data(first_noun_type, needed_count))
+            if first_noun_type in snowman_levels[snowman_levels_keys[0]]["noun_types"]:
+                singularity_format = SINGULARITY_FORMATS[first_noun_type]
+                self.questions.extend(self.generate_questions_data(first_noun_type, singularity_format, needed_count))
+            else:
+                self.questions.extend(self.generate_questions_data(first_noun_type, needed_count))
         elapsed_time_generation = time.time() - self.start
         string_to_append = f'The time elapsed for generating {self.total_questions_count} question is {elapsed_time_generation}'
         append_string_to_file(string_to_append, snowman_working_directory / 'assets/files/latency.txt')
