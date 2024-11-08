@@ -4,7 +4,7 @@ from ibm_watsonx_ai.foundation_models import Model
 # watsonx API connection¶
 # This cell defines the credentials required to work with watsonx API for Foundation Model inferencing.
 # Action: Provide the IBM Cloud personal API key. For details, see documentation.
-from src.core.json_response_parser import parse_specific_json_response
+from src.core.json_response_parser import parse_specific_json_response, get_substring_delimited_by
 from src.core.output import append_string_to_file
 from src.snowman.constants import snowman_working_directory
 
@@ -16,21 +16,9 @@ def get_credentials():
     }
 
 
-def set_model(output_queue):
+def set_model(parameters):
     # Defining the model id
     model_id = "sdaia/allam-1-13b-instruct"
-    # Defining the model parameters
-
-    parameters = {
-        "decoding_method": "sample",
-        "max_new_tokens": 600,
-        "stop_sequences": ["<end_json>", "}}]<end_json>"],
-        "temperature": 0.8,
-        "top_k": 52,
-        "top_p": 0.8,
-        "repetition_penalty": 1.2,
-        "timeout": 60,
-    }
 
     # Defining the project id or space id
     project_id = "5637c821-378b-4fc9-b2b7-c96b62f8be4e"
@@ -44,75 +32,27 @@ def set_model(output_queue):
         credentials=get_credentials(),
         project_id=project_id,
     )
-    output_queue.put(model)
+    return model
 
 
 # Defining the inferencing input
-def load_game_data(model, noun_type="""اسم ظاهر معرف بأل التعريف بحالة جمع التكسير""",
-                   questions_count="""تمرين واحد"""):
+def load_game_data(model, system_prompt_examples, input_examples,
+                   noun_type="""اسم ظاهر معرف بأل التعريف بحالة جمع التكسير""",
+                   questions_count="""تمرين واحد""", ):
     try:
 
         prompt_input = f"""لنلعب لعبة باللغة العربية وهي تأليف جملة اسمية بسيطة. المطلوب إكمال جملة منقوصة المبتدأ.
 تذكّر أن المبتدأ هو الاسم المرفوع الذي نبدأ به الكلام،ونخبر عنه باسم آخر ليتم المعنى، يسمى الخبر،ومن المبتدأ والخبر تتألف ما يسمى (الجملة الاسمية).
-أمثلة عن شكل المبتدأ في الجملة الاسمية كاسم ظاهر:
--الاسم الظاهر المعرّف بـأل التعريف،حالة المفرد
--الصبر مفتاح الفرج.
--الوطن أعز ما نملك.
--الحقيقة واضحة.
--أخوك ذو همة.
-- الاسم الظاهر المعرّف بـأل التعريف،حالة المثنى المذكر
--العالمان مبتكران.
--المهندسان مسافران لحضور المؤتمر.
-الاسم الظاهر المعرّف بأل التعريف،حالة المثنى المؤنث
--الطالبتان متفوقتان في الرياضيات.
--الشجرتان مثمرتان.
--النافذتان تلمعان.
--الاسم الظاهر المعرّف بـأل التعريف،حالة جمع المؤنث السالم
--السيارات سريعة.
--الفنانات موهوبات.
--الاسم الصريح المعرف بـأل التعريف،حالة جمع المذكر السالم،مثال:
--اللاعبون محترفون.
--المسافرون متعبون من السفر.
--المؤمنون متوحدون فيما بينهم.
--الفلاحون بارعون في الزراعة.
--الاسم الصريح المعرف بـأل التعريف،حالة جمع التكسير،مثال:
--المدن صاخبة.
--الوجوه مبتسمة.
--الثمار لذيذة.
--الجبال شاهقة.
-توصيف اللعبة:
-اكتب جملة فيها فراغ واحد في بداية الجملة الاسمية بحيث تحذف المبتدأ ،ليتمكن المتعلم  من إكمالها.
- ألّف الجملة بحيث يكون للفراغ أكثر من إجابة صحيحة محتملة.
+{input_examples}
+ألّف جملة اسمية بسيطة ذات معنى.
 احذف المبتدأ من الجملة الاسمية واجعل الخبر على شكل نكرة.
-حافظ على مطابقة المبتدأ للخبر.
-تذكّر أنه إذا كان المبتدأ والخبر مثنيين فعلامة رفعهما الألف والنون، وأما إذا كان المبتدأ والخبر جمع مذكر سالم فعلامة رفعهما الواو والنون.
-تذكّر أنه إذا كان المبتدأ والخبر من الأسماء التالية(أخ،أب،حم،ذو،فو) فعلامة رفعهما الواو فقط.
- ألّف الجملة بحيث يكون للفراغ أكثر من إجابة صحيحة محتملة.
- اختر إجابة صحيحة منطقية ومتعلقة بموضوع جملة التمرين.
- لا تكرر أي تمرين على الإطلاق
+المبتدأ هو كلمة واحدة.
 تنسيق الخرج:
 قدم لي الخرج بتنسيق JSON سليم، حيث يكون لكل سؤال كائن يحتوي على الحقول التالية:
-question: وهو الجملة ذات الفراغ.
-correct_answer: وهي الكلمة الصحيحة التي تملأ الفراغ.
-help_questions: وهي قائمة من ثلاثة أسئلة فقط،هدفها مساعدة المتعلم على تخمين الإجابة الصحيحة.اجعل واحد من الأسئلة المساعدة يصف وظيفة أو شكل أو مواصفات الإجابة الصحيحة إن أمكن ذلك.
-grammar: وهو شرح بسيط للقاعدة النحوية.
-
-Input: اعتمد على القاعدة التالية لتوليد تمرينين مختلفين:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف بحالة المفرد.
-Output: <start_json>[{{"question":"... مغلق.","correct_answer":"الباب","help_questions":["ما هو الشيء الذي عادةً ما يكون له قفل ويمكن فتحه وإغلاقه","ما هو الشيء الذي ندخل منه إلى الغرفة ونخرج منه","هو جسم خشبي صلب، له مقبض وعادةً ما يكون لونه بني،فما هو؟"],"grammar":"اسم ظاهر معرف بأل التعريف بحالة المفرد."}},{{"question":"... من أهم مصادر الطاقة المتجددة.","correct_answer":"الطاقة الشمسية","help_questions":[ "ما هو المصدر الذي يستخدم أشعة الشمس لتوليد الكهرباء؟","ما هو المصدر الذي يعتبر صديق للبيئة ومستدام؟", "ما هو المصدر الذي يستخدم الألواح الشمسية لاستغلال الطاقة؟"],"grammar":"اسم ظاهر معرف بأل التعريف بحالة المفرد."}}]<end_json>
-
-Input: اعتمد على القاعدة التالية لتوليد تمرين واحد:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف بحالة جمع المؤنث السالم.
-Output: <start_json>[{{"question": "... مهمة.","correct_answer":"الواجبات","help_questions":["ما هي الأشياء التي يجب على الطالب إنجازها؟", "ما هي الأشياء التي يجب على الشخص القيام بها؟", "ما هي الأشياء التي تعتبر جزءًا من المهام اليومية؟" ],"grammar":"اسم ظاهر معرف بأل التعريف بحالة المؤنث السالم."}}]<end_json>
-
-Input: اعتمد على القاعدة التالية لتوليد تمرين واحد:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف بحالة المثنى المؤنث.
-Output: <start_json>[{{"question":"... متعاونتان.","correct_answer":"الطبيبتان","help_questions":["من هما الشخصان اللذان يعملان في مجال الصحة؟", "من هما الشخصان اللذان يساعدان المرضى؟", "من هما الشخصان اللذان يرتديان المعطف الأبيض؟" ],"grammar":"اسم ظاهر معرف بأل التعريف بحالة المثنى المؤنث."}}]<end_json>
-
-Input: اعتمد على القاعدة التالية لتوليد تمرين واحد:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف بحالة المثنى المذكر.
-Output: <start_json>[{{"question":"... متفاهمان.","correct_answer":"الزوجان","help_questions":["من هما الشخصان اللذان يعيشان معًا؟", "من هما الشخصان اللذان يتعاونان في الحياة؟", "من هما الشخصان اللذان يشكلان عائلة؟" ],"grammar":"اسم ظاهر معرف بأل التعريف بحالة المثنى المذكر."}}]<end_json>
-
-Input: اعتمد على القاعدة التالية لتوليد تمرينين مختلفين:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف بحالة جمع التكسير.
-Output:  <start_json>[{{"question":"... جميلة.","correct_answer":"الزهور","help_questions":["ما هي النباتات الملونة والمبهجة للعين؟", "ما هي العناصر الطبيعية التي تضفي جمالاً على المكان؟", "ما هي المكونات الأساسية لتزيين الحدائق والمنازل؟" ],"grammar":"المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف بحالة الجمع التكسير."}},{{"question":"... قوية.","correct_answer":"الجسور","help_questions":["ما هي الهياكل الهندسية المصممة لربط الأماكن عبر الأنهار والوديان؟", "ما هي المنشآت الضرورية لتسهيل النقل والتواصل بين المناطق؟", "ما هي الأمثلة البارزة للهندسة المدنية والعمارة؟" ],"grammar":"اسم ظاهر معرف بأل التعريف بحالة الجمع التكسير."}}]<end_json>
-
-Input: اعتمد على القاعدة التالية لتوليد {questions_count}:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل {noun_type}.تأكد من تطابق المبتدأ والخبر.
+question: وهو الجملة الاسمية
+correct_answer: وهو المبتدأ
+{system_prompt_examples}
+Input: اعتمد على القاعدة التالية لتوليد {questions_count} تحقق القاعدة النحوية التالية:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل {noun_type}.
 Output:"""
 
         allam_response = model.generate_text(prompt=prompt_input)
@@ -124,3 +64,74 @@ Output:"""
     except Exception as e:
         print(f"Error: {str(e)}")
         return False
+
+
+# Defining the inferencing input
+def load_help_questions_data(model, keyword):
+    try:
+
+        prompt_input = f"""اكتب ثلاثة أسئلة.
+ابدأ السؤال بإحدى الكلمات المفتاحية التالية (ما،من، كيف، لماذا،أين،متى)
+تنسيق الخرج:
+قدم لي الخرج بالتنسيق التالي:
+<start_json>["...","...","..."]<end_json>
+
+اكتب ثلاثة أسئلة يكون جوابها كلمة (المشروعان)
+<start_json>["ما هما العملان اللذان يتم تنفيذهما بشكل مشترك بين فريقين أو شخصين؟","ما هي الكلمة المرتبطة بمفهوم التعاون والعمل الجماعي؟","ما هي الكلمة المرتبطة بمفهوم التعاون بين الأفراد أو المؤسسات لتحقيق هدف مشترك؟"]<end_json>
+
+
+اكتب ثلاثة أسئلة يكون جوابها كلمة (المطالعة)
+<start_json>["ما هو النشاط الذي يقوم به الشخص عندما يقرأ الكتب أو المواد المكتوبة؟","ما هي الكلمة المرتبطة بمفهوم القراءة والتعلم من النصوص؟","ما هي الكلمة التي تساعد ممارستها على تحسين مهارات اللغة والثقافة؟"]<end_json>
+
+
+اكتب ثلاثة أسئلة يكون جوابها كلمة (السرعة). 
+<start_json>["ما هو العنصر المهم في الأداء الرياضي والتنافسية؟","ما هي الكلمة المرتبطة بمفهوم كفاءة الإنجاز والنشاط؟","ما هي الكلمة المهمة لتحديد الوقت المستغرق لإنجاز مهمة ما؟"]<end_json>
+
+اكتب ثلاثة أسئلة يكون جوابها كلمة ({keyword}). """
+        allam_response = model.generate_text(prompt=prompt_input)
+        print("allam_response: ", allam_response)
+        data, string_result = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
+        append_string_to_file(string_result, snowman_working_directory / 'assets/files/help_questions.txt')
+        return data
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return False
+
+
+# Defining the inferencing input
+def check_questions_correctness(model, sentence="""الوالدان حنون""", type="""مفرد مؤنث"""):
+    try:
+        prompt_input = f"""أجب ب "نعم" أو "لا" فقط
+
+Input: هل المبتدأ في جملة (الكتب مفيدة) هو (مثنى مذكر)
+Output: <start_json>لا<end_json>
+
+
+Input: هل المبتدأ في جملة (الطقس جميل) هو (مثنى مؤنث)
+Output: <start_json>لا<end_json>
+
+Input: هل المبتدأ في جملة (الطالبان مجدان ونشيطان) هو (مثنى مذكر)
+Output: <start_json>نعم<end_json>
+
+Input: هل المبتدأ في جملة (العاملون متفانون في العمل) هو (جمع مذكر)
+Output: <start_json>نعم<end_json>
+
+Input: هل المبتدأ في جملة (الصديقات مستمتعات في الرحلة) هو (جمع مؤنث)
+Output: <start_json>نعم<end_json>
+
+Input: هل المبتدأ في جملة (المعلمان ملتزمان بمتابعة الطلاب) هو (جمع مؤنث)
+Output: <start_json>لا<end_json>
+
+Input: هل المبتدأ في جملة ({sentence}) هو ({type})
+Output:"""
+
+        allam_response = model.generate_text(prompt=prompt_input)
+        print("allam_response: ", allam_response)
+        is_correct = get_substring_delimited_by(allam_response, "<start_json>", "<end_json>")
+        append_string_to_file(is_correct, snowman_working_directory / 'assets/files/check_questions_correctness.txt')
+        return is_correct
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return None

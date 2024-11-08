@@ -95,7 +95,7 @@ def parse_specific_json_response(string, start_marker="<start>", end_marker="<en
 
     search = json.dumps(string)
     data = json.loads(search)
-    data = json.loads(data)
+    # data = json.loads(data)
     print("data : ", data)
     print(type(data))
     return data, search
