@@ -129,6 +129,7 @@ Output:"""
         allam_response = model.generate_text(prompt=prompt_input)
         print("allam_response: ", allam_response)
         is_correct = get_substring_delimited_by(allam_response, "<start_json>", "<end_json>")
+        is_correct = is_correct.strip()
         append_string_to_file(is_correct, snowman_working_directory / 'assets/files/check_questions_correctness.txt')
         return is_correct
 

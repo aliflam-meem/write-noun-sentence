@@ -408,4 +408,4 @@ class SnowmanGame:
         return fuzz.ratio(self.get_current_correct_answer(), answer_box.text.strip()) == 100
 
     def generate_help_questions(self, correct_answer):
-        return load_help_questions_data(correct_answer)
+        return load_help_questions_data(self.LLM_help_model, correct_answer)
