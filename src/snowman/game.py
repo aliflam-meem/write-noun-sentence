@@ -169,6 +169,7 @@ class SnowmanGame:
         # Format the question text (replace series of periods with underscores)
         question = question_dict["question"]
         question = re.sub(r'(\.\.\.)+', "_______ ", question)
+        # question = "_____" + question
 
         # Determine the number of words in the correct answer
         num_of_answer_words = len(question_dict["correct_answer"].split())
