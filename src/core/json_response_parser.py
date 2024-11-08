@@ -93,12 +93,14 @@ def parse_specific_json_response(string, start_marker="<start>", end_marker="<en
         "] ", "]").replace("\n", "").replace("\t", "")
     string = re.sub(' +', " ", string)
 
-    search = json.dumps(string)
-    data = json.loads(search)
+    # search = json.dumps(string)
+    # data = json.loads(search)
     # data = json.loads(data)
+    data = json.loads(string)
     print("data : ", data)
     print(type(data))
-    return data, search
+    # return data, search
+    return data, string
 
 
 def get_substring_delimited_by(text, start_word, end_word):

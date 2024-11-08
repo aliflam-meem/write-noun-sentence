@@ -43,7 +43,7 @@ def load_game_data(model, system_prompt_examples, input_examples,
 
         prompt_input = f"""لنلعب لعبة باللغة العربية وهي تأليف جملة اسمية بسيطة. المطلوب إكمال جملة منقوصة المبتدأ.
 تذكّر أن المبتدأ هو الاسم المرفوع الذي نبدأ به الكلام،ونخبر عنه باسم آخر ليتم المعنى، يسمى الخبر،ومن المبتدأ والخبر تتألف ما يسمى (الجملة الاسمية).
-{input_examples}
+{system_prompt_examples}
 ألّف جملة اسمية بسيطة ذات معنى.
 احذف المبتدأ من الجملة الاسمية واجعل الخبر على شكل نكرة.
 المبتدأ هو كلمة واحدة.
@@ -51,7 +51,7 @@ def load_game_data(model, system_prompt_examples, input_examples,
 قدم لي الخرج بتنسيق JSON سليم، حيث يكون لكل سؤال كائن يحتوي على الحقول التالية:
 question: وهو الجملة الاسمية
 correct_answer: وهو المبتدأ
-{system_prompt_examples}
+{input_examples}
 Input: اعتمد على القاعدة التالية لتوليد {questions_count} تحقق القاعدة النحوية التالية:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل {noun_type}.
 Output:"""
 

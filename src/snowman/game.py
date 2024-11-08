@@ -219,7 +219,7 @@ class SnowmanGame:
 
     def initialize_game_with_questions(self):
         for n_type in snowman_levels[self.level]["noun_types"]:
-            print(n_type)
+            print(" The type is ", n_type)
             system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[n_type]
             input_examples = INPUT_EXAMPLES[n_type]
             self.questions.extend(self.generate_questions_data(system_prompt_examples, input_examples, n_type))
