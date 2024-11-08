@@ -51,6 +51,7 @@ def load_game_data(model, system_prompt_examples, input_examples,
 قدم لي الخرج بتنسيق JSON سليم، حيث يكون لكل سؤال كائن يحتوي على الحقول التالية:
 question: وهو الجملة الاسمية
 correct_answer: وهو المبتدأ
+<start_json>[{{"question":"...","correct_answer":"..."}},...]<end_json>
 {input_examples}
 Input: اعتمد على القاعدة التالية لتوليد {questions_count} تحقق القاعدة النحوية التالية:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل {noun_type}.
 Output:"""
