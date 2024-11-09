@@ -5,6 +5,7 @@ from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, TITLE_HEIGHT, screen, tit
     subtitle_font, body_font, BUTTON_COLOR, BUTTON_HEIGHT, BUTTON_WIDTH, LONG_PADDING, HEALTH_POINT_IMAGE, \
     numbering_font, DISABLED_BUTTON_COLOR, silverfiligree, ivory, maroon, \
     HIGHLIGHT_BUTTON_COLOR, SMALL_PADDING, BLACK, LOADING_IMAGE
+from src.core.drawTextRightAligned import drawText
 
 
 def draw_title(title, title_height=TITLE_HEIGHT, title_color=ivory, padding=160,
@@ -257,3 +258,32 @@ def load_loading_image(text_message='جار تحميل اللعبة', text_color
                        SCREEN_HEIGHT // 2 - text.get_height() // 2 + LONG_PADDING))
     screen.blit(transformed_loading_image, (SCREEN_WIDTH * 0.5 - LONG_PADDING // 2, SCREEN_HEIGHT * 0.5 - LONG_PADDING))
     pygame.display.update()
+
+
+def draw_wrapped_text_box(text, x, y, width, height, box_color=None, text_color=maroon, add_border=False):
+    # Create a rectangle for the input box
+    input_box_rect = pygame.Rect(x, y, width, height)
+
+    # Draw the input box rectangle
+    if box_color is not None:
+        pygame.draw.rect(screen, box_color, input_box_rect)
+
+    # Draw the border around the input box if needed
+    if add_border:
+        pygame.draw.rect(screen, "black", input_box_rect, 2)  # 2 is the border width
+
+    # Render the input text
+    text_surface = body_font.render(text, True, text_color)
+
+    # Use the topright attribute to align the text to the right within the input box
+    padding = 10  # Add padding to the text position
+    text_rect = text_surface.get_rect(
+        topright=(input_box_rect.right - padding, input_box_rect.top + padding))  # Get the rect for the text surface
+    # text_rect.  # Align top-right with padding
+
+    # Blit the text surface onto the input box
+    # screen.blit(text_surface, text_rect)
+    drawText(screen, text, maroon, text_rect, body_font, 1, True)
+
+    # Return the input box rectangle for further interactions (e.g., detecting clicks)
+    return input_box_rect

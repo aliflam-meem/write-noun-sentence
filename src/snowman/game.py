@@ -284,7 +284,7 @@ class SnowmanGame:
             num_words = "أكثر من كلمتين"
 
         # Format the question text with the word count description
-        question = f"املأ الفراغ التالي ب{num_words} بالمبتدأ المناسب.\n{question}"
+        question = f" املأ الفراغ التالي ب {num_words} بالمبتدأ المناسب. {question} "
 
         # Update the formatted question back into the dictionary
         question_dict["question"] = question
