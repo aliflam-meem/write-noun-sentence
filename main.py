@@ -6,16 +6,14 @@ from src.constants import screen, GAME_SCREEN_BG, SCREEN_WIDTH, BUTTON_WIDTH, BU
     MENU_BUTTON_WIDTH, SMALL_PADDING, MAIN_MENU, GAMES_BOARD_SCREEN, \
     WHACK_A_MOLE_GAME, JAR_BINGO_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME, gainsboro, GAME_SCREEN_SECONDARY_BG, \
     SNOWMAN_LOADING_SCREEN, maroon
-from src.core.audio_player import play_background_sound, pause_background_sound
+from src.core.audio_player import pause_background_sound
 from src.core.utility import draw_title, draw_back_button, draw_button, load_loading_image
-from src.jar_bingo.constants import BACKGROUND_SEA_SHP
 from src.jar_bingo.game import JBGameComponents
 from src.jar_bingo.game_utils import load_jar_bingo_game_thumbnail
 from src.snowman.constants import snowman_levels_keys, snowman_levels
 from src.snowman.game import SnowmanGame
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
     load_snowman_game_thumbnail, snowman_loading_game_screen
-from src.whack_a_mole.constants import WM_MUSIC
 from src.whack_a_mole.game import WhackaMoleGame
 from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail, display_game_result
 
@@ -120,18 +118,18 @@ def main():
     running = True
     snowman_current_game = SnowmanGame()
     whack_a_mole_game = WhackaMoleGame()
-    
-    #jar_bingo_game
+
+    # jar_bingo_game
     jar_bingo_game = JBGameComponents()
-    play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
-    pause_background_sound(True)
+    # play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
+    # pause_background_sound(True)
     bingo_bg_sound_state = True
     jar_bingo_initial = True
     # -----------------
     # screen.fill("black")  # Set background color of the screen (blocks my screen for some reason?So I moved it outside the while so it doesn't get displayed each time)
 
-    #play_background_sound(WM_MUSIC, volume=0.5)
-    #pause_background_sound(True)
+    # play_background_sound(WM_MUSIC, volume=0.5)
+    # pause_background_sound(True)
     while running:
 
         # Handle different screens based on game state

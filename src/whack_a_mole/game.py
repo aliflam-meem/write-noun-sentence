@@ -137,7 +137,7 @@ class Mole:
         self.mole_y = 0
         self.word_x = 0
         self.word_y = 0
-        self.speed = 1
+        self.speed = 3
         self.hole_num = 0
         self.hole_row = 0
         self.move = False
