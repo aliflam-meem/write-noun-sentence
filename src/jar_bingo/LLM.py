@@ -199,10 +199,13 @@ def get_questions(model,  _diff_level, _lvl_prep):
             print("in: elif correct_answer: ب in  generated_response or correct_answer")
             append_string_to_file("Missing prep subject", "src/jar_bingo/assets/jar_bingo_questions.txt")
             while processed_response_problem:
+                #
                 if processed_response.get("correct_answer") not in prepositions_2 and processed_response.get("correct_answer")[0] not in prepositions_single_letters:
+                    generated_response = model.generate_text(prompt=prompt_input)  # guardrails=False
                     processed_response, prep_parts_list = parse_coupled_json_response(generated_response, "<start>", "<end>")
                     print("processed_response:", processed_response)
                     processed_response_problem = True
+                    continue
                 elif processed_response.get("correct_answer") == "ب" or processed_response.get("correct_answer") =="ك" or processed_response.get("correct_answer") == "ل":
                     #incorrect correct_answer, generated only single_prep_letters
                     #elif detect_s_and_r_sentences(sexual_beh_and_racism_detection_model, processed_response.get("sentence")) == "نعم":
@@ -212,6 +215,7 @@ def get_questions(model,  _diff_level, _lvl_prep):
                     processed_response, prep_parts_list = parse_coupled_json_response(generated_response, "<start>", "<end>")
                     print("processed_response:", processed_response)
                     processed_response_problem = True
+                    continue
                     
                 else:
                     processed_response_problem = False
@@ -276,3 +280,7 @@ def detect_s_and_r_sentences(model,_sentence):
     generated_response = model.generate_text(prompt=prompt_input)  # guardrails=False
     string = split_response_string(generated_response, '<start>', '<end>')
     return string
+
+
+def dfummy():
+    print("do smth")
