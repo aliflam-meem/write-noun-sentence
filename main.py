@@ -121,8 +121,8 @@ def main():
 
     # jar_bingo_game
     jar_bingo_game = JBGameComponents()
-    # play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
-    # pause_background_sound(True)
+    play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
+    pause_background_sound(True)
     bingo_bg_sound_state = True
     jar_bingo_initial = True
     # -----------------
@@ -375,7 +375,7 @@ def main():
 
         elif game_state == JAR_BINGO_GAME:
             if bingo_bg_sound_state:#resume the bg sound.
-                pause_background_sound(False)
+                pause_background_sound(True)#False
             running, game_state, bingo_bg_sound_state  = jar_bingo_game.play_jar_bingo_game(running, back_button, JAR_BINGO_GAME)
             if game_state != JAR_BINGO_GAME:
                 pause_background_sound(True)
