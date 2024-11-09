@@ -329,7 +329,8 @@ class SnowmanGame:
         return open_questions
 
     def get_current_grammar(self):
-        return self.questions[self.question_index]["grammar"]
+        # return self.questions[self.question_index]["grammar"]
+        return ""
 
     def get_current_melting_snowman_image(self):
         return self.melting_snowman_images[self.melting_image_index]
