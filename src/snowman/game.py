@@ -136,76 +136,95 @@ class SnowmanGame:
 
     def generate_questions_data(self, system_prompt_examples, input_examples, noun_type, total_questions_count=None):
         print("generate_questions_data")
-        # Initialize the list to store all questions
         questions = []
-
-        # Process the questions in chunks of x number
         total_questions_count = self.questions_count_per_type if total_questions_count is None else total_questions_count
+        collected_count = 0  # Track the number of correct questions collected
 
-        # Generate questions in batches of 5 until we run out of questions
-        for i in range(0, total_questions_count, self.max_questions_count_per_type):
-            # Determine how many questions to generate in the current batch
-            questions_to_generate = min(self.max_questions_count_per_type, total_questions_count - i)
-            print("questions_to_generate ", questions_to_generate)
-            # Format the questions count string (assuming it's for UI or logging)
+        # Continue generating until we have the required number of correct questions
+        while collected_count < total_questions_count:
+            # Calculate the remaining questions needed
+            remaining_count = total_questions_count - collected_count
+            questions_to_generate = min(self.max_questions_count_per_type, remaining_count)
+            print("Questions to generate in this batch:", questions_to_generate)
+
             questions_count_as_string = format_questions_count_string(questions_to_generate)
-
-            # Load the question data for the current batch
-            questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples, input_examples, noun_type,
-                                            questions_count_as_string)
+            questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples, input_examples,
+                                            noun_type, questions_count_as_string)
 
             # Retry if questions_data is not valid (loop until a valid dictionary or list is returned)
             while isinstance(questions_data, bool):
                 questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples, input_examples,
                                                 noun_type, questions_count_as_string)
 
-            # Process the questions depending on their type (list or dictionary)
-            # questions = []  # List to store only correct questions
-
             if isinstance(questions_data, dict):
-                # Handle the case when questions_data is a single dictionary
-                while True:
-                    # Check if the question is correct
+                # Ensure we get a single correct question
+                while collected_count < total_questions_count:
                     is_correct_question = check_questions_correctness(self.LLM_correctness_model,
                                                                       questions_data['question'],
                                                                       SINGULARITY_FORMATS[noun_type])
                     if is_correct_question == "نعم":
-                        # Format and store the correct question
                         self.format_questions_data(questions_data)
                         questions.append(questions_data)
-                        break  # Exit loop as the correct question has been found
+                        collected_count += 1
+                        break
                     else:
-                        # Replace with a new question data
                         questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples,
-                                                        input_examples,
-                                                        noun_type, questions_count_as_string)
+                                                        input_examples, noun_type, "1")
 
             elif isinstance(questions_data, list):
-                # Process each question in the list individually
                 for question_dict in questions_data:
+                    if collected_count >= total_questions_count:
+                        break
+
                     while True:
-                        # Check if the question is correct
                         is_correct_question = check_questions_correctness(self.LLM_correctness_model,
                                                                           question_dict['question'],
                                                                           SINGULARITY_FORMATS[noun_type])
                         if is_correct_question == "نعم":
-                            # Format and add the correct question to the list
                             self.format_questions_data(question_dict)
                             questions.append(question_dict)
-                            break  # Move to the next question once it's correct
+                            collected_count += 1
+                            break
                         else:
-                            # Replace this question with a new one and check it
                             question_dict = load_game_data(self.LLM_questions_model, system_prompt_examples,
-                                                           input_examples,
-                                                           noun_type, "1")  # Load one new question for replacement
+                                                           input_examples, noun_type, "1")
 
-            # Store the collected correct questions in the original questions list
-            # questions.extend(questions)
+        # Generate help questions for each collected question
+        for data in questions:
+            correct_answer = data["correct_answer"]
+            data['help_questions'] = self.generate_help_questions(correct_answer)
 
-            for data in questions:
-                correct_answer = data["correct_answer"]
-                data['help_questions'] = self.generate_help_questions(correct_answer)
         return questions
+
+    def initialize_game_with_questions(self):
+        # Generate questions for each noun type while tracking the total generated
+        for n_type in snowman_levels[self.level]["noun_types"]:
+            system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[n_type]
+            input_examples = INPUT_EXAMPLES[n_type]
+            # Determine how many questions we still need to reach total
+            remaining_needed = self.total_questions_count - len(self.questions)
+            if remaining_needed <= 0:
+                break  # Exit early if we have enough questions
+            # Generate only as many questions as still needed
+            self.questions.extend(
+                self.generate_questions_data(system_prompt_examples, input_examples, n_type, remaining_needed)
+            )
+
+        # Check if more questions are needed and generate if necessary
+        if len(self.questions) < self.total_questions_count:
+            needed_count = self.total_questions_count - len(self.questions)
+            first_noun_type = snowman_levels[self.level]["noun_types"][-1]
+            system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[first_noun_type]
+            input_examples = INPUT_EXAMPLES[first_noun_type]
+            # Generate additional questions to meet the exact count
+            self.questions.extend(
+                self.generate_questions_data(system_prompt_examples, input_examples, first_noun_type, needed_count)
+            )
+
+        # Log time taken for question generation
+        elapsed_time_generation = time.time() - self.start
+        string_to_append = f'The time elapsed for generating {self.total_questions_count} questions is {elapsed_time_generation}'
+        append_string_to_file(string_to_append, snowman_working_directory / 'assets/files/latency.txt')
 
     def format_questions_data(self, question_dict):
         # Strip the correct answer and clean up
@@ -232,26 +251,6 @@ class SnowmanGame:
         # Update the formatted question back into the dictionary
         question_dict["question"] = question
 
-    def initialize_game_with_questions(self):
-        for n_type in snowman_levels[self.level]["noun_types"]:
-            system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[n_type]
-            input_examples = INPUT_EXAMPLES[n_type]
-            self.questions.extend(self.generate_questions_data(system_prompt_examples, input_examples, n_type))
-
-        # Get the first noun type from the current level
-        first_noun_type = snowman_levels[self.level]["noun_types"][-1]
-        # If more questions are needed, genrate more questions so the list reaches the desired count
-        print("len(self.questions) < self.total_questions_count ", len(self.questions), self.total_questions_count)
-        if len(self.questions) < self.total_questions_count:
-            needed_count = self.total_questions_count - len(self.questions)
-            print("needed_count", needed_count)
-            system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[first_noun_type]
-            input_examples = INPUT_EXAMPLES[first_noun_type]
-            self.questions.extend(
-                self.generate_questions_data(system_prompt_examples, input_examples, first_noun_type, needed_count))
-        elapsed_time_generation = time.time() - self.start
-        string_to_append = f'The time elapsed for generating {self.total_questions_count} question is {elapsed_time_generation}'
-        append_string_to_file(string_to_append, snowman_working_directory / 'assets/files/latency.txt')
 
     def load_melting_snowman_images(self):
         img = pygame.image.load(snowman_working_directory / 'assets/images/complete.png')
