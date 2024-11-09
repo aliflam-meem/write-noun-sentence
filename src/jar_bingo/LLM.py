@@ -199,6 +199,7 @@ def get_questions(model,  _diff_level, _lvl_prep):
             print("in: elif correct_answer: ب in  generated_response or correct_answer")
             append_string_to_file("Missing prep subject", "src/jar_bingo/assets/jar_bingo_questions.txt")
             while processed_response_problem:
+                #
                 if processed_response.get("correct_answer") not in prepositions_2 and processed_response.get("correct_answer")[0] not in prepositions_single_letters:
                     generated_response = model.generate_text(prompt=prompt_input)  # guardrails=False
                     processed_response, prep_parts_list = parse_coupled_json_response(generated_response, "<start>", "<end>")
