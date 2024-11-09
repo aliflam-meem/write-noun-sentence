@@ -138,33 +138,32 @@ class SnowmanGame:
         print(f"Generating {total_questions_count} questions for noun type: {noun_type}")
         questions = []
         collected_count = 0  # Track the number of correct questions collected
-        max_retries = 5  # Set the maximum number of retries for loading data
+        max_retries = 10  # Increased max retries to allow more attempts
 
         # Continue generating until we have the required number of correct questions
         while collected_count < total_questions_count:
-            # Calculate the remaining questions needed
             remaining_count = total_questions_count - collected_count
             questions_to_generate = min(self.max_questions_count_per_type, remaining_count)
             print("Questions to generate in this batch:", questions_to_generate)
 
             questions_count_as_string = format_questions_count_string(questions_to_generate)
 
-            # Retry loop to handle loading failures
+            # Retry loop to handle loading failures, with increased max_retries
+            questions_data = None
             for attempt in range(max_retries):
                 questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples, input_examples,
                                                 noun_type, questions_count_as_string)
                 if questions_data is not False:
                     break  # Exit retry loop if data is successfully loaded
                 else:
-                    print(f"Load failed for noun type {noun_type}. Retrying {attempt + 1}/{max_retries}...")
+                    print(f"Load failed for noun type '{noun_type}', retrying {attempt + 1}/{max_retries}...")
 
-            # Check if data was loaded successfully after retries
             if questions_data is False:
-                print(f"Failed to load questions after {max_retries} attempts for noun type {noun_type}.")
-                continue  # Optionally skip this batch and move to the next attempt
+                print(f"Failed to load questions after {max_retries} attempts for noun type '{noun_type}'.")
+                break  # Exit if we can't load data after max retries
 
             if isinstance(questions_data, dict):
-                # Ensure we get a single correct question
+                # If it's a dictionary, handle single question
                 while collected_count < total_questions_count:
                     is_correct_question = check_questions_correctness(self.LLM_correctness_model,
                                                                       questions_data['question'],
@@ -175,20 +174,21 @@ class SnowmanGame:
                         collected_count += 1
                         break
                     else:
-                        # Retry loading a new question in case of an incorrect one
+                        # Retry loading a new question
                         for attempt in range(max_retries):
                             questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples,
-                                                            input_examples, noun_type)
+                                                            input_examples, noun_type, "1")
                             if questions_data is not False:
                                 break
                             else:
                                 print(f"Load failed for replacement question, attempt {attempt + 1}/{max_retries}")
 
                         if questions_data is False:
-                            print("Failed to load a replacement question after maximum retries.")
+                            print("Failed to load a replacement question after max retries.")
                             break
 
             elif isinstance(questions_data, list):
+                # If it's a list, handle multiple questions
                 for question_dict in questions_data:
                     if collected_count >= total_questions_count:
                         break
@@ -203,10 +203,10 @@ class SnowmanGame:
                             collected_count += 1
                             break
                         else:
-                            # Retry loading a new question in case of an incorrect one
+                            # Retry loading a new question
                             for attempt in range(max_retries):
                                 question_dict = load_game_data(self.LLM_questions_model, system_prompt_examples,
-                                                               input_examples, noun_type)
+                                                               input_examples, noun_type, "1")
                                 if question_dict is not False:
                                     break
                                 else:
@@ -214,7 +214,7 @@ class SnowmanGame:
                                         f"Load failed for replacement question in list, attempt {attempt + 1}/{max_retries}")
 
                             if question_dict is False:
-                                print("Failed to load a replacement question after maximum retries.")
+                                print("Failed to load a replacement question after max retries.")
                                 break
 
         # Generate help questions for each collected question
@@ -224,42 +224,34 @@ class SnowmanGame:
 
         return questions
 
-
     def initialize_game_with_questions(self):
-        # Get the noun types for the current level
         noun_types = snowman_levels[self.level]["noun_types"]
         num_noun_types = len(noun_types)
 
-        # Determine the base count per noun type and handle any remainder
         base_count_per_type = self.total_questions_count // num_noun_types
         extra_questions = self.total_questions_count % num_noun_types
 
-        # Stage 1: Generate the requested number of questions for each noun type
         for idx, n_type in enumerate(noun_types):
-            # Calculate how many questions to generate for this noun type
             questions_for_type = base_count_per_type + (1 if idx < extra_questions else 0)
 
             system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[n_type]
             input_examples = INPUT_EXAMPLES[n_type]
 
-            # Generate questions for this noun type
             generated_questions = self.generate_questions_data(system_prompt_examples, input_examples, n_type,
                                                                questions_for_type)
             self.questions.extend(generated_questions)
 
-        # Stage 2: Calculate any remaining questions needed to reach total count
+        # Check if we generated enough questions and attempt to fulfill any remaining needed
         remaining_needed = self.total_questions_count - len(self.questions)
         if remaining_needed > 0:
             final_noun_type = noun_types[-1]
             system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[final_noun_type]
             input_examples = INPUT_EXAMPLES[final_noun_type]
 
-            # Generate remaining questions specifically for the last noun type
             additional_questions = self.generate_questions_data(system_prompt_examples, input_examples, final_noun_type,
                                                                 remaining_needed)
             self.questions.extend(additional_questions)
 
-        # Log time taken for question generation
         elapsed_time_generation = time.time() - self.start
         string_to_append = f'The time elapsed for generating {self.total_questions_count} questions is {elapsed_time_generation}'
         append_string_to_file(string_to_append, snowman_working_directory / 'assets/files/latency.txt')
