@@ -8,7 +8,7 @@
   ```python
   pip install -r requirments.txt
   ```
-- Run the following command (if .exe is not provided):
+- Run the following command (if .exe is not provided): (make sure you're in \write-noun-sentence )
   ```python
   python -m main
   ```
