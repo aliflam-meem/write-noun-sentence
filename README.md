@@ -5,7 +5,13 @@
 - تستفيد المنصة من نموذج ALLaM لتوليد محتوى تعليمي يتناول مهارات اللغة العربية المختلفة مثل اكتساب المفردات وممارسة القواعد وإتقان الكتابة.
 ## Installation
 - Install requirments.
-- Run the main file (if .exe is not provided).
+  ```python
+  pip install -r requirments.txt
+  ```
+- Run the following command (if .exe is not provided):
+  ```python
+  python -m main
+  ```
 
 ## الألعاب:
 ###  لعبة الرجل الثلجي
