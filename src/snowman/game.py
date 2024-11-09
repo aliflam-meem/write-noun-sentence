@@ -155,39 +155,52 @@ class SnowmanGame:
                                             questions_count_as_string)
 
             # Retry if questions_data is not valid (loop until a valid dictionary or list is returned)
-            while type(questions_data) is bool:
+            while isinstance(questions_data, bool):
                 questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples, input_examples,
-                                                noun_type,
-                                                questions_count_as_string)
+                                                noun_type, questions_count_as_string)
 
             # Process the questions depending on their type (list or dictionary)
-            wrong_question_existed = True
-            while wrong_question_existed:
-                if isinstance(questions_data, dict):
-                    # Check questions correctness
+            # questions = []  # List to store only correct questions
+
+            if isinstance(questions_data, dict):
+                # Handle the case when questions_data is a single dictionary
+                while True:
+                    # Check if the question is correct
                     is_correct_question = check_questions_correctness(self.LLM_correctness_model,
                                                                       questions_data['question'],
                                                                       SINGULARITY_FORMATS[noun_type])
                     if is_correct_question == "نعم":
-                        # Format and update the dictionary directly
+                        # Format and store the correct question
                         self.format_questions_data(questions_data)
-                        questions.append(questions_data)  # Store the formatted question
-                        wrong_question_existed = False
+                        questions.append(questions_data)
+                        break  # Exit loop as the correct question has been found
                     else:
+                        # Replace with a new question data
                         questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples,
                                                         input_examples,
-                                                        noun_type,
-                                                        questions_count_as_string)
-                elif isinstance(questions_data, list):
-                    # Process each question in the list
-                    for question_dict in questions_data:
-                        # Check questions correctness
+                                                        noun_type, questions_count_as_string)
+
+            elif isinstance(questions_data, list):
+                # Process each question in the list individually
+                for question_dict in questions_data:
+                    while True:
+                        # Check if the question is correct
                         is_correct_question = check_questions_correctness(self.LLM_correctness_model,
                                                                           question_dict['question'],
                                                                           SINGULARITY_FORMATS[noun_type])
                         if is_correct_question == "نعم":
-                            self.format_questions_data(question_dict)  # Format each question
-                            questions.append(question_dict)  # Add all formatted questions to the list
+                            # Format and add the correct question to the list
+                            self.format_questions_data(question_dict)
+                            questions.append(question_dict)
+                            break  # Move to the next question once it's correct
+                        else:
+                            # Replace this question with a new one and check it
+                            question_dict = load_game_data(self.LLM_questions_model, system_prompt_examples,
+                                                           input_examples,
+                                                           noun_type, "1")  # Load one new question for replacement
+
+            # Store the collected correct questions in the original questions list
+            # questions.extend(questions)
 
             for data in questions:
                 correct_answer = data["correct_answer"]
