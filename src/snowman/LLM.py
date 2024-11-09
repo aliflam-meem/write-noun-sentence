@@ -90,7 +90,6 @@ def load_help_questions_data(model, keyword):
 
 اكتب ثلاثة أسئلة يكون جوابها كلمة ({keyword}). """
         allam_response = model.generate_text(prompt=prompt_input)
-        print("allam_response: ", allam_response)
         data, string_result = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
         append_string_to_file(string_result, snowman_working_directory / 'assets/files/help_questions.txt')
         return data
@@ -128,7 +127,6 @@ Input: هل المبتدأ في جملة ({sentence}) هو ({type})
 Output:"""
 
         allam_response = model.generate_text(prompt=prompt_input)
-        print("allam_response: ", allam_response)
         is_correct = get_substring_delimited_by(allam_response, "<start_json>", "<end_json>")
         is_correct = is_correct.strip()
         append_string_to_file(is_correct, snowman_working_directory / 'assets/files/check_questions_correctness.txt')

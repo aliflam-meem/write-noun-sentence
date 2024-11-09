@@ -161,34 +161,37 @@ class SnowmanGame:
                                                 questions_count_as_string)
 
             # Process the questions depending on their type (list or dictionary)
-            if isinstance(questions_data, dict):
-                print(isinstance(questions_data, dict))
-                # Check questions correctness
-                is_correct_question = check_questions_correctness(self.LLM_correctness_model,
-                                                                  questions_data['question'],
-                                                                  SINGULARITY_FORMATS[noun_type])
-                print("is_correct_question", is_correct_question)
-                if is_correct_question == "نعم":
-                    # Format and update the dictionary directly
-                    self.format_questions_data(questions_data)
-                    questions.append(questions_data)  # Store the formatted question
-            elif isinstance(questions_data, list):
-                print(isinstance(questions_data, list))
-                # Process each question in the list
-                for question_dict in questions_data:
+            wrong_question_existed = True
+            while wrong_question_existed:
+                if isinstance(questions_data, dict):
                     # Check questions correctness
                     is_correct_question = check_questions_correctness(self.LLM_correctness_model,
-                                                                      question_dict['question'],
+                                                                      questions_data['question'],
                                                                       SINGULARITY_FORMATS[noun_type])
-                    print("is_correct_question", is_correct_question)
                     if is_correct_question == "نعم":
-                        self.format_questions_data(question_dict)  # Format each question
-                        questions.append(question_dict)  # Add all formatted questions to the list
+                        # Format and update the dictionary directly
+                        self.format_questions_data(questions_data)
+                        questions.append(questions_data)  # Store the formatted question
+                        wrong_question_existed = False
+                    else:
+                        questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples,
+                                                        input_examples,
+                                                        noun_type,
+                                                        questions_count_as_string)
+                elif isinstance(questions_data, list):
+                    # Process each question in the list
+                    for question_dict in questions_data:
+                        # Check questions correctness
+                        is_correct_question = check_questions_correctness(self.LLM_correctness_model,
+                                                                          question_dict['question'],
+                                                                          SINGULARITY_FORMATS[noun_type])
+                        if is_correct_question == "نعم":
+                            self.format_questions_data(question_dict)  # Format each question
+                            questions.append(question_dict)  # Add all formatted questions to the list
 
             for data in questions:
                 correct_answer = data["correct_answer"]
                 data['help_questions'] = self.generate_help_questions(correct_answer)
-        print(questions)
         return questions
 
     def format_questions_data(self, question_dict):
@@ -198,7 +201,6 @@ class SnowmanGame:
         # Format the question text (replace series of periods with underscores)
         question = question_dict["question"]
         question = re.sub(rf"\b{question_dict['correct_answer']}\b", "_______ ", question)
-        print("questions after formating", question)
 
         # Determine the number of words in the correct answer
         num_of_answer_words = len(question_dict["correct_answer"].split())
@@ -219,7 +221,6 @@ class SnowmanGame:
 
     def initialize_game_with_questions(self):
         for n_type in snowman_levels[self.level]["noun_types"]:
-            print(" The type is ", n_type)
             system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[n_type]
             input_examples = INPUT_EXAMPLES[n_type]
             self.questions.extend(self.generate_questions_data(system_prompt_examples, input_examples, n_type))
@@ -227,6 +228,7 @@ class SnowmanGame:
         # Get the first noun type from the current level
         first_noun_type = snowman_levels[self.level]["noun_types"][-1]
         # If more questions are needed, genrate more questions so the list reaches the desired count
+        print("len(self.questions) < self.total_questions_count ", len(self.questions), self.total_questions_count)
         if len(self.questions) < self.total_questions_count:
             needed_count = self.total_questions_count - len(self.questions)
             print("needed_count", needed_count)

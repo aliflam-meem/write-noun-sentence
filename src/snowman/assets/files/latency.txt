@@ -81,3 +81,5 @@ The time elapsed for setting up the snowman model is 7.414320707321167
 The time elapsed for setting up the snowman model is 8.344837427139282
 ********* 
 The time elapsed for setting up the snowman model is 6.704175233840942
+********* 
+The time elapsed for setting up the snowman model is 7.678095817565918
