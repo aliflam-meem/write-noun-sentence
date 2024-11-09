@@ -199,13 +199,13 @@ def draw_score_and_health(score, x=30, y=30, health_points=2, max_score=100, tex
 
 def format_questions_count_string(count=1):
     if count == 1:
-        return "تمرين واحد"
+        return "جملة واحدة"
     elif count == 2:
-        return "تمرينين مختلفين"
+        return "جملتين مختلفتين"
     elif count > 2 and count <= 10:
-        return f"""{count} تمارين مختلفة"""
+        return f"""{count} جمل مختلفة"""
     elif count > 10:
-        return f"""{count} تمرين مختلف"""
+        return f"""{count} جملة مختلفة"""
 
 
 def load_image(filename, size):

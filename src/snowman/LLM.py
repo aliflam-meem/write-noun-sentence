@@ -38,7 +38,7 @@ def set_model(parameters):
 # Defining the inferencing input
 def load_game_data(model, system_prompt_examples, input_examples,
                    noun_type="""اسم ظاهر معرف بأل التعريف بحالة جمع التكسير""",
-                   questions_count="""تمرين واحد""", ):
+                   questions_count="""جملة واحدة""", ):
     try:
 
         prompt_input = f"""لنلعب لعبة باللغة العربية وهي تأليف جملة اسمية بسيطة. المطلوب إكمال جملة منقوصة المبتدأ.
