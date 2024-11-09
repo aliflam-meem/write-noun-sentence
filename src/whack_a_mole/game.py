@@ -1,6 +1,7 @@
 import os
 import random
 
+import mishkal.tashkeel
 import pygame
 from gtts import gTTS
 from pygame import mixer
@@ -11,8 +12,9 @@ from src.constants import SCREEN_HEIGHT, SCREEN_WIDTH, screen, body_font, SMALL_
     YOU_WIN_AUDIO, YOU_LOST_AUDIO
 from src.core.audio_player import play_sound, pause_background_sound
 from src.core.utility import draw_score_and_health, draw_title, draw_button, load_image
+from src.whack_a_mole.LLM import load_whack_a_mole_data
 from src.whack_a_mole.constants import *
-import mishkal.tashkeel
+
 
 # from LLM import load_whack_a_mole_data
 
