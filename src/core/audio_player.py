@@ -11,7 +11,7 @@ def pause_background_sound(pause):
         pygame.mixer.music.pause()
     else:
        pygame.mixer.music.unpause()
-    
+
 
 def stop_background_sound():
     pygame.mixer.music.stop()

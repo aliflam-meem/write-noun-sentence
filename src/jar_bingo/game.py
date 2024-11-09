@@ -1,7 +1,10 @@
+from src.constants import RED, GAMES_BOARD_SCREEN, ORANGE
+from src.core.utility import draw_title, draw_back_button, draw_score_and_health, \
+    draw_sound_button
 import pygame
 from src.jar_bingo.constants import JR_TITLE_HEIGHT
 from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, RED, GAMES_BOARD_SCREEN, ORANGE, maroon
-from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, RED, GAMES_BOARD_SCREEN, ORANGE, maroon 
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, RED, GAMES_BOARD_SCREEN, ORANGE, maroon
 from src.core.utility import draw_title, draw_back_button, draw_button, load_loading_image, draw_score_and_health
 from src.core.json_response_parser import *
 from src.core.audio_player import *
@@ -97,9 +100,9 @@ class JBGameComponents:
         # score and health
         draw_score_and_health(self.score, x=900, y=70, health_points=3, max_score=100, text_color=TURQUOISE_BLUE)
         # draw music button
-        self.music_button = draw_button("الصوت", SCREEN_WIDTH - 100, 10, 60, 50, border_width=2, border_color=DARK_TEAL,
-                                        text_color=TURQUOISE_BLUE, button_color=DARK_TEAL, highlight_color=BLACK,
-                                        radius=5)
+        self.music_button = draw_sound_button(SCREEN_WIDTH - 100, 10, 60, 50, border_color=DARK_TEAL,
+                                              text_color=TURQUOISE_BLUE, button_color=DARK_TEAL, highlight_color=BLACK,
+                                              radius=5)
 
     # Main
     def play_jar_bingo_game(self, running, back_button, main_game_state):
@@ -213,7 +216,7 @@ class JBGameComponents:
                         game_over_card(LOSE_MENU_IMG, ORANGE, False, score = self.score, max_score=100)
                         self.game_state = "game_over"
                         game_over_card(LOSE_MENU_IMG, ORANGE, False, score = self.score, max_score=100)
-                        self.game_state = "game_over" 
+                        self.game_state = "game_over"
                     else:
                         print("waiting for the player")
 

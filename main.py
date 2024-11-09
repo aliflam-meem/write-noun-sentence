@@ -6,16 +6,14 @@ from src.constants import screen, GAME_SCREEN_BG, SCREEN_WIDTH, BUTTON_WIDTH, BU
     MENU_BUTTON_WIDTH, SMALL_PADDING, MAIN_MENU, GAMES_BOARD_SCREEN, \
     WHACK_A_MOLE_GAME, JAR_BINGO_GAME, SNOWMAN_LEVELS, SNOWMAN_GAME, gainsboro, GAME_SCREEN_SECONDARY_BG, \
     SNOWMAN_LOADING_SCREEN, maroon
-from src.core.audio_player import play_background_sound, pause_background_sound
+from src.core.audio_player import pause_background_sound
 from src.core.utility import draw_title, draw_back_button, draw_button, load_loading_image
-from src.jar_bingo.constants import BACKGROUND_SEA_SHP
 from src.jar_bingo.game import JBGameComponents
 from src.jar_bingo.game_utils import load_jar_bingo_game_thumbnail
 from src.snowman.constants import snowman_levels_keys, snowman_levels
 from src.snowman.game import SnowmanGame
 from src.snowman.scences import create_input_box, snowman_levels_screen, snowman_game_screen, \
     load_snowman_game_thumbnail, snowman_loading_game_screen
-from src.whack_a_mole.constants import WM_MUSIC
 from src.whack_a_mole.game import WhackaMoleGame
 from src.whack_a_mole.game import whack_a_mole_game_screen, load_mole_game_thumbnail, display_game_result
 
@@ -120,18 +118,18 @@ def main():
     running = True
     snowman_current_game = SnowmanGame()
     whack_a_mole_game = WhackaMoleGame()
-    
-    #jar_bingo_game
+
+    # jar_bingo_game
     jar_bingo_game = JBGameComponents()
-    play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
-    pause_background_sound(True)
+    # play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
+    # pause_background_sound(True)
     bingo_bg_sound_state = True
     jar_bingo_initial = True
     # -----------------
     # screen.fill("black")  # Set background color of the screen (blocks my screen for some reason?So I moved it outside the while so it doesn't get displayed each time)
 
-    #play_background_sound(WM_MUSIC, volume=0.5)
-    #pause_background_sound(True)
+    # play_background_sound(WM_MUSIC, volume=0.5)
+    # pause_background_sound(True)
     while running:
 
         # Handle different screens based on game state
@@ -172,7 +170,7 @@ def main():
                         whack_a_mole_game.reset_game()
 
         elif game_state == SNOWMAN_LEVELS:
-            back_button, al_atareef_button, demonstratives_button, pronouns_button = snowman_levels_screen()
+            back_button, al_atareef_button, demonstratives_button, pronouns_button, sound_button = snowman_levels_screen()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -180,6 +178,9 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         game_state = GAMES_BOARD_SCREEN
+                    if sound_button.collidepoint(event.pos):
+                        pause_background_sound(snowman_current_game.is_sound_on)
+                        snowman_current_game.is_sound_on = not snowman_current_game.is_sound_on
                     if al_atareef_button.collidepoint(event.pos):
                         game_state = SNOWMAN_LOADING_SCREEN
                         show_snowman_loading_screen = True
@@ -209,19 +210,18 @@ def main():
             elif snowman_current_game.get_current_question() != "":
                 game_state = SNOWMAN_GAME
         elif game_state == SNOWMAN_GAME:
-            print(len(snowman_current_game.questions))
             title = snowman_levels[snowman_current_game.level]["title"]
             stop_game_interaction = snowman_current_game.is_win is not None
-            back_button, buttons, submit_answer_button = snowman_game_screen(answer_box,
-                                                                             snowman_current_game.get_current_question(),
-                                                                             title,
-                                                                             snowman_current_game.score,
-                                                                             snowman_current_game.health_points,
-                                                                             snowman_current_game.get_current_melting_snowman_image(),
-                                                                             snowman_current_game.get_current_information(),
-                                                                             snowman_current_game.can_submit_answer(),
-                                                                             snowman_current_game.can_proceed_to_next_question(),
-                                                                             snowman_current_game.is_user_answer_correct)
+            back_button, buttons, submit_answer_button, sound_button = snowman_game_screen(answer_box,
+                                                                                           snowman_current_game.get_current_question(),
+                                                                                           title,
+                                                                                           snowman_current_game.score,
+                                                                                           snowman_current_game.health_points,
+                                                                                           snowman_current_game.get_current_melting_snowman_image(),
+                                                                                           snowman_current_game.get_current_information(),
+                                                                                           snowman_current_game.can_submit_answer(),
+                                                                                           snowman_current_game.can_proceed_to_next_question(),
+                                                                                           snowman_current_game.is_user_answer_correct)
             correct_button, help_button, grammar_button, next_question_button = buttons
 
             # Automatically advance if we are waiting and a new question becomes available
@@ -248,6 +248,9 @@ def main():
                     if back_button.collidepoint(event.pos):
                         game_state = SNOWMAN_LEVELS
                         snowman_current_game.reset_questions_list()
+                    if sound_button.collidepoint(event.pos):
+                        pause_background_sound(snowman_current_game.is_sound_on)
+                        snowman_current_game.is_sound_on = not snowman_current_game.is_sound_on
                     # Handle the game button if the game isn't over and the result screen isn't displayed yet
                     if not stop_game_interaction:
                         if next_question_button.collidepoint(event.pos) and not snowman_current_game.is_game_over():
@@ -261,6 +264,7 @@ def main():
                                 if snowman_current_game.is_answer_valid(answer_box):
                                     if snowman_current_game.reached_last_question():
                                         pause_background_sound(True)
+                                        snowman_current_game.is_sound_on = False
                                         # We've reached the last question already --> show final score and result
                                         snowman_current_game.finalize_game()
                                         snowman_current_game.display_result_and_play_sound()
@@ -274,6 +278,7 @@ def main():
                                         snowman_current_game.move_to_next_snowman_melting_image()
                                         if snowman_current_game.are_all_answers_wrong():
                                             pause_background_sound(True)
+                                            snowman_current_game.is_sound_on = False
                                             # We've reached the last question already or the snowman has melted --> show
                                             # final score and result
                                             snowman_current_game.finalize_game()
@@ -293,6 +298,7 @@ def main():
                 load_loading_image(text_message="", text_color=maroon)
             if snowman_current_game.is_win is not None:
                 pause_background_sound(True)
+                snowman_current_game.is_sound_on = False
                 snowman_current_game.display_result_and_play_sound()
 
         elif game_state == WHACK_A_MOLE_GAME:

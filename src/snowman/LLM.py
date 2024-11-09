@@ -4,7 +4,9 @@ from ibm_watsonx_ai.foundation_models import Model
 # watsonx API connection¶
 # This cell defines the credentials required to work with watsonx API for Foundation Model inferencing.
 # Action: Provide the IBM Cloud personal API key. For details, see documentation.
-from src.core.json_response_parser import parse_specific_json_response
+from src.core.json_response_parser import parse_specific_json_response, get_substring_delimited_by
+from src.core.output import append_string_to_file
+from src.snowman.constants import snowman_working_directory
 
 
 def get_credentials():
@@ -14,21 +16,9 @@ def get_credentials():
     }
 
 
-def set_model(output_queue):
+def set_model(parameters):
     # Defining the model id
     model_id = "sdaia/allam-1-13b-instruct"
-    # Defining the model parameters
-
-    parameters = {
-        "decoding_method": "sample",
-        "max_new_tokens": 600,
-        "stop_sequences": ["<end_json>"],
-        "temperature": 0.6,
-        "top_k": 50,
-        "top_p": 1,
-        "repetition_penalty": 1.09,
-        "timeout": 60,
-    }
 
     # Defining the project id or space id
     project_id = "5637c821-378b-4fc9-b2b7-c96b62f8be4e"
@@ -42,184 +32,106 @@ def set_model(output_queue):
         credentials=get_credentials(),
         project_id=project_id,
     )
-    output_queue.put(model)
+    return model
 
 
 # Defining the inferencing input
-def load_game_data(model, noun_type="""ضمير مفرد""", questions_count="""سؤال واحد"""):
+def load_game_data(model, system_prompt_examples, input_examples,
+                   noun_type="""اسم ظاهر معرف بأل التعريف بحالة جمع التكسير""",
+                   questions_count="""جملة واحدة""", ):
     try:
 
-        prompt_input = f"""لنلعب لعبة باللغة العربية وهي تأليف جملة اسمية بسيطة. المطلوب إكمال جملة تبدأ بأحد أشكال المبتدأ.
+        prompt_input = f"""لنلعب لعبة باللغة العربية وهي تأليف جملة اسمية بسيطة. المطلوب إكمال جملة منقوصة المبتدأ.
+تذكّر أن المبتدأ هو الاسم المرفوع الذي نبدأ به الكلام،ونخبر عنه باسم آخر ليتم المعنى، يسمى الخبر،ومن المبتدأ والخبر تتألف ما يسمى (الجملة الاسمية).
+{system_prompt_examples}
+ألّف جملة اسمية بسيطة ذات معنى.
+احذف المبتدأ من الجملة الاسمية واجعل الخبر على شكل نكرة.
+المبتدأ هو كلمة واحدة.
+تنسيق الخرج:
+قدم لي الخرج بتنسيق JSON سليم، حيث يكون لكل سؤال كائن يحتوي على الحقول التالية:
+question: وهو الجملة الاسمية
+correct_answer: وهو المبتدأ
+<start_json>[{{"question":"...","correct_answer":"..."}},...]<end_json>
+{input_examples}
+Input: اعتمد على القاعدة التالية لتوليد {questions_count} تحقق القاعدة النحوية التالية:المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل {noun_type}.
+Output:"""
 
-        أشكال المبتدأ في الجملة الاسمية:
-        أمثلة عن أشكال المبتدأ
-        - الاسم الصريح المعرف بـأل التعريف،حالة المفرد،مثال:
-        1- الصبر مفتاح الفرج.
-        2- الوطن أعز ما نملك.
-        3- الحقيقة واضحة.
-
-        - الاسم الصريح المعرف بـأل التعريف،حالة المثنى،مثال:
-        1- الطالبتان متفوقتان.
-        2- المهندسان مسافران لحضور المؤتمر
-        3- العالمان مبتكران
-
-        - الاسم الصريح المعرف بـأل التعريف،حالة جمع المؤنث السالم،مثال:
-        - السيارات سريعة.
-        - الفنانات موهوبات
-
-        - الاسم الصريح المعرف بـأل التعريف،حالة جمع المذكر السالم،مثال:
-        1- اللاعبون محترفون.
-        2- المسافرون متعبون.
-        3- المؤمنون متوحدون فيما بينهم.
-        4- الفلاحون بارعون في الزراعة.
-
-        - الاسم الصريح المعرف بـأل التعريف،حالة جمع التكسير،مثال:
-        1- المدن صاخبة.
-        2- الوجوه مبتسمة.
-        3- الثمار لذيذة.
-        4- الجبال شاهقة.
-
-
-        - حالة الضمير المفرد:
-        1- أنت مهندس ماهر.
-        2- هو ابن بار.
-        3- هي ابنة مطيعة.
-        4- أنا قارئ نهم.
-
-        - حالة الضمير المثنى:
-        1- أنتما صديقان حميمان.
-        2- هما أخوان متعاونان.
-        3- أنتما مهندستان مبتكرتان.
-        4- هما طالبتان مجدتان.
-
-        - حالة الضمير الجمع:
-        1- نحن طالبات مجتهدات.
-        2- أنتم مهندسون أذكياء.
-        3- هم أطباء متخصصون.
-        4- هن بنات بارات.
-        5- نحن قراء متشوقون.
-        6- أنتن فتيات حسناوات.
-
-        - اسم الإشارة:
-        1- هذا كتاب جميل.
-        2- هذه قصة مشوقة.
-        3- هؤلاء طلاب مجتهدون.
-        4- أولئك رجال شجعان.
-        5- تلك سماء صافية.
-        6- هذا جبل.
-        7- هذه حديقة.
-
-
-        توصيف اللعبة:
-        سنساعد المتعلم على فهم جميع أشكال المبتدأ.
-        ألّف جملة فيها فراغ واحد في البداية. هذا الفراغ هو المبتدأ.
-        ألّف الجملة بحيث يكون للفراغ أكثر من إجابة صحيحة محتملة.
-        اختر إجابة صحيحة منطقية ومتعلقة بموضوع الجملة.
-        لا تكرر أي خرج
-
-
-        تنسيق الخرج:
-        قدم لي الخرج بتنسيق JSON سليم، حيث يكون لكل سؤال كائن يحتوي على الحقول التالية:
-        question: وهو الجملة ذات الفراغ.
-        correct_answer: وهي الكلمة الصحيحة التي تكمل الجملة.
-        help_questions: وهي قائمة من ثلاثة أسئلة هدفها مساعدة المتعلم على تخمين الإجابة الصحيحة.اجعل واحد من الأسئلة المساعدة سؤال يخبرنا بعدد أحرف الإجابة الصحيحة ثم يصف وظيفة أو شكل أو مواصفات الإجابة الصحيحة إن أمكن ذلك.
-        grammar: وهو شرح بسيط للقاعدة النحوية.
-
-        Input: اكتب جملة فيها فراغ واحد بحيث تحذف المبتدأ ،يطلب من اللاعب إكمالها بكلمة مناسبة تأتي في بداية الجملة. اعتمد على القاعدة التالية لتوليد الخرج:
-        المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف. ولِّد سؤالين.
-        Output: <start_json>
-        [
-          {{
-        	"question": "... مغلق.",
-        	"correct_answer": "الباب",
-        	"help_questions": ["ما هو الشيء الذي عادة ما يكون له قفل ويمكن فتحه وإغلاقه؟", "تما هو الشيء الذي ندخله منه إلى الغرفة ونخرجه منه؟", "هو جسم خشبي صلب، له مقبض وعادةً ما يكون لونه بني، فما هو"],
-        	"grammar": "المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف."
-          }},
-
-          {{
-        	"question": "... من أهم مصادر الطاقة المتجددة.",
-        	"correct_answer": "الطاقة الشمسية",
-        	"help_questions": [
-        "ما هو المصدر الذي يستخدم أشعة الشمس لتوليد الكهرباء؟",
-        "ما هو المصدر الذي يعتبر صديق للبيئة ومستدام؟",
-        "ما هو المصدر الذي يستخدم الألواح الشمسية لاستغلال الطاقة؟"
-        ],
-        	"grammar": "المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف."
-          }}
-        ]
-        <end_json>
-
-
-        Input: اكتب جملة فيها فراغ واحد بحيث تحذف المبتدأ ،يطلب من اللاعب إكمالها بكلمة مناسبة تأتي في بداية الجملة. اعتمد على القاعدة التالية لتوليد الخرج:
-        المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل ضمير مفرد.
-        Output: <start_json>
-        [
-          {{
-        	"السؤال": "... معلمة متفانية.",
-        	"correct_answer": "هي",
-        	"help_questions": ["إذا قلنا أن فاطمة معلمة متفانية، ما هو الضمير الذي يمكن أن يحل محل اسم فاطمة؟", 
-        "تخيل أنك تتحدث عن صديقتك، كيف تصفها؟ استخدم الضمير المناسب", 
-        "ما هو الضمير الذي يشير إلى الاسم المفرد المؤنث؟"
-        ],
-        	"grammar": "المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل ضمير."
-          }}
-        ]
-        <end_json>
-
-        Input: اكتب جملة فيها فراغ واحد بحيث تحذف المبتدأ ،يطلب من اللاعب إكمالها بكلمة مناسبة تأتي في بداية الجملة. اعتمد على القاعدة التالية لتوليد الخرج:
-        المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم إشارة.
-        Output: <start_json>
-        [
-          {{
-        	"question": "... علم بلادي.",
-        	"correct_answer": "هذا",
-        	"help_questions": [
-        ما هي الكلمة التي نستخدمها للإشارة إلى شيء قريب منا ونريده؟",
-              "عندما نريد التعبير عن فخرنا بشيء يمثل بلدنا، ما هي الكلمة التي نستخدمها للإشارة إليه؟",
-              "كلمة مؤلفة من ثلاثة أحرف، وهي الاسم المذكر من اسم الإشارة (هي)؟"
-        ],
-        	"grammar": "المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم إشارة."
-          }}
-        ]
-        <end_json>
-
-        Input: اكتب جملة فيها فراغ واحد بحيث تحذف المبتدأ ،يطلب من اللاعب إكمالها بكلمة مناسبة تأتي في بداية الجملة. اعتمد على القاعدة التالية لتوليد الخرج:
-        المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف. ولِّد سؤالين.
-        Output:  <start_json>
-        [
-          {{
-        	"question": "... مدينة جميلة.",
-        	"correct_answer": "القاهرة",
-        	"help_questions": [
-        "ما هي عاصمة مصر؟",
-        "أي دولة تعتبر ملتقى الحضارات القديمة والحديثة؟",
-        "ما هي المدينة المعروفة بتاريخها العريق وأسواقها النابضة بالحياة؟"
-        ],
-        	"grammar": "المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف."
-          }},
-          {{
-        	"question": "... أسرع حيوان.",
-        	"correct_answer": "الظبي ",
-        	"help_questions": ["ما هو الحيوان الذي يتميز بسرعة تفوق معظم الحيوانات الأخرى؟",
-        "اسم حيوان يبدأ بحرف الظاء ويعتبر أسرع الكائنات الحية؟",
-        "حيوان يتميز بالرشاقة والسرعة العالية، وقد ورد ذكره في القرآن الكريم"
-        ],
-        	"grammar": "المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل اسم ظاهر معرف بأل التعريف."
-          }}
-        ]
-        <end_json>
-
-        Input: اكتب جملة فيها فراغ واحد بحيث تحذف المبتدأ ،يطلب من اللاعب إكمالها بكلمة مناسبة تأتي في بداية الجملة. اعتمد على القاعدة التالية لتوليد الخرج:
-        المبتدأ هو اسم مرفوع تبدأ به الجملة الاسمية ويأتي على شكل {noun_type}. ولِّد {questions_count}.
-        Output:"""
-
-        allam_response = model.generate_text(prompt=prompt_input)#,
-        # guardrails=False)
+        allam_response = model.generate_text(prompt=prompt_input)
         print("allam_response: ", allam_response)
-        data = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
-        # append_string_to_file(data, snowman_working_directory / 'assets/files/generated_questions.txt')
+        data, string_result = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
+        append_string_to_file(string_result, snowman_working_directory / 'assets/files/generated_questions.txt')
         return data
 
     except Exception as e:
         print(f"Error: {str(e)}")
         return False
+
+
+# Defining the inferencing input
+def load_help_questions_data(model, keyword):
+    try:
+
+        prompt_input = f"""اكتب ثلاثة أسئلة.
+ابدأ السؤال بإحدى الكلمات المفتاحية التالية (ما،من، كيف، لماذا،أين،متى)
+تنسيق الخرج:
+قدم لي الخرج بالتنسيق التالي:
+<start_json>["...","...","..."]<end_json>
+
+اكتب ثلاثة أسئلة يكون جوابها كلمة (المشروعان)
+<start_json>["ما هما العملان اللذان يتم تنفيذهما بشكل مشترك بين فريقين أو شخصين؟","ما هي الكلمة المرتبطة بمفهوم التعاون والعمل الجماعي؟","ما هي الكلمة المرتبطة بمفهوم التعاون بين الأفراد أو المؤسسات لتحقيق هدف مشترك؟"]<end_json>
+
+
+اكتب ثلاثة أسئلة يكون جوابها كلمة (المطالعة)
+<start_json>["ما هو النشاط الذي يقوم به الشخص عندما يقرأ الكتب أو المواد المكتوبة؟","ما هي الكلمة المرتبطة بمفهوم القراءة والتعلم من النصوص؟","ما هي الكلمة التي تساعد ممارستها على تحسين مهارات اللغة والثقافة؟"]<end_json>
+
+
+اكتب ثلاثة أسئلة يكون جوابها كلمة (السرعة). 
+<start_json>["ما هو العنصر المهم في الأداء الرياضي والتنافسية؟","ما هي الكلمة المرتبطة بمفهوم كفاءة الإنجاز والنشاط؟","ما هي الكلمة المهمة لتحديد الوقت المستغرق لإنجاز مهمة ما؟"]<end_json>
+
+اكتب ثلاثة أسئلة يكون جوابها كلمة ({keyword}). """
+        allam_response = model.generate_text(prompt=prompt_input)
+        data, string_result = parse_specific_json_response(allam_response, "<start_json>", "<end_json>")
+        append_string_to_file(string_result, snowman_working_directory / 'assets/files/help_questions.txt')
+        return data
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return False
+
+
+# Defining the inferencing input
+def check_questions_correctness(model, sentence="""الوالدان حنون""", type="""مفرد مؤنث"""):
+    try:
+        prompt_input = f"""أجب ب "نعم" أو "لا" فقط
+
+Input: هل المبتدأ في جملة (الكتب مفيدة) هو (مثنى مذكر)
+Output: <start_json>لا<end_json>
+
+
+Input: هل المبتدأ في جملة (الطقس جميل) هو (مثنى مؤنث)
+Output: <start_json>لا<end_json>
+
+Input: هل المبتدأ في جملة (الطالبان مجدان ونشيطان) هو (مثنى مذكر)
+Output: <start_json>نعم<end_json>
+
+Input: هل المبتدأ في جملة (العاملون متفانون في العمل) هو (جمع مذكر)
+Output: <start_json>نعم<end_json>
+
+Input: هل المبتدأ في جملة (الصديقات مستمتعات في الرحلة) هو (جمع مؤنث)
+Output: <start_json>نعم<end_json>
+
+Input: هل المبتدأ في جملة (المعلمان ملتزمان بمتابعة الطلاب) هو (جمع مؤنث)
+Output: <start_json>لا<end_json>
+
+Input: هل المبتدأ في جملة ({sentence}) هو ({type})
+Output:"""
+
+        allam_response = model.generate_text(prompt=prompt_input)
+        is_correct = get_substring_delimited_by(allam_response, "<start_json>", "<end_json>")
+        is_correct = is_correct.strip()
+        append_string_to_file(is_correct, snowman_working_directory / 'assets/files/check_questions_correctness.txt')
+        return is_correct
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return None

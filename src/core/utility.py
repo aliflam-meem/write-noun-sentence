@@ -1,9 +1,11 @@
 # Function to draw the title with background
 import pygame
+
 from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, TITLE_HEIGHT, screen, title_font, \
     subtitle_font, body_font, BUTTON_COLOR, BUTTON_HEIGHT, BUTTON_WIDTH, LONG_PADDING, HEALTH_POINT_IMAGE, \
     numbering_font, DISABLED_BUTTON_COLOR, silverfiligree, ivory, maroon, \
-    HIGHLIGHT_BUTTON_COLOR, barelyblue,HIGHLIGHT_BUTTON_COLOR, SMALL_PADDING, BLACK,LOADING_IMAGE
+    HIGHLIGHT_BUTTON_COLOR, SMALL_PADDING, BLACK, LOADING_IMAGE
+from src.core.drawTextRightAligned import drawText
 
 
 def draw_title(title, title_height=TITLE_HEIGHT, title_color=ivory, padding=160,
@@ -21,7 +23,6 @@ def draw_title(title, title_height=TITLE_HEIGHT, title_color=ivory, padding=160,
     screen.blit(title_text, title_rect)
 
 
-
 def draw_subtitle(subtitle, x, y, color="white"):
     title_text = subtitle_font.render(subtitle, True, color)
     title_rect = title_text.get_rect()
@@ -30,7 +31,8 @@ def draw_subtitle(subtitle, x, y, color="white"):
 
 
 def draw_button(text, x, y, width, height, auto_width=False, border_width=2, border_color=maroon,
-                text_color=ivory, button_color=BUTTON_COLOR, highlight_color=HIGHLIGHT_BUTTON_COLOR, radius=10, is_disabled=False):
+                text_color=ivory, button_color=BUTTON_COLOR, highlight_color=HIGHLIGHT_BUTTON_COLOR, radius=10,
+                is_disabled=False):
     """
     Draws a button with rounded corners.
 
@@ -91,9 +93,22 @@ def draw_button(text, x, y, width, height, auto_width=False, border_width=2, bor
     return button_rect
 
 
-def draw_back_button(button_height= BUTTON_HEIGHT):
-    return draw_button("رجوع", 30, (TITLE_HEIGHT - BUTTON_HEIGHT) / 2, BUTTON_WIDTH - LONG_PADDING,
+def draw_back_button(button_height=BUTTON_HEIGHT):
+    left_margin = 25
+    return draw_button("رجوع", left_margin, (TITLE_HEIGHT - BUTTON_HEIGHT) / 2, BUTTON_WIDTH - LONG_PADDING,
                        button_height)
+
+
+def draw_sound_button(x_cor=None, y_cor=None, button_width=None, button_height=BUTTON_HEIGHT, border_color=maroon,
+                      text_color=ivory, button_color=BUTTON_COLOR, highlight_color=HIGHLIGHT_BUTTON_COLOR, radius=10):
+    width = BUTTON_WIDTH - LONG_PADDING if not button_width else button_width
+    right_margin = 25
+    x = SCREEN_WIDTH - width - right_margin if not x_cor else x_cor
+    y = (TITLE_HEIGHT - BUTTON_HEIGHT) / 2 if not y_cor else y_cor
+    return draw_button("الصوت", x, y, width, button_height, border_width=2,
+                       border_color=border_color, text_color=text_color,
+                       button_color=button_color, highlight_color=highlight_color,
+                       radius=radius, auto_width=False)
 
 
 def draw_text_box(text, x, y, width, height, box_color=None, text_color=maroon, add_border=False):
@@ -185,13 +200,13 @@ def draw_score_and_health(score, x=30, y=30, health_points=2, max_score=100, tex
 
 def format_questions_count_string(count=1):
     if count == 1:
-        return "سؤال واحد"
+        return "جملة واحدة"
     elif count == 2:
-        return "سؤالين"
+        return "جملتين مختلفتين"
     elif count > 2 and count <= 10:
-        return f"""{count} أسئلة"""
+        return f"""{count} جمل مختلفة"""
     elif count > 10:
-        return f"""{count} سؤال"""
+        return f"""{count} جملة مختلفة"""
 
 
 def load_image(filename, size):
@@ -220,7 +235,9 @@ def load_image(filename, size):
 def handle_image_load_error(file_name):
     print(f"Error loading image: {file_name}")
 
-def load_loading_image(text_message = 'جار تحميل اللعبة', text_color = BLACK, loading_image_path="", scale_x=125, scale_y=125):
+
+def load_loading_image(text_message='جار تحميل اللعبة', text_color=BLACK, loading_image_path="", scale_x=125,
+                       scale_y=125):
     """
     Args:
 
@@ -230,7 +247,7 @@ def load_loading_image(text_message = 'جار تحميل اللعبة', text_col
     scale_x: image x-axis scale.
     scale_y: image y-axis scale.
     """
-    if loading_image_path =="":
+    if loading_image_path == "":
         transformed_loading_image = LOADING_IMAGE
     else:
         loading_image = pygame.image.load(loading_image_path)
@@ -238,6 +255,35 @@ def load_loading_image(text_message = 'جار تحميل اللعبة', text_col
 
     text = body_font.render(text_message, 1, text_color)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2 + SMALL_PADDING // 2,
-                               SCREEN_HEIGHT // 2 - text.get_height() // 2 + LONG_PADDING))
+                       SCREEN_HEIGHT // 2 - text.get_height() // 2 + LONG_PADDING))
     screen.blit(transformed_loading_image, (SCREEN_WIDTH * 0.5 - LONG_PADDING // 2, SCREEN_HEIGHT * 0.5 - LONG_PADDING))
     pygame.display.update()
+
+
+def draw_wrapped_text_box(text, x, y, width, height, box_color=None, text_color=maroon, add_border=False):
+    # Create a rectangle for the input box
+    input_box_rect = pygame.Rect(x, y, width, height)
+
+    # Draw the input box rectangle
+    if box_color is not None:
+        pygame.draw.rect(screen, box_color, input_box_rect)
+
+    # Draw the border around the input box if needed
+    if add_border:
+        pygame.draw.rect(screen, "black", input_box_rect, 2)  # 2 is the border width
+
+    # Render the input text
+    text_surface = body_font.render(text, True, text_color)
+
+    # Use the topright attribute to align the text to the right within the input box
+    padding = 10  # Add padding to the text position
+    text_rect = text_surface.get_rect(
+        topright=(input_box_rect.right - padding, input_box_rect.top + padding))  # Get the rect for the text surface
+    # text_rect.  # Align top-right with padding
+
+    # Blit the text surface onto the input box
+    # screen.blit(text_surface, text_rect)
+    drawText(screen, text, maroon, text_rect, body_font, 1, True)
+
+    # Return the input box rectangle for further interactions (e.g., detecting clicks)
+    return input_box_rect

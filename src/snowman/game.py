@@ -1,5 +1,6 @@
 import queue
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pygame
@@ -8,19 +9,28 @@ from thefuzz import fuzz
 from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, screen, IMAGE_WIDTH, YOU_WIN_AUDIO, YOU_LOST_AUDIO, \
     body_font, RED, GREEN, numbering_font, SMALL_PADDING
 from src.core.audio_player import play_sound
+from src.core.output import append_string_to_file
 from src.core.utility import format_questions_count_string
-from src.snowman.LLM import load_game_data, set_model
-from src.snowman.constants import snowman_levels, snowman_levels_keys, snowman_working_directory, SNOWMAN_GAME_RESULT
+from src.snowman.LLM import load_game_data, set_model, load_help_questions_data, check_questions_correctness
+from src.snowman.constants import snowman_levels, snowman_levels_keys, snowman_working_directory, SNOWMAN_GAME_RESULT, \
+    snow_melting_sound, INPUT_EXAMPLES, SYSTEM_PROMPT_EXAMPLES, PARAMETERS_SHORT_SENTENCES, HELP_QUESTIONS_PARAMETERS, \
+    CORRECTNESS_PARAMETERS, SINGULARITY_FORMATS
 
 
 class SnowmanGame:
 
     def __init__(self, level=snowman_levels_keys[2], questions_count=1):
         # Flag to track if the user clicked "Next" but no new question is ready
+        self.check_correctness_model_thread = None
+        self.help_questions_model_thread = None
+        self.elapsed_time_model = 0
+        self.is_sound_on = False
         self.executor = ThreadPoolExecutor(max_workers=2)  # Create a thread pool with 2 workers
         self.llm_thread = None  # Future to hold the result of the LLM thread
         self.output_queue = queue.Queue()
-        self.LLM_model = None
+        self.LLM_questions_model = None
+        self.LLM_correctness_model = None
+        self.LLM_help_model = None
         self.levels_keys = snowman_levels_keys
         self.waiting_for_next_question = False
         self.max_score = 100
@@ -39,12 +49,14 @@ class SnowmanGame:
         self.is_user_answer_correct = False
         self.level = level
         self.questions_count_per_type = questions_count
-        self.max_questions_count_per_type = 4
+        self.max_questions_count_per_type = 3
         self.information = ""
         self.is_correct_answer_displayed = False
         self.is_result_sound_played = False
         # Start the question generation in a separate thread
         self.start_setting_llm_model_thread()
+        self.start_setting_help_questions_model_thread()
+        self.start_setting_check_correctness_model_thread()
         self.load_melting_snowman_images()
 
     def reset_game(self):
@@ -97,61 +109,160 @@ class SnowmanGame:
         # Check if LLM model is being set
         if self.llm_thread and not self.llm_thread.done():
             print("Waiting for LLM model to be set...")
-            self.llm_thread.result()  # This will block until the LLM model setup is complete
-
-        # Now check if the model is set
-        if not self.LLM_model:
-            self.LLM_model = self.output_queue.get()
-            print(" done setting llm ", self.LLM_model)
+            self.LLM_questions_model = self.llm_thread.result()  # This will block until the LLM model setup is complete
+            elapsed_time_model = time.time() - self.start
+            string_to_append = f'********* \nThe time elapsed for setting up the snowman model is {elapsed_time_model}'
+            append_string_to_file(string_to_append, snowman_working_directory / 'assets/files/latency.txt')
+            self.LLM_help_model = self.help_questions_model_thread.result()
+            self.LLM_correctness_model = self.check_correctness_model_thread.result()
 
         # Start question generation using the executor
+        self.start = time.time()
         self.executor.submit(self.initialize_game_with_questions)
-
 
     def start_setting_llm_model_thread(self):
         print("start_setting_llm_model_thread")
+        self.start = time.time()
         # Submit the LLM model setup to the executor
-        self.llm_thread = self.executor.submit(set_model, self.output_queue)
+        self.llm_thread = self.executor.submit(set_model, PARAMETERS_SHORT_SENTENCES)
 
-    def generate_questions_data(self, noun_type, total_questions_count=None):
-        print("generate_questions_data")
-        # Initialize the list to store all questions
+    def start_setting_help_questions_model_thread(self):
+        print("start_setting_help_questions_model_thread")
+        self.help_questions_model_thread = self.executor.submit(set_model, HELP_QUESTIONS_PARAMETERS)
+
+    def start_setting_check_correctness_model_thread(self):
+        print("start_setting_check_correctness_model_thread")
+        self.check_correctness_model_thread = self.executor.submit(set_model, CORRECTNESS_PARAMETERS)
+
+    def generate_questions_data(self, system_prompt_examples, input_examples, noun_type, total_questions_count):
+        print(f"Generating {total_questions_count} questions for noun type: {noun_type}")
         questions = []
+        collected_count = 0  # Track the number of correct questions collected
+        max_retries = 5  # Set the maximum number of retries for loading data
 
-        # Process the questions in chunks of x number
-        total_questions_count = self.questions_count_per_type if total_questions_count is None else total_questions_count
+        # Continue generating until we have the required number of correct questions
+        while collected_count < total_questions_count:
+            # Calculate the remaining questions needed
+            remaining_count = total_questions_count - collected_count
+            questions_to_generate = min(self.max_questions_count_per_type, remaining_count)
+            print("Questions to generate in this batch:", questions_to_generate)
 
-        # Generate questions in batches of 5 until we run out of questions
-        print("range(0, total_questions_count, self.max_questions_count_per_type) ",
-              range(0, total_questions_count, self.max_questions_count_per_type))
-        for i in range(0, total_questions_count, self.max_questions_count_per_type):
-            # Determine how many questions to generate in the current batch
-            questions_to_generate = min(self.max_questions_count_per_type, total_questions_count - i)
-            print("questions_to_generate ", questions_to_generate)
-            # Format the questions count string (assuming it's for UI or logging)
             questions_count_as_string = format_questions_count_string(questions_to_generate)
 
-            # Load the question data for the current batch
-            questions_data = load_game_data(self.LLM_model, noun_type, questions_count_as_string)
+            # Retry loop to handle loading failures
+            for attempt in range(max_retries):
+                questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples, input_examples,
+                                                noun_type, questions_count_as_string)
+                if questions_data is not False:
+                    break  # Exit retry loop if data is successfully loaded
+                else:
+                    print(f"Load failed for noun type {noun_type}. Retrying {attempt + 1}/{max_retries}...")
 
-            # Retry if questions_data is not valid (loop until a valid dictionary or list is returned)
-            while type(questions_data) is bool:
-                questions_data = load_game_data(self.LLM_model, noun_type, questions_count_as_string)
+            # Check if data was loaded successfully after retries
+            if questions_data is False:
+                print(f"Failed to load questions after {max_retries} attempts for noun type {noun_type}.")
+                continue  # Optionally skip this batch and move to the next attempt
 
-            # Process the questions depending on their type (list or dictionary)
             if isinstance(questions_data, dict):
-                print(isinstance(questions_data, dict))
-                # Format and update the dictionary directly
-                self.format_questions_data(questions_data)
-                questions.append(questions_data)  # Store the formatted question
+                # Ensure we get a single correct question
+                while collected_count < total_questions_count:
+                    is_correct_question = check_questions_correctness(self.LLM_correctness_model,
+                                                                      questions_data['question'],
+                                                                      SINGULARITY_FORMATS[noun_type])
+                    if is_correct_question == "نعم":
+                        self.format_questions_data(questions_data)
+                        questions.append(questions_data)
+                        collected_count += 1
+                        break
+                    else:
+                        # Retry loading a new question in case of an incorrect one
+                        for attempt in range(max_retries):
+                            questions_data = load_game_data(self.LLM_questions_model, system_prompt_examples,
+                                                            input_examples, noun_type)
+                            if questions_data is not False:
+                                break
+                            else:
+                                print(f"Load failed for replacement question, attempt {attempt + 1}/{max_retries}")
+
+                        if questions_data is False:
+                            print("Failed to load a replacement question after maximum retries.")
+                            break
+
             elif isinstance(questions_data, list):
-                print(isinstance(questions_data, list))
-                # Process each question in the list
                 for question_dict in questions_data:
-                    self.format_questions_data(question_dict)  # Format each question
-                questions.extend(questions_data)  # Add all formatted questions to the list
+                    if collected_count >= total_questions_count:
+                        break
+
+                    while True:
+                        is_correct_question = check_questions_correctness(self.LLM_correctness_model,
+                                                                          question_dict['question'],
+                                                                          SINGULARITY_FORMATS[noun_type])
+                        if is_correct_question == "نعم":
+                            self.format_questions_data(question_dict)
+                            questions.append(question_dict)
+                            collected_count += 1
+                            break
+                        else:
+                            # Retry loading a new question in case of an incorrect one
+                            for attempt in range(max_retries):
+                                question_dict = load_game_data(self.LLM_questions_model, system_prompt_examples,
+                                                               input_examples, noun_type)
+                                if question_dict is not False:
+                                    break
+                                else:
+                                    print(
+                                        f"Load failed for replacement question in list, attempt {attempt + 1}/{max_retries}")
+
+                            if question_dict is False:
+                                print("Failed to load a replacement question after maximum retries.")
+                                break
+
+        # Generate help questions for each collected question
+        for data in questions:
+            correct_answer = data["correct_answer"]
+            data['help_questions'] = self.generate_help_questions(correct_answer)
 
         return questions
+
+
+    def initialize_game_with_questions(self):
+        # Get the noun types for the current level
+        noun_types = snowman_levels[self.level]["noun_types"]
+        num_noun_types = len(noun_types)
+
+        # Determine the base count per noun type and handle any remainder
+        base_count_per_type = self.total_questions_count // num_noun_types
+        extra_questions = self.total_questions_count % num_noun_types
+
+        # Stage 1: Generate the requested number of questions for each noun type
+        for idx, n_type in enumerate(noun_types):
+            # Calculate how many questions to generate for this noun type
+            questions_for_type = base_count_per_type + (1 if idx < extra_questions else 0)
+
+            system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[n_type]
+            input_examples = INPUT_EXAMPLES[n_type]
+
+            # Generate questions for this noun type
+            generated_questions = self.generate_questions_data(system_prompt_examples, input_examples, n_type,
+                                                               questions_for_type)
+            self.questions.extend(generated_questions)
+
+        # Stage 2: Calculate any remaining questions needed to reach total count
+        remaining_needed = self.total_questions_count - len(self.questions)
+        if remaining_needed > 0:
+            final_noun_type = noun_types[-1]
+            system_prompt_examples = SYSTEM_PROMPT_EXAMPLES[final_noun_type]
+            input_examples = INPUT_EXAMPLES[final_noun_type]
+
+            # Generate remaining questions specifically for the last noun type
+            additional_questions = self.generate_questions_data(system_prompt_examples, input_examples, final_noun_type,
+                                                                remaining_needed)
+            self.questions.extend(additional_questions)
+
+        # Log time taken for question generation
+        elapsed_time_generation = time.time() - self.start
+        string_to_append = f'The time elapsed for generating {self.total_questions_count} questions is {elapsed_time_generation}'
+        append_string_to_file(string_to_append, snowman_working_directory / 'assets/files/latency.txt')
 
     def format_questions_data(self, question_dict):
         # Strip the correct answer and clean up
@@ -159,7 +270,7 @@ class SnowmanGame:
 
         # Format the question text (replace series of periods with underscores)
         question = question_dict["question"]
-        question = re.sub(r'(\.\.\.)+', "_______ ", question)
+        question = re.sub(rf"\b{question_dict['correct_answer']}\b", "_______ ", question)
 
         # Determine the number of words in the correct answer
         num_of_answer_words = len(question_dict["correct_answer"].split())
@@ -173,23 +284,11 @@ class SnowmanGame:
             num_words = "أكثر من كلمتين"
 
         # Format the question text with the word count description
-        question = f"املأ الفراغ التالي ب{num_words} بالمبتدأ المناسب.\n{question}"
+        question = f" املأ الفراغ التالي ب {num_words} بالمبتدأ المناسب. {question} "
 
         # Update the formatted question back into the dictionary
         question_dict["question"] = question
 
-    def initialize_game_with_questions(self):
-        for n_type in snowman_levels[self.level]["noun_types"]:
-            print(n_type)
-            self.questions.extend(self.generate_questions_data(n_type))
-
-        # Get the first noun type from the current level
-        first_noun_type = snowman_levels[self.level]["noun_types"][0]
-        # If more questions are needed, genrate more questions so the list reaches the desired count
-        if len(self.questions) < self.total_questions_count:
-            needed_count = self.total_questions_count - len(self.questions)
-            print("needed_count", needed_count)
-            self.questions.extend(self.generate_questions_data(first_noun_type, needed_count))
 
     def load_melting_snowman_images(self):
         img = pygame.image.load(snowman_working_directory / 'assets/images/complete.png')
@@ -230,7 +329,8 @@ class SnowmanGame:
         return open_questions
 
     def get_current_grammar(self):
-        return self.questions[self.question_index]["grammar"]
+        # return self.questions[self.question_index]["grammar"]
+        return ""
 
     def get_current_melting_snowman_image(self):
         return self.melting_snowman_images[self.melting_image_index]
@@ -242,12 +342,13 @@ class SnowmanGame:
         return self.are_all_answers_wrong() or self.reached_last_question()
 
     def reached_last_question(self):
-        print("self.question_index ", self.question_index)
         return self.question_index == self.total_questions_count - 1
 
     def move_to_next_snowman_melting_image(self):
         self.melting_image_index = self.melting_image_index if self.melting_image_index == len(
             self.melting_snowman_images) - 1 else self.melting_image_index + 1
+        if self.melting_image_index < len(self.melting_snowman_images) - 1:
+            play_sound(snow_melting_sound, volume=1)
 
     def move_to_next_help_question(self):
         self.opened_help_questions += 1
@@ -359,33 +460,5 @@ class SnowmanGame:
         print("get_current_correct_answer ", self.get_current_correct_answer())
         return fuzz.ratio(self.get_current_correct_answer(), answer_box.text.strip()) == 100
 
-    # def generate_initial_questions(self):
-    #     for level in self.levels_keys:
-    #         # Format the questions count string (assuming it's for UI or logging)
-    #         questions_count_as_string = format_questions_count_string(2)
-    #
-    #         noun_type = snowman_levels[level]["noun_types"][0]
-    #         # Load the question data for the current batch
-    #         questions_data = load_game_data(self.LLM_model, noun_type, questions_count_as_string)
-    #
-    #         # Retry if questions_data is not valid (loop until a valid dictionary or list is returned)
-    #         while type(questions_data) is bool:
-    #             questions_data = load_game_data(self.LLM_model, noun_type, questions_count_as_string)
-    #
-    #         # Process the questions depending on their type (list or dictionary)
-    #         with self.lock_questions_list:
-    #             if isinstance(questions_data, dict):
-    #                 # Format and update the dictionary directly
-    #                 self.format_questions_data(questions_data)
-    #                 self.initial_questions[level].append(questions_data)  # Store the formatted question
-    #                 self.new_question_added_event.set()  # Signal that a new question is ready
-    #                 self.new_question_added_event.clear()
-    #             elif isinstance(questions_data, list):
-    #                 # Process each question in the list
-    #                 for question_dict in questions_data:
-    #                     self.format_questions_data(question_dict)  # Format each question
-    #                     self.initial_questions[level].extend(questions_data)  # Add all formatted questions to the list
-    #                     self.new_question_added_event.set()  # Signal that a new question is ready
-    #                     self.new_question_added_event.clear()
-    #
-    #     self.start_question_generation_thread()
+    def generate_help_questions(self, correct_answer):
+        return load_help_questions_data(self.LLM_help_model, correct_answer)
