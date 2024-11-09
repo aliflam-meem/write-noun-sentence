@@ -280,3 +280,7 @@ def detect_s_and_r_sentences(model,_sentence):
     generated_response = model.generate_text(prompt=prompt_input)  # guardrails=False
     string = split_response_string(generated_response, '<start>', '<end>')
     return string
+
+
+def dfummy():
+    print("do smth")
