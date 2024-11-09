@@ -120,6 +120,7 @@ def main():
     running = True
     snowman_current_game = SnowmanGame()
     whack_a_mole_game = WhackaMoleGame()
+    
     #jar_bingo_game
     jar_bingo_game = JBGameComponents()
     play_background_sound(BACKGROUND_SEA_SHP, volume=0.5)
@@ -129,8 +130,8 @@ def main():
     # -----------------
     # screen.fill("black")  # Set background color of the screen (blocks my screen for some reason?So I moved it outside the while so it doesn't get displayed each time)
 
-    play_background_sound(WM_MUSIC, volume=0.5)
-    pause_background_sound(True)
+    #play_background_sound(WM_MUSIC, volume=0.5)
+    #pause_background_sound(True)
     while running:
 
         # Handle different screens based on game state
