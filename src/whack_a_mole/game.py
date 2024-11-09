@@ -12,7 +12,7 @@ from src.constants import SCREEN_HEIGHT, SCREEN_WIDTH, screen, body_font, SMALL_
 from src.core.audio_player import play_sound, pause_background_sound
 from src.core.utility import draw_score_and_health, draw_title, draw_button, load_image
 from src.whack_a_mole.constants import *
-
+import mishkal.tashkeel
 
 # from LLM import load_whack_a_mole_data
 
@@ -236,14 +236,14 @@ class WhackaMoleGame:
         #    "word": "يجلس",
         #    "answer": "فعل"
         #  }
-        #self.questions = []
-        #'''
+        self.questions = []
+        '''
         self.questions = [
             {"sentence": "يجلسُ الطالبُ على المقعدِ", "word": "يجلس", "answer": "فعل"},
             {"sentence": "تقرأُ المعلمةُ الدرسَ", "word": "تقرأ", "answer": "فعل"},
             # ... add more question items here
         ]
-        # '''
+        '''
 
         self.current_question_index = 0
         self.next_question_index  = 0
@@ -269,7 +269,7 @@ class WhackaMoleGame:
         self.game_end_counter = 0
         self.show_up_timer = 0
         self.show_up_end = 100
-        #self.questions = []
+        self.questions = []
         self.is_data_loaded = False
         self.is_win = None
         self.game_stop = False
@@ -298,9 +298,10 @@ class WhackaMoleGame:
             hole.draw()
 
         if self.current_question_index < len(self.questions):
-
+            vocalizer = mishkal.tashkeel.TashkeelClass()
             question_item = self.questions[self.current_question_index]
-            question_text = [f"{question_item['sentence']}", "ما هو نوع قسم الكلام في كلمة "]
+            diacritic_sentense =  vocalizer.tashkeel(f"{question_item['sentence']}")
+            question_text = [diacritic_sentense, "ما هو نوع قسم الكلام في كلمةِ "]
 
             question = []
             question_max_len = SMALL_PADDING + SCREEN_WIDTH / 3
@@ -314,7 +315,8 @@ class WhackaMoleGame:
             for line in range(len(question)):
                 screen.blit(question[line], (SCREEN_WIDTH / 2.5, WM_TITLE_HEIGHT + (LINES_SPACING * line)))
 
-            question_word = f"( {question_item['word']} )"
+            diacritic_question_word = vocalizer.tashkeel(f"{question_item['word']}")
+            question_word = f"({diacritic_question_word})"
             # print(rendered_question_word.get_width())
             rendered_question_word = body_font.render(question_word, True, (0, 0, 0))
             screen.blit(rendered_question_word, (SCREEN_WIDTH/2.5-rendered_question_word.get_width(), WM_TITLE_HEIGHT+LINES_SPACING))
@@ -406,8 +408,8 @@ def whack_a_mole_game_screen(game):
                             SCREEN_HEIGHT // 2 - text.get_height() // 2 + LONG_PADDING))
             screen.blit(LOADING_IMAGE, (SCREEN_WIDTH * 0.5 - LONG_PADDING // 2, SCREEN_HEIGHT * 0.5 - LONG_PADDING))
             pygame.display.update()
-            #questions = load_whack_a_mole_data()
-            #game.questions = questions
+            questions = load_whack_a_mole_data()
+            game.questions = questions
             game.is_data_loaded = True
 
         screen.blit(game.background, (0, 0))
