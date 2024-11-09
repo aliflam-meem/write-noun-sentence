@@ -172,6 +172,7 @@ def get_questions(model,  _diff_level, _lvl_prep):
     {prep_letter_example_and_rule}
     Output:"""
 
+
     print("Submitting generation request...")
     prep_parts_list = []
     try:

@@ -102,6 +102,8 @@ def show_quiz_card(model, sexual_beh_and_racism_detection_model, quiz_card_shown
     print("question_answer_pair", question_answer_pair)
     quiz_question = question_answer_pair["sentence"] #currently supports 1 question
     correct_answer = question_answer_pair["correct_answer"]
+    quiz_question = question_answer_pair["sentence"] #currently supports 1 question
+    correct_answer = question_answer_pair["correct_answer"]
     print("correct answer in func ", correct_answer)
     # Adjust drawing positions based on the quiz card image content
     # question
