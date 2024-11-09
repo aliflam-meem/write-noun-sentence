@@ -1,15 +1,16 @@
 import os
-import pathlib
 import random
+
 import pygame
 from gtts import gTTS
 from pygame import mixer
-from src.core.audio_player import play_sound, pause_background_sound
+
 from src.constants import SCREEN_HEIGHT, SCREEN_WIDTH, screen, body_font, SMALL_PADDING, LONG_PADDING, BUTTON_HEIGHT, \
-    BUTTON_WIDTH, LOADING_IMAGE, BUTTON_FONT_COLOR, TITLE_HEIGHT, saddlebrown, thumbnail_width, IMAGE_WIDTH, numbering_font, \
+    BUTTON_WIDTH, LOADING_IMAGE, BUTTON_FONT_COLOR, TITLE_HEIGHT, saddlebrown, thumbnail_width, IMAGE_WIDTH, \
+    numbering_font, \
     YOU_WIN_AUDIO, YOU_LOST_AUDIO
+from src.core.audio_player import play_sound, pause_background_sound
 from src.core.utility import draw_score_and_health, draw_title, draw_button, load_image
-from src.whack_a_mole.LLM import load_whack_a_mole_data
 from src.whack_a_mole.constants import *
 
 
@@ -88,7 +89,7 @@ def generate_gtts(text,number):
         quit()
 
 def whack_a_mole_play_audio(game):
-            
+
             if  game.next_question_index == game.current_question_index and game.next_question_index<=len(game.questions):
                 game.next_question_index+=1
                 pause_background_sound(False)
@@ -108,7 +109,7 @@ def whack_a_mole_play_audio(game):
                     while pygame.mixer.get_busy():
                         #pygame.time.delay(1)
                         pygame.event.poll()
-                    
+
 # ---------------------------------------
 # game components
 # ---------------------------------------
@@ -134,7 +135,7 @@ class Mole:
         self.mole_y = 0
         self.word_x = 0
         self.word_y = 0
-        self.speed = 6
+        self.speed = 1
         self.hole_num = 0
         self.hole_row = 0
         self.move = False
@@ -181,7 +182,7 @@ class Mole:
                     self.word_y -= self.speed
 
             # Adjusted the y-coordinate
-            elif self.mole_y < self.hole_row -70:
+            elif self.mole_y < self.hole_row - 35:
                 self.mole_y += self.speed * 2
                 self.word_y += self.speed * 2
 
@@ -242,7 +243,7 @@ class WhackaMoleGame:
             {"sentence": "تقرأُ المعلمةُ الدرسَ", "word": "تقرأ", "answer": "فعل"},
             # ... add more question items here
         ]
-        #'''     
+        # '''
 
         self.current_question_index = 0
         self.next_question_index  = 0
@@ -324,12 +325,12 @@ class WhackaMoleGame:
                 generate_gtts(question_text[0],1)
                 generate_gtts(' '.join(question_text_l2),2)
                 self.generate_new_gtts = False
-       
+
         draw_score_and_health(10*self.score,x=900, y=10, health_points=self.lives, max_score=self.max_score , text_color=saddlebrown)
 
 
 def display_game_result(self):
-        
+
         background_tr = load_background_tr_image()
         screen.blit(background_tr, (0, 0))
         title = "لعبة أقسام الكلام"
@@ -363,7 +364,7 @@ def display_game_result(self):
         pygame.draw.rect(screen, BORDER_COLOR, border_rect, border_radius=BORDER_RADIUS)
 
         # Blit the main image onto the screen, centered within the border
-        
+
         screen.blit(image, (x, y))
 
         # Render the result message and center it within the image
@@ -397,7 +398,7 @@ def whack_a_mole_game_screen(game):
 
         back_button = draw_button("رجوع", 30, (WM_TITLE_HEIGHT - BUTTON_HEIGHT // 1.5) / 2,
                                 BUTTON_WIDTH - LONG_PADDING, BUTTON_HEIGHT // 1.5)
-        
+
         #sound_button = screen.blit(SOUND_ON_IMAGE, (200, 10))
         if game.is_data_loaded == False:
             text = body_font.render('جار تحميل اللعبة', 1, (255, 255, 255))
@@ -415,12 +416,11 @@ def whack_a_mole_game_screen(game):
                                 BUTTON_WIDTH - LONG_PADDING, BUTTON_HEIGHT // 1.5)
         game.draw()
         pygame.display.update()
-        
-        
+
         try:
             whack_a_mole_play_audio(game)
         except Exception as e:
             print(f"Error playing audio whack_a_mole_game: {e}")
             return
-        
+
     return game
