@@ -182,3 +182,51 @@ Missing prep subject
     }]
     <end>
 Missing prep subject
+ <start>
+    [{
+    "sentence": "وضعت الكتاب على المكتب",
+    "correct_answer": "على"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "جلس الولد تحت الشجرة",
+    "correct_answer": "تحت"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "جاءت هند من الحديقة",
+    "correct_answer": "من"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "جلس الرجل على الطاولة",
+    "correct_answer": "على"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "لعبت الطفلة بدمية جميلة",
+    "correct_answer": "ب"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "جلس الطفل بجانب الأم",
+    "correct_answer": "بجانب"
+    }]
+    <end>
+ <start>
+    [{
+    "sentence": "تحدث المعلم عن أهمية القراءة وتنمية مهارات التفكير الناقد",
+    "correct_answer": "عن"
+    }]
+    <end>
+Missing prep subject
