@@ -133,7 +133,7 @@ def add_ablank_inthe_sentence(parsed_dict):
     sentence= parsed_dict.get("sentence")
     prep = parsed_dict.get("correct_answer")
     prep_parts_list = []
-    if prep == "ب" == "ك" "ل" : #ALLAM incorrectly returned only the single prepo letter.
+    if prep == "ب" or prep == "ك" or prep == "ل" : #ALLAM incorrectly returned only the single prepo letter.
         print("inside add_ablank_inthe_sentence 2")
         separator = prep[0]
         prep_letter = prep.partition(separator)[0]
@@ -142,10 +142,11 @@ def add_ablank_inthe_sentence(parsed_dict):
         prep_object =  prep.partition(separator)[2]
         prep_parts_list.append(prep_letter)
         prep_parts_list.append(prep_object)
+        print("rep_letter, prep_object" , prep_letter, prep_object)
     else:
         prep_parts_list.append(prep)
     print("inside add_ablank_inthe_sentence 3")
-    sentence = re.sub(prep, '___', sentence, count=1, flags=0)
+    sentence = re.sub(prep, '___', sentence, count=1)
     print("sentence after adding a blank space: ",sentence)
     parsed_dict["sentence"] = sentence
     return parsed_dict, prep_parts_list

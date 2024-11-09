@@ -26,7 +26,7 @@ def prepare_board_prepositions_list(preposition, prep_parts_list):
     Generate quiz_choices, two randomly generated prepositions -execluding from the list the correct choice-,
                 and then added to them the correct choice.
     """
-    if len(prep_parts_list) > 1:
+    if preposition in prepositions_single_letters and len(prep_parts_list)>1:
         print("prep_parts_list[1]", prep_parts_list[1])
         rest_of_prepositions = [element+prep_parts_list[1] for element in prepositions_single_letters if element != preposition]
         quiz_choices = [preposition] + random.sample(rest_of_prepositions, 2)
@@ -83,7 +83,7 @@ def show_quiz_card_choices(quiz_choices):
         choice_rects.append(choice_rect)
     return choice_rects
 
-def show_quiz_card(model, quiz_card_shown, preposition):
+def show_quiz_card(model, sexual_beh_and_racism_detection_model, quiz_card_shown, preposition):
     """
     Prints the quiz card and its questions and answers.
 
@@ -98,7 +98,7 @@ def show_quiz_card(model, quiz_card_shown, preposition):
     quiz_card_image = draw_quiz_card()
     # change to bring the qestions in bulk
     #load_loading_image(text_message = "جار تحميل السؤال ...", text_color = WHITE, scale_x=100, scale_y=100)
-    question_answer_pair, prep_parts_list = get_questions(model,"المبتدئ",preposition)
+    question_answer_pair, prep_parts_list = get_questions(model, "المبتدئ",preposition)
     print("question_answer_pair", question_answer_pair)
     quiz_question = question_answer_pair["sentence"] #currently supports 1 question
     correct_answer = question_answer_pair["correct_answer"]

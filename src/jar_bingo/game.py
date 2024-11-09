@@ -25,7 +25,9 @@ class JBGameComponents:
         self.game_over = False
         self.quiz_card_shown = False  # track the state of the quiz card
         self.quiz_choices = []
+        self.correct_answer = ""
         self.model = None
+        self.sexual_beh_and_racism_detection_model = None
         self.score = 0
         # bg sound button
         self.music_button = None
@@ -60,6 +62,7 @@ class JBGameComponents:
             self.draw_bingo_screen()
             load_loading_image(text_message='جار تحميل اللعبة', text_color=WHITE, scale_x=200, scale_y=200)
             self.model = set_model()
+            #self.sexual_beh_and_racism_detection_model = set_sexual_beh_and_racism_detection_model()
         # initialize Game state variables
         self.game_state = "restart"
         self.loading = False
@@ -69,6 +72,7 @@ class JBGameComponents:
         self.game_over = False
         self.quiz_card_shown = False  # track the state of the quiz card
         self.quiz_choices = []
+        self.correct_answer = ""
         self.score = 0
         # bg sound button
         # self.music_button = pygame.image.load(BG_MUSIC_BUTTON)
@@ -135,10 +139,10 @@ class JBGameComponents:
                         self.clicked_cells.append(self.clicked_cell)
                         print("clicked_cell: ", self.clicked_cell)
                         preposition = self.board[self.clicked_cell[0]][self.clicked_cell[1]][0]
-                        self.quiz_card_shown, self.choice_rects, self.quiz_choices, correct_answer = show_quiz_card(
-                            self.model, self.quiz_card_shown, preposition)
+                        self.quiz_card_shown, self.choice_rects, self.quiz_choices, self.correct_answer = show_quiz_card(
+                            self.model, self.sexual_beh_and_racism_detection_model, self.quiz_card_shown, preposition)
                         # compare requested preposition and correct answer
-                        print("preposition & correct answer: ",preposition, correct_answer)
+                        print("preposition & correct answer: ",preposition, self.correct_answer)
                 # user clicked a choice from the quiz card.
                 elif event.type == pygame.MOUSEBUTTONDOWN and self.quiz_card_shown:
                     # Check if the clicked position is within any of the choice rectangles
@@ -148,7 +152,7 @@ class JBGameComponents:
                             # User selected a choice
                             selected_choice = self.quiz_choices[i]
                             # Check if the selected choice is correct
-                            if selected_choice == self.board[self.clicked_cell[0]][self.clicked_cell[1]][0]:
+                            if selected_choice == self.correct_answer: #self.board[self.clicked_cell[0]][self.clicked_cell[1]][0]:
                                 # Correct answer, do something
                                 print("Correct!")
                                 # Hide the quiz card and update the game state accordingly

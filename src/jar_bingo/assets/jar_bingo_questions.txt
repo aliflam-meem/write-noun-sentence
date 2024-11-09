@@ -83,26 +83,102 @@ Missing_correct_answer
 Missing_correct_answer
 Missing_correct_answer
 Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
-Missing_correct_answer
+
+ <start>
+    [{
+    "sentence": "سلمت الرسالة إلى صديقي لتوصيلها إلى مكتب البريد",
+    "correct_answer": "إلى"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "لعب الأطفال بالكرة في الحديقة",
+    "correct_answer": "بالكرة"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "جرى الحصان بسرعة كالبرق",
+    "correct_answer": "كالبرق"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "لعب الطفل كالقطة",
+    "correct_answer": "كالقطة"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "لعب الأطفال في الحديقة",
+    "correct_answer": "في"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "أحببت أن أجلس من تحت الشجرة وأستمتع بالهواء النقي",
+    "correct_answer": "من"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "وصلت الطائرة إلى المطار في الموعد المحدد",
+    "correct_answer": "إلى"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "جلس الولد على الأريكة يشاهد التلفاز",
+    "correct_answer": "على"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "بدأت العمل من الصباح الباكر",
+    "correct_answer": "من"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "السيارة تشبه الفهد في سرعتها",
+    "correct_answer": "في"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "جلس الطالب على الكرسي كما لو كان نائمًا",
+    "correct_answer": "كما"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "كتب الطفل بالقلم الرصاص",
+    "correct_answer": "بالقلم"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "أحببت تناول الطعام اللذيذ من المطعم القريب",
+    "correct_answer": "من"
+    }]
+    <end>
+Missing prep subject
+ <start>
+    [{
+    "sentence": "أحببت اللعب مع أصدقائي في الحديقة",
+    "correct_answer": "في"
+    }]
+    <end>
+Missing prep subject

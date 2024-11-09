@@ -1,5 +1,9 @@
 from src.core.json_response_parser import *
+from src.jar_bingo.LLM import *
 
+
+model = set_sexual_beh_and_racism_detection_model()
+print(detect_s_and_r_sentences(model, "الصداقة كنز يفى"))
 
 
 string = "<start>[{'sentence': 'Alice 30', 'correct_answer': '30'}]<end>"
